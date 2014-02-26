@@ -1,10 +1,6 @@
-
-
-
 /*! \file assert.cpp
     \brief Implements a better 'Assert'
  */
-
 
 #include <iostream>
 #include <stdlib.h>

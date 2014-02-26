@@ -211,7 +211,7 @@
 			>
 		</Filter>
 		<File
-			RelativePath=".\README.txt"
+			RelativePath=".\README.md"
 			>
 		</File>
 	</Files>

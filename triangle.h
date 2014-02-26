@@ -1,5 +1,4 @@
 
-
 /*! \file triangle.h
     \brief Original Triangle package's include file.
 

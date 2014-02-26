@@ -1,14 +1,12 @@
 
-
 /*! \file triangle_impl.hpp
     \brief The original JPS's C-implementation of Triangle; wrapped in the 
-		   Triwrap class.
+           Triwrap class.
 
-	For for backgroud info on the implementation see "Triangle: Engineering a 2D 
-	Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk: 
-	www.cs.cmu.edu/~quake-papers/triangle.ps
+    For for backgroud info on the implementation see "Triangle: Engineering a 2D 
+    Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk: 
+    www.cs.cmu.edu/~quake-papers/triangle.ps
  */
-
 
 /*****************************************************************************/
 /*                                                                           */

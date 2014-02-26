@@ -1,13 +1,12 @@
 
-
 /*! \file tpp_interface.hpp
     \brief The main Delaunay C++ class of the Triangle++ wrapper.
 
-	Use this class to produce Delaunay triangulations. 
-	
-	The following description pertains to the original version, the current version
-	was ported to VisualStudio. It doesn't need Python scripts, and is supposed to be 
-	used as it is in your program.
+    Use this class to produce Delaunay triangulations. 
+    
+    The following description pertains to the original version, the current version
+    was ported to VisualStudio. Thus it doesn't need Python scripts, and is supposed 
+    to be used as it is in your program.
  */
  
  
@@ -50,11 +49,11 @@ Also needed is doxygen for generating documentation.
 You can download the latest version of the source code from <a href="triangle++.tar.gz">here</a>.
 
 \section authors Authors
-	<ul>
-		<li><a href="http://compgeom.com/~piyush">Piyush Kumar</a></li>
-		<li><a href="http://www.ib-krajewski.de">Marek Krajewski</a></li>
-		<li>Hopefully more to come... (please feel free to extend this wrapper)</li>
-	</ul>
+    <ul>
+        <li><a href="http://compgeom.com/~piyush">Piyush Kumar</a></li>
+        <li><a href="http://www.ib-krajewski.de">Marek Krajewski</a></li>
+        <li>Hopefully more to come... (please feel free to extend this wrapper)</li>
+    </ul>
         
 \section changelog Change Log
 
@@ -63,8 +62,8 @@ You can download the latest version of the source code from <a href="triangle++.
 08/24/11: mrkkrj - Ported to VisualStudio, added comp. operators, reformatted and added some comments<br>
 10/21/06: Replaced vertexsort with C++ sort.<br>
 10/25/06: Wrapped in tpp namespace for usage with other libraries with similar names. 
-		  Added some more documentation/small changes. Used doxygen 1.5.0 and dot. Tested compilation with
-		  icc 9.0/9.1, gcc-4.1/3.4.6. <br>
+          Added some more documentation/small changes. Used doxygen 1.5.0 and dot. Tested compilation with
+          icc 9.0/9.1, gcc-4.1/3.4.6. <br>
 11/03/06: Fixed the compilation system. <br>
 
 \todo
@@ -106,320 +105,320 @@ namespace tpp {
   \author Piyush Kumar
   \note   (mrkkrj) For for backgroud info on the Triangle's implementation see "Triangle: 
           Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk: 
-	      www.cs.cmu.edu/~quake-papers/triangle.ps
+          www.cs.cmu.edu/~quake-papers/triangle.ps
 */
 class Delaunay {
 public:
-	//! Point Typedef
+    //! Point Typedef
     /*! Warning: If you want to use your own point class, you might have to 
         work hard... (mrkkrj - true! spare your time, use an adapter class.) 
-	*/
-	typedef reviver::dpoint <double, 2> Point; 
+    */
+    typedef reviver::dpoint <double, 2> Point; 
 
 private:	
-	std::vector<Point> m_PList;	/*! Stores the input point list. */
-	void* m_in;					/*! Used for intput to triangle  */
-	void* m_delclass;			/*! Triangle is wrapped in this pointer. */
-	void* m_pmesh;				/*! pointer to triangle mesh */
-	void* m_pbehavior;
-	bool m_Triangulated;
+    std::vector<Point> m_PList;	/*! Stores the input point list. */
+    void* m_in;					/*! Used for intput to triangle  */
+    void* m_delclass;			/*! Triangle is wrapped in this pointer. */
+    void* m_pmesh;				/*! pointer to triangle mesh */
+    void* m_pbehavior;
+    bool m_Triangulated;
 
-	void Triangulate(std::string& triswitches);
+    void Triangulate(std::string& triswitches);
 
 public:
-	//! The main constructor.
+    //! The main constructor.
     /*!
       Takes a vector of 2 dimensional points where each of the coordinates is 
-	  expressed as double.
+      expressed as double.
     */
-	Delaunay(std::vector<Point>& v){
-		m_PList.assign(v.begin(), v.end());
-		m_Triangulated = false;
-	}
+    Delaunay(std::vector<Point>& v){
+        m_PList.assign(v.begin(), v.end());
+        m_Triangulated = false;
+    }
 
-	//! Delaunay Triangulate the input points
+    //! Delaunay Triangulate the input points
     /*!
       This function calls triangle to delaunay triangulate points given as input 
-	  to the constructor of this class.
-	  \param quality  enforce ninimal angle of 20°.
+      to the constructor of this class.
+      \param quality  enforce ninimal angle of 20°.
     */
-	void Triangulate(bool quality = false, bool trace = false) { 
-		std::string options = "nz";  // n: need neighbors, z: index from 0
-		if(quality) options.append("q");
-		if(!trace) 
-			options.append("Q"); // Q: no trace, no debug
-		else 
-			options.append("V"); // trace & debug
-		
-		Triangulate(options); 
-	}
+    void Triangulate(bool quality = false, bool trace = false) { 
+        std::string options = "nz";  // n: need neighbors, z: index from 0
+        if(quality) options.append("q");
+        if(!trace) 
+            options.append("Q"); // Q: no trace, no debug
+        else 
+            options.append("V"); // trace & debug
+        
+        Triangulate(options); 
+    }
 
-	//! Output a geomview .off file containing the delaunay triangulation
+    //! Output a geomview .off file containing the delaunay triangulation
     /*!
       \param fname output file name.
     */
-	void writeoff(std::string& fname);
+    void writeoff(std::string& fname);
 
-	//! Number of edges in the triangulation
-	/*!
+    //! Number of edges in the triangulation
+    /*!
       \return Number of Edges
       Remember to call Triangulate before using this function.
     */
-	int nedges();
-	
-	//! Number of triangles in the triangulation
-	/*!
+    int nedges();
+    
+    //! Number of triangles in the triangulation
+    /*!
       \return Number of Triangles
       Remember to call Triangulate before using this function.
     */	
-	int ntriangles();
+    int ntriangles();
 
- 	//! Number of vertices in the triangulation
-	/*!
+    //! Number of vertices in the triangulation
+    /*!
       \return Number of Vertices
       Remember to call Triangulate before using this function.
     */
-	int nvertices();
+    int nvertices();
 
-	//! Number of vertices on the convex hull.
-	/*!
+    //! Number of vertices on the convex hull.
+    /*!
       \return Number of vertices on the convex hull.
       Remember to call Triangulate before using this function.
     */
-	int hull_size();
+    int hull_size();
 
-	//! The main destructor.
+    //! The main destructor.
     /*!
       Does memory cleanup mostly.
-    */	
-	~Delaunay();
+    */
+    ~Delaunay();
 
 
-	///////////////////////////////
-	//
-	// Vertex Iterator
-	//
-	///////////////////////////////
+    ///////////////////////////////
+    //
+    // Vertex Iterator
+    //
+    ///////////////////////////////
 
-	//!  The vertex iterator for the Delaunay class
-	class vIterator {
-		private:
-			vIterator(Delaunay *);  //! To set container
-			Delaunay *MyDelaunay;     //! Which container do I point
+    //!  The vertex iterator for the Delaunay class
+    class vIterator {
+        private:
+            vIterator(Delaunay *);  //! To set container
+            Delaunay *MyDelaunay;   //! Which container do I point
 
-			void *vloop;		  //! Triangles Internal data.
+            void *vloop;            //! Triangles Internal data.
 
-		public:
-			vIterator operator++();
-			vIterator():vloop(NULL) {};
-			Point &operator*() const; 
-			~vIterator();
+        public:
+            vIterator operator++();
+            vIterator():vloop(NULL) {};
+            Point &operator*() const; 
+            ~vIterator();
 
-		friend class Delaunay;
-		friend bool operator==(vIterator const &, vIterator const &);
-		friend bool operator!=(vIterator const &, vIterator const &);
-	};
-	
-	//! Vertex iterator begin function
+        friend class Delaunay;
+        friend bool operator==(vIterator const &, vIterator const &);
+        friend bool operator!=(vIterator const &, vIterator const &);
+    };
+    
+    //! Vertex iterator begin function
     vIterator vbegin(){ return vIterator(this);} ;
-	//! Vertex iterator end function
-	vIterator vend();
+    //! Vertex iterator end function
+    vIterator vend();
 
-	//! Given an iterator, find its index in the input vector of points.
-	int vertexId(vIterator const &);
+    //! Given an iterator, find its index in the input vector of points.
+    int vertexId(vIterator const &);
 
-	//! Given an index, return the actual double Point
-	const Point& point_at_vertex_id(int i) {return m_PList[i];};
+    //! Given an index, return the actual double Point
+    const Point& point_at_vertex_id(int i) {return m_PList[i];};
 
-	//! Return the Point additionally created in quality mesh generation ("q" option)
-	Point added_point_at_vertex_id(int i);
+    //! Return the Point additionally created in quality mesh generation ("q" option)
+    Point added_point_at_vertex_id(int i);
 
-	friend class vIterator; 
+    friend class vIterator; 
 
 
-	///////////////////////////////
-	//
-	// Face Iterator
-	//
-	///////////////////////////////
+    ///////////////////////////////
+    //
+    // Face Iterator
+    //
+    ///////////////////////////////
 
-	//!  The face iterator for the Delaunay class
-	class fIterator {
-            private:
+    //!  The face iterator for the Delaunay class
+    class fIterator {
+        private:
 
-				struct tdata {
-					double ***tri;
-					int orient;
-				};
+            struct tdata {
+                double ***tri;
+                int orient;
+            };
 
-				typedef struct tdata  poface;
+            typedef struct tdata  poface;
 
-                    fIterator(Delaunay *);  //! To set container
-                    Delaunay *MyDelaunay;   //! Which container do I point
+            fIterator(Delaunay *);  //! To set container
+            Delaunay *MyDelaunay;   //! Which container do I point
 
-                    //void *floop;          //! Triangles Internal data.
-					poface floop;
-					
-            public:
-                    void operator++();
-					fIterator() {floop.tri = NULL;};
-		            ~fIterator();
+            //void *floop;          //! Triangles Internal data.
+            poface floop;
+                
+        public:
+            void operator++();
+            fIterator() {floop.tri = NULL;};
+            ~fIterator();
 
-            friend class Delaunay;
-            friend bool operator==(fIterator const &, fIterator const &);
-            friend bool operator!=(fIterator const &, fIterator const &);
-			friend bool operator<(fIterator const &, fIterator const &); // added mrkkrj
+        friend class Delaunay;
+        friend bool operator==(fIterator const &, fIterator const &);
+        friend bool operator!=(fIterator const &, fIterator const &);
+        friend bool operator<(fIterator const &, fIterator const &); // added mrkkrj
     };
 
-	//! Face iterator begin function
+    //! Face iterator begin function
     fIterator fbegin(){ return fIterator(this);	} ;
-	//! Face iterator end function
+    //! Face iterator end function
     fIterator fend();
     int faceId(fIterator const &);
 
 
-	//! Access the origin (Org) vertex of a face.
-	/*!
-	  \param fit  Face interator.
-	  \param point  if specified: the cordinates of the vertex
+    //! Access the origin (Org) vertex of a face.
+    /*!
+      \param fit  Face interator.
+      \param point  if specified: the cordinates of the vertex
       \return Index of the vertex in m_pList, 
-			  or -1 if quality option was used and a new vertex was created!
+              or -1 if quality option was used and a new vertex was created!
 
-	  A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
+      A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
       c.  These vertices occur in counterclockwise order about the triangle.  
       Remember to call Triangulate before using this function. Do not use it on a null iterator.
     */
-	int Org (fIterator const & fit, Point* point = 0);
+    int Org (fIterator const & fit, Point* point = 0);
 
 
-	//! Access the destination (Dest) vertex of a face.
-	/*!
-	  \param fit  Face interator.
-	  \param point  if specified: the cordinates of the vertex
+    //! Access the destination (Dest) vertex of a face.
+    /*!
+      \param fit  Face interator.
+      \param point  if specified: the cordinates of the vertex
       \return Index of the vertex in m_pList, 
-			  or -1 if quality option was used and a new vertex was created!
+              or -1 if quality option was used and a new vertex was created!
 
-	  A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
+      A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
       c.  These vertices occur in counterclockwise order about the triangle.  
       Remember to call Triangulate before using this function. Do not use it on a null iterator.
     */
-	int Dest(fIterator const & fit, Point* point = 0);
+    int Dest(fIterator const & fit, Point* point = 0);
 
 
-	//! Access the apex (Apex) vertex of a face.
-	/*!
-	  \param fit  Face interator.
-	  \param point  if specified: the cordinates of the vertex
+    //! Access the apex (Apex) vertex of a face.
+    /*!
+      \param fit  Face interator.
+      \param point  if specified: the cordinates of the vertex
       \return Index of the vertex in m_pList, 
-			  or -1 if quality option was used and a new vertex was created!
+              or -1 if quality option was used and a new vertex was created!
 
-	  A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
+      A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
       c.  These vertices occur in counterclockwise order about the triangle.  
       Remember to call Triangulate before using this function. Do not use it on a null iterator.
     */
-	int Apex(fIterator const & fit, Point* point = 0);
+    int Apex(fIterator const & fit, Point* point = 0);
 
 
-	//! Access the triangle adjoining edge i
-	/*!
-	  \param fit  Face Iterator
-	  \param i  edge number  
+    //! Access the triangle adjoining edge i
+    /*!
+      \param fit  Face Iterator
+      \param i  edge number  
       \return The vertex on the opposite face, or -1 (see Org() above)
 
-	  A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
+      A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
           c.  These vertices occur in counterclockwise order about the triangle.  
-	  <ul>
-	  <li>sym(abc, 0) -> ba*</li>
-	  <li>sym(abc, 1) -> cb*</li>
-	  <li>sym(abc, 2) -> ac*</li>
-	  </ul>
-	  * is the farthest vertex on the adjoining triangle whose index
-	  is returned. A -1 is returned if the edge is part of the convex hull.
+      <ul>
+      <li>sym(abc, 0) -> ba*</li>
+      <li>sym(abc, 1) -> cb*</li>
+      <li>sym(abc, 2) -> ac*</li>
+      </ul>
+      * is the farthest vertex on the adjoining triangle whose index
+      is returned. A -1 is returned if the edge is part of the convex hull.
       Remember to call Triangulate before using this function.
-	  Do not use it on a null iterator.
+      Do not use it on a null iterator.
     */
-	int Sym(fIterator const & fit, char i);
+    int Sym(fIterator const & fit, char i);
 
 
-	//! Access the triangle opposite to current edge of the face
-	/*!
-	  \param fit  Face iterator
+    //! Access the triangle opposite to current edge of the face
+    /*!
+      \param fit  Face iterator
       \return The iterator of the opposite face
 
-	  A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
+      A triangle abc has origin (org) a,destination (dest) b, and apex (apex)  
           c.  These vertices occur in counterclockwise order about the triangle.  
-	  The iterator
-	  to the triangle is returned. The iterator is empty if the edge
-	  is on the convex hull.
+      The iterator
+      to the triangle is returned. The iterator is empty if the edge
+      is on the convex hull.
           Remember to call Triangulate before using this function.
-	  Do not use it on a null iterator.
+      Do not use it on a null iterator.
     */
-	fIterator Sym(fIterator const & fit);
+    fIterator Sym(fIterator const & fit);
 
 
-	//! Is the iterator empty?
-	/*!
-	  \param fit  Face interator.
+    //! Is the iterator empty?
+    /*!
+      \param fit  Face interator.
       \return true if the iterator is empty
     */
-	inline bool empty(fIterator const & fit)
-		{ return fit.floop.tri == NULL; };
+    inline bool empty(fIterator const & fit)
+        { return fit.floop.tri == NULL; };
 
 
-	//! Is the iterator pointing to the dummy triangle?
-	/*!
-	  \param fit  Face interator.
+    //! Is the iterator pointing to the dummy triangle?
+    /*!
+      \param fit  Face interator.
       \return true if the iterator is of the dummy triangle.
     */
-	bool isdummy(fIterator const & fit);
+    bool isdummy(fIterator const & fit);
 
      
-	//! Find the next edge (counterclockwise) of a triangle.   
-	/*!
-	  \param fit  face iterator
+    //! Find the next edge (counterclockwise) of a triangle.   
+    /*!
+      \param fit  face iterator
       \return The face iterator corresponding to the next counterclockwise edge of a triangle
 
-	  Lnext(abc) -> bca.
-	  Remember to call Triangulate before using this function.
-	  Do not use it on a null iterator.
+      Lnext(abc) -> bca.
+      Remember to call Triangulate before using this function.
+      Do not use it on a null iterator.
     */
-	fIterator Lnext(fIterator const & fit);
+    fIterator Lnext(fIterator const & fit);
 
 
-	//! Find the previous edge (clockwise) of a triangle.   
-	/*!
-	  \param fit  face iterator
+    //! Find the previous edge (clockwise) of a triangle.   
+    /*!
+      \param fit  face iterator
       \return The face iterator corresponding to the previous clockwise edge of a triangle
 
-	  Lprev(abc) -> cab.
-	  Remember to call Triangulate before using this function.
-	  Do not use it on a null iterator.
+      Lprev(abc) -> cab.
+      Remember to call Triangulate before using this function.
+      Do not use it on a null iterator.
     */
-	fIterator Lprev(fIterator const & fit);
+    fIterator Lprev(fIterator const & fit);
 
 
-	//! Find the next edge (counterclockwise) of a triangle with the same origin
-	/*!
-	  \param fit  face iterator
+    //! Find the next edge (counterclockwise) of a triangle with the same origin
+    /*!
+      \param fit  face iterator
       \return The face iterator corresponding to the next edge counterclockwise with the same origin.
 
-	  Onext(abc) -> ac*.
-	  Remember to call Triangulate before using this function.
-	  Do not use it on a null iterator.
+      Onext(abc) -> ac*.
+      Remember to call Triangulate before using this function.
+      Do not use it on a null iterator.
     */
-	fIterator Onext(fIterator const & fit);
+    fIterator Onext(fIterator const & fit);
 
-	
-	//! Find the next edge clockwise with the same origin.
-	/*!
-	  \param fit  face iterator
+    
+    //! Find the next edge clockwise with the same origin.
+    /*!
+      \param fit  face iterator
       \return The face iterator corresponding to the next edge clockwise with the same origin.
 
-	  Onext(abc) -> a*b.
-	  Remember to call Triangulate before using this function.
-	  Do not use it on a null iterator.
+      Onext(abc) -> a*b.
+      Remember to call Triangulate before using this function.
+      Do not use it on a null iterator.
     */
-	fIterator Oprev(fIterator const & fit);
+    fIterator Oprev(fIterator const & fit);
 
 
 // TODO List: (for face iterators)
@@ -436,61 +435,61 @@ public:
 /*  rprev(abc) -> b**                                                        */
 
 
-	//! Calculate incident triangles around a vertex.
-	/*!
-	  \param vertexid The vertex for which you want incident triangles.
+    //! Calculate incident triangles around a vertex.
+    /*!
+      \param vertexid The vertex for which you want incident triangles.
           \param ivv Returns triangles around a vertex in counterclockwise order.
 
-	  Note that behaviour is undefined if vertexid is greater than 
-	  number of vertices - 1. Remember to call Triangulate before using this function.
-	  All triangles returned have Org(triangle) = vertexid.
-	  All triangles returned are in counterclockwise order.
+      Note that behaviour is undefined if vertexid is greater than 
+      number of vertices - 1. Remember to call Triangulate before using this function.
+      All triangles returned have Org(triangle) = vertexid.
+      All triangles returned are in counterclockwise order.
     */
-	void trianglesAroundVertex(int vertexid, std::vector<int>& ivv );
+    void trianglesAroundVertex(int vertexid, std::vector<int>& ivv );
 
 
-	//! Calculate the area of a face. 
-	/*!
-	  \param fit  Face interator.
+    //! Calculate the area of a face. 
+    /*!
+      \param fit  Face interator.
       \return area of the face associated with the iterator.
 
     */
-	double area(fIterator const & fit);
+    double area(fIterator const & fit);
 
 
-	//! Point locate a vertex v
-	/*!
-   	  \param vertexid  vertex id
+    //! Point locate a vertex v
+    /*!
+      \param vertexid  vertex id
       \return a face iterator whose origin is v.
     */
-	fIterator locate(int vertexid); // OPEN:: doesn't seem to be working!
+    fIterator locate(int vertexid); // OPEN:: doesn't seem to be working!
 
 
-	//--------------------------------------
-	// added mrkkrj - helper for Points 
-	//	OPEN:: compiler cannot instantiate less<> with operator<() for Point, why?!
-	//--------------------------------------
-	struct OrderPoints
-	{
-	bool operator() (const Point& lhs, const Point& rhs) const {
-		// first sort on x, then on y coordinates
-		if (lhs[0] < rhs[0]){
-			return true;
-		}
-		if (lhs[0] == rhs[0] && lhs[1] < rhs[1]){
-			return true;
-		}
-		return false;
-	}
+    //--------------------------------------
+    // added mrkkrj - helper for Points 
+    //    OPEN:: compiler cannot instantiate less<> with operator<() for Point, why?!
+    //--------------------------------------
+    struct OrderPoints
+    {
+    bool operator() (const Point& lhs, const Point& rhs) const {
+        // first sort on x, then on y coordinates
+        if (lhs[0] < rhs[0]){
+            return true;
+        }
+        if (lhs[0] == rhs[0] && lhs[1] < rhs[1]){
+            return true;
+        }
+        return false;
+    }
 };
 
 private: 
-	// added mrkkrj - helper functions for face iterator access methods 
-	//   HACK:: double* as not to export internal impl.
-	void SetPoint(Point& point, double* vertexptr); 
-	int GetVertexIndex(fIterator const & fit, double* vertexptr); 
+    // added mrkkrj - helper functions for face iterator access methods 
+    //    HACK:: double* as not to export internal impl.
+    void SetPoint(Point& point, double* vertexptr); 
+    int GetVertexIndex(fIterator const & fit, double* vertexptr); 
 
-	friend class fIterator;
+    friend class fIterator;
 
 }; // Class Delaunay
 

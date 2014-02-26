@@ -1,8 +1,6 @@
-
-
 /*! \file dpoint.hpp
     \brief d-dimensional point class
-	
+    
     A d-dimensional point class which is written carefully using templates. It allows for basic
     operations on points in any dimension. Orientation tests for 2 and 3 dimensional points are 
     supported using <a href="http://www.cs.berkeley.edu/~jrs/">Jonathan's</a> code. This class 
@@ -77,7 +75,7 @@ template< typename NumType, unsigned D, unsigned I > struct origin
 {
    static inline void eval( dpoint<NumType,D>& p )
    {
-	  p[I] = 0.0;
+      p[I] = 0.0;
       origin< NumType, D, I-1 >::eval( p );
    }
 };
@@ -88,7 +86,7 @@ template <typename NumType, unsigned D> struct origin<NumType, D, 0>
 {
    static inline void eval( dpoint<NumType,D>& p )
    {
-	  p[0] = 0.0;
+      p[0] = 0.0;
    }
 };
 
@@ -105,7 +103,7 @@ template< typename NumType, unsigned D, unsigned I > struct Distance
    static inline double eval( const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
      double sum = ((double)p[I] -  (double)q[I] ) *( (double)p[I] - (double)q[I] );
-	  return sum + Distance< NumType, D, I-1 >::eval( p,q );
+      return sum + Distance< NumType, D, I-1 >::eval( p,q );
    }
 };
 
@@ -131,8 +129,8 @@ template< typename __INT, typename NumType, unsigned D, unsigned I > struct DotP
 {
    static inline __INT eval( const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	  __INT sum = ( ((__INT)p[I]) * ((__INT)q[I]) );
-	  return sum + DotProd< __INT, NumType, D, I-1 >::eval( p,q );
+      __INT sum = ( ((__INT)p[I]) * ((__INT)q[I]) );
+      return sum + DotProd< __INT, NumType, D, I-1 >::eval( p,q );
    }
 };
 
@@ -142,7 +140,7 @@ template < typename __INT, typename NumType, unsigned D> struct DotProd<__INT,Nu
 {
    static inline __INT eval( const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	  return ( ((__INT)p[0]) * ((__INT)q[0]) );
+      return ( ((__INT)p[0]) * ((__INT)q[0]) );
    }
 };
 
@@ -154,8 +152,8 @@ template< typename NumType, unsigned D, unsigned I > struct IsEqual
 {
    static inline bool eval( const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	  if( p[I]  != q[I] ) return false;
-	  else return IsEqual< NumType, D, I-1 >::eval( p,q );
+      if( p[I]  != q[I] ) return false;
+      else return IsEqual< NumType, D, I-1 >::eval( p,q );
    }
 };
 
@@ -165,7 +163,7 @@ template <typename NumType, unsigned D> struct IsEqual<NumType, D, 0>
 {
    static inline NumType eval( const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	   return (p[0] == q[0])?1:0;
+       return (p[0] == q[0])?1:0;
    }
 };
 
@@ -175,7 +173,7 @@ template <typename NumType, unsigned D> struct IsEqual<NumType, D, 0>
 /*!
     Uses unrolling of loops using templates. 
     A class used to implement operator= for points. This class also helps in automatic type 
-	conversions of points (with explicit calls for conversion).
+    conversions of points (with explicit calls for conversion).
 */
 template< 
   typename NumType1, 
@@ -186,8 +184,8 @@ template<
 {
    static inline void eval( dpoint<NumType1,D>& p,const dpoint<NumType2,D>& q )
    {
-	  p[I]  = q[I];
-	  Equate< NumType1, NumType2, D, I-1 >::eval( p,q );
+      p[I]  = q[I];
+      Equate< NumType1, NumType2, D, I-1 >::eval( p,q );
    }
 };
 
@@ -201,7 +199,7 @@ template <
 {
    static inline void  eval( dpoint<NumType1,D>& p,const dpoint<NumType2,D>& q )
    {
-	   p[0] = q[0];
+       p[0] = q[0];
    }
 };
 
@@ -217,8 +215,8 @@ template< typename NumType, unsigned D, unsigned I > struct Add
 {
    static inline void eval( dpoint<NumType,D>& result, const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	  result[I] = p[I]  + q[I];
-	  Add< NumType, D, I-1 >::eval( result,p,q );
+      result[I] = p[I]  + q[I];
+      Add< NumType, D, I-1 >::eval( result,p,q );
    }
 };
 
@@ -228,7 +226,7 @@ template <typename NumType, unsigned D> struct Add<NumType, D, 0>
 {
    static inline void eval( dpoint<NumType,D>& result, const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	   result[0] = p[0] + q[0];
+       result[0] = p[0] + q[0];
    }
 };
 
@@ -243,7 +241,7 @@ template <typename NumType, unsigned D> struct Add<NumType, D, 0>
 template< typename NumType > 
 inline NumType Subtract_nums(const NumType& x, const NumType& y) {
   if(!std::numeric_limits<NumType>::is_signed) {
-	  std::cerr << "Exception: Can't subtract unsigned types."; exit(1);
+      std::cerr << "Exception: Can't subtract unsigned types."; exit(1);
   }
   return x - y;
 }
@@ -259,7 +257,7 @@ template< typename NumType, unsigned D, unsigned I > struct Subtract
    {
      
           result[I] = Subtract_nums(p[I] , q[I]);
-	  Subtract< NumType, D, I-1 >::eval( result,p,q );
+      Subtract< NumType, D, I-1 >::eval( result,p,q );
    }
 };
 
@@ -269,7 +267,7 @@ template <typename NumType, unsigned D> struct Subtract<NumType, D, 0>
 {
    static inline void eval( dpoint<NumType,D>& result, const dpoint<NumType,D>& p, const dpoint<NumType,D>& q )
    {
-	   result[0] = Subtract_nums(p[0] , q[0]);
+       result[0] = Subtract_nums(p[0] , q[0]);
    }
 };
 
@@ -285,8 +283,8 @@ template< typename NumType, unsigned D, unsigned I > struct Multiply
 {
    static inline void eval( dpoint<NumType,D>& result, const dpoint<NumType,D>& p, NumType k)
    {
-	  result[I] = p[I] * k;
-	  Multiply< NumType, D, I-1 >::eval( result,p,k );
+      result[I] = p[I] * k;
+      Multiply< NumType, D, I-1 >::eval( result,p,k );
    }
 };
 
@@ -296,7 +294,7 @@ template <typename NumType, unsigned D> struct Multiply<NumType, D, 0>
 {
    static inline void eval( dpoint<NumType,D>& result, const dpoint<NumType,D>& p, NumType k )
    {
-	   result[0] = p[0] * k;
+       result[0] = p[0] * k;
    }
 };
 
@@ -304,39 +302,39 @@ template <typename NumType, unsigned D> struct Multiply<NumType, D, 0>
 
 //!  Main d dimensional Point Class
 /*!
-	-  NumType = Floating Point Type
-	-  D       = Dimension of Point
+    -  NumType = Floating Point Type
+    -  D       = Dimension of Point
 */
 template<typename NumType = double, unsigned D = 3>
 class dpoint {
 
-		// Makes Swap operation fast
-		NumType  x[D];
+        // Makes Swap operation fast
+        NumType  x[D];
 
 public:
         typedef NumType NT;
         typedef typename InternalNumberType<NumType>::__INT __INT;
 
-	// To be defined in a cpp file
-	//  const MgcVector2 MgcVector2::ZERO(0,0);
-	//  static const dpoint<NumType,D> Zero;
+    // To be defined in a cpp file
+    //  const MgcVector2 MgcVector2::ZERO(0,0);
+    //  static const dpoint<NumType,D> Zero;
 
-	inline void move2origin(){ origin<NumType, D, D-1>::eval(*this); };
+    inline void move2origin(){ origin<NumType, D, D-1>::eval(*this); };
 
-	dpoint(){ 
-		Assert( (D >= 1), "Dimension < 1 not allowed" ); 
-		// move2origin(); 
-	};
+    dpoint(){ 
+        Assert( (D >= 1), "Dimension < 1 not allowed" ); 
+        // move2origin(); 
+    };
 
-	//! 1 D Point
-	dpoint(NumType x0){ x[0] = x0; };
-	//! 2 D Point
-	dpoint(NumType x0,NumType x1){ x[0] = x0;  x[1] = x1; };
-	//! 3 D Point
-	dpoint(NumType x0,NumType x1,NumType x2){  x[0] = x0;  x[1] = x1; x[2] = x2; };
-	//! Array Initialization
-	dpoint(NumType ax[]){ for(int i =0; i < D; ++i) x[i] = ax[i]; };
-	//! Initialization from another point : Copy Constructor
+    //! 1 D Point
+    dpoint(NumType x0){ x[0] = x0; };
+    //! 2 D Point
+    dpoint(NumType x0,NumType x1){ x[0] = x0;  x[1] = x1; };
+    //! 3 D Point
+    dpoint(NumType x0,NumType x1,NumType x2){  x[0] = x0;  x[1] = x1; x[2] = x2; };
+    //! Array Initialization
+    dpoint(NumType ax[]){ for(int i =0; i < D; ++i) x[i] = ax[i]; };
+    //! Initialization from another point : Copy Constructor
         dpoint(const dpoint<NumType,D>& p){  Equate<NumType,NumType,D,D-1>::eval((*this),p);	};
 
          
@@ -345,54 +343,54 @@ public:
     template<class OtherNumType>
         explicit dpoint(const dpoint<OtherNumType,D>& p){ Equate<NumType,OtherNumType,D,D-1>::eval((*this),p); };
 
-	// Destructor
-	~dpoint(){};
+    // Destructor
+    ~dpoint(){};
 
-	inline int      dim() const { return D; };
-	inline double   sqr_dist(const dpoint<NumType,D> q) const ;
-	inline double   distance(const dpoint<NumType,D> q) const ;
-	inline __INT    dotprod (const dpoint<NumType,D> q) const ;
-	inline __INT    sqr_length(void)  const;
-	inline void     normalize (void);
-	inline NumType& operator[](int i);
-	inline NumType  operator[](int i) const;
+    inline int      dim() const { return D; };
+    inline double   sqr_dist(const dpoint<NumType,D> q) const ;
+    inline double   distance(const dpoint<NumType,D> q) const ;
+    inline __INT    dotprod (const dpoint<NumType,D> q) const ;
+    inline __INT    sqr_length(void)  const;
+    inline void     normalize (void);
+    inline NumType& operator[](int i);
+    inline NumType  operator[](int i) const;
 
-	inline dpoint&  operator= (const dpoint<NumType,D>& q);
+    inline dpoint&  operator= (const dpoint<NumType,D>& q);
 
-	template<typename NT, unsigned __DIM>
-	friend dpoint<NT,__DIM>   operator- (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
+    template<typename NT, unsigned __DIM>
+    friend dpoint<NT,__DIM>   operator- (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
 
-	template<typename NT, unsigned __DIM>
-	friend dpoint<NT,__DIM>   operator+ (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
+    template<typename NT, unsigned __DIM>
+    friend dpoint<NT,__DIM>   operator+ (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
 
-	template<typename NT, unsigned __DIM>
-	friend bool   operator== (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
+    template<typename NT, unsigned __DIM>
+    friend bool   operator== (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
 
-	template<typename NT, unsigned __DIM>
-	friend bool   operator!= (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
+    template<typename NT, unsigned __DIM>
+    friend bool   operator!= (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q);
 
 
 //	inline dpoint&  operator= (const valarray<NumType>& v);
 //	inline operator valarray<NumType>() const;
 
-	template<typename __NT,unsigned __DIM>
-	friend void iswap(dpoint<__NT,__DIM>& p,dpoint<__NT,__DIM>& q);
+    template<typename __NT,unsigned __DIM>
+    friend void iswap(dpoint<__NT,__DIM>& p,dpoint<__NT,__DIM>& q);
 };
 
 template<typename NumType, unsigned D>
 void dpoint<NumType,D>::normalize (void){
-	double len = sqrt(sqr_length());
-	if (len > 0.00001)
-	for(int i = 0; i < D; ++i){
-		x[i] /= len;
-	}
+    double len = sqrt(sqr_length());
+    if (len > 0.00001)
+    for(int i = 0; i < D; ++i){
+        x[i] /= len;
+    }
 }
 
 /*
 template<typename NumType, unsigned D>
 dpoint<NumType,D>::operator valarray<NumType>() const{
-	valarray<NumType> result((*this).x , D);
-	return result;
+    valarray<NumType> result((*this).x , D);
+    return result;
 }
 
 //Warning : Valarray should be of size D
@@ -400,57 +398,57 @@ dpoint<NumType,D>::operator valarray<NumType>() const{
 template<typename NumType, unsigned D>
 dpoint<NumType,D>&
 dpoint<NumType,D>::operator= (const valarray<NumType>& v){
-	dpoint<NumType,D> result;
-	for(int i = 0; i < D; i++) (*this).x[i] = v[i];
-	return (*this);
+    dpoint<NumType,D> result;
+    for(int i = 0; i < D; i++) (*this).x[i] = v[i];
+    return (*this);
 }
 */
 
 template<typename NT, unsigned __DIM>
 dpoint<NT,__DIM>
 operator+ (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q){
-	dpoint<NT,__DIM> result;
-	Add<NT,__DIM,__DIM-1>::eval(result,p,q);	
-	return result;
+    dpoint<NT,__DIM> result;
+    Add<NT,__DIM,__DIM-1>::eval(result,p,q);	
+    return result;
 }
 
 template<typename NT, unsigned __DIM>
 dpoint<NT,__DIM>
 operator- (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q){
-	dpoint<NT,__DIM> result;
-	// cout << "Subtracting..." << p << " from " << q << " = ";
-	Subtract<NT,__DIM,__DIM-1>::eval(result,p,q);	
-	// cout << result << endl;	
-	return result;
+    dpoint<NT,__DIM> result;
+    // cout << "Subtracting..." << p << " from " << q << " = ";
+    Subtract<NT,__DIM,__DIM-1>::eval(result,p,q);	
+    // cout << result << endl;	
+    return result;
 }
 
 template<typename NT, unsigned __DIM>
 bool
 operator== (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q){
-	return IsEqual<NT,__DIM,__DIM-1>::eval(p,q);	
+    return IsEqual<NT,__DIM,__DIM-1>::eval(p,q);	
 }
 
 template<typename NT, unsigned __DIM>
 bool
 operator!= (const dpoint<NT,__DIM>& p, const dpoint<NT,__DIM>& q){
-	return !(IsEqual<NT,__DIM,__DIM-1>::eval(p,q));	
+    return !(IsEqual<NT,__DIM,__DIM-1>::eval(p,q));	
 }
 
 template<typename NT, unsigned __DIM>
 dpoint<NT,__DIM>
 operator* (const dpoint<NT,__DIM>& p, const NT k){
-	dpoint<NT,__DIM> result;
-	Multiply<NT,__DIM,__DIM-1>::eval(result,p,k);	
-	return result;
+    dpoint<NT,__DIM> result;
+    Multiply<NT,__DIM,__DIM-1>::eval(result,p,k);	
+    return result;
 }
 
 template<typename NT, unsigned __DIM>
 dpoint<NT,__DIM>
 operator/ (const dpoint<NT,__DIM>& p, const NT k){
-	Assert( (k != 0), "Hell division by zero man...\n");
-	dpoint<NT,__DIM> result;
-	Multiply<NT,__DIM,__DIM-1>::eval(result,p,((double)1.0)/k);	
-	return result;
+    Assert( (k != 0), "Hell division by zero man...\n");
+    dpoint<NT,__DIM> result;
+    Multiply<NT,__DIM,__DIM-1>::eval(result,p,((double)1.0)/k);	
+    return result;
 }
 
 template < typename NumType, unsigned D >
@@ -471,26 +469,27 @@ template < typename NumType, unsigned D >
 NumType&
 dpoint<NumType,D>::operator[](int i)
 {
- return x[i]; }
+  return x[i]; 
+}
 
 
 template<typename NumType, unsigned D>
 double
 dpoint<NumType,D>::sqr_dist (const dpoint<NumType,D> q) const {
-	return Distance<NumType,D,D-1>::eval(*this,q);	
+    return Distance<NumType,D,D-1>::eval(*this,q);	
 }
 
 template<typename NumType, unsigned D>
 double 
 dpoint<NumType,D>::distance (const dpoint<NumType,D> q) const {
-	return sqrt(static_cast<double>(Distance<NumType,D,D-1>::eval(*this,q)));	
+    return sqrt(static_cast<double>(Distance<NumType,D,D-1>::eval(*this,q)));	
 }
 
 
 template<typename NumType, unsigned D>
 typename dpoint<NumType,D>::__INT
 dpoint<NumType,D>::dotprod (const dpoint<NumType,D> q) const {
-	return DotProd<__INT,NumType,D,D-1>::eval(*this,q);	
+    return DotProd<__INT,NumType,D,D-1>::eval(*this,q);	
 }
 
 template<typename NumType, unsigned D>
@@ -499,13 +498,13 @@ dpoint<NumType,D>::sqr_length (void) const {
 #ifdef _DEBUG	
     if( DotProd<__INT,NumType,D,D-1>::eval(*this,*this) < 0) {
           std::cerr << "Point that caused error: ";
-	  std::cerr << *this << std::endl;
-	  std::cerr << DotProd<__INT,NumType,D,D-1>::eval(*this,*this) << std::endl;
-	  std::cerr << "Fatal: Hell!\n"; exit(1);
-	}
+      std::cerr << *this << std::endl;
+      std::cerr << DotProd<__INT,NumType,D,D-1>::eval(*this,*this) << std::endl;
+      std::cerr << "Fatal: Hell!\n"; exit(1);
+    }
 #endif
-	return DotProd<__INT,NumType,D,D-1>::eval(*this,*this);	
-	
+    return DotProd<__INT,NumType,D,D-1>::eval(*this,*this);	
+    
 }
 
 template < class NumType, unsigned D >
@@ -513,10 +512,10 @@ std::ostream&
 operator<<(std::ostream& os,const dpoint<NumType,D> &p)
 {
      os << "Point (d=";
-	 os << D << ", (";
-	 for (unsigned int i=0; i<D-1; ++i)
-		os << p[i] << ", ";
-	return os << p[D-1] << "))";
+     os << D << ", (";
+     for (unsigned int i=0; i<D-1; ++i)
+        os << p[i] << ", ";
+    return os << p[D-1] << "))";
     
 };
 
@@ -524,26 +523,26 @@ template < class NumType, unsigned D >
 std::istream&
 operator>>(std::istream& is,dpoint<NumType,D> &p)
 {
-	 for (int i=0; i<D; ++i)
-		 if(!(is >> p[i])){
-			 if(!is.eof()){
-				std::cerr << "Error Reading Point:" 
-					  << is << std::endl;
-				exit(1);
-			 }
-		 }
-		 
-	return is;
+     for (int i=0; i<D; ++i)
+         if(!(is >> p[i])){
+             if(!is.eof()){
+                std::cerr << "Error Reading Point:" 
+                      << is << std::endl;
+                exit(1);
+             }
+         }
+         
+    return is;
     
 };
 
 /*
 template<typename __NT,unsigned __DIM>
 static inline void iswap(dpoint<__NT,__DIM>& p,dpoint<__NT,__DIM>& q){
-	__NT *y;
-	y = p.x;
-	p.x = q.x;
-	q.x = y;
+    __NT *y;
+    y = p.x;
+    p.x = q.x;
+    q.x = y;
 }
 */
 
@@ -551,7 +550,7 @@ static inline void iswap(dpoint<__NT,__DIM>& p,dpoint<__NT,__DIM>& q){
 
 template < typename NumType, unsigned D >
 dpoint<NumType, D> CrossProd(const dpoint<NumType, D>& vector1, 
-			     const dpoint<NumType, D>& vector2) {
+                 const dpoint<NumType, D>& vector2) {
    Assert(D == 3, "Cross product only defined for 3d vectors");
    dpoint<NumType, D> vector;
    vector[0] = (vector1[1] * vector2[2]) - (vector2[1] * vector1[2]);
@@ -567,11 +566,11 @@ template < typename __NT, unsigned __DIM >
 int
 orientation(const dpoint<__NT,__DIM> p[__DIM+1])
 {
-	int _sign = + 1;
-	// To be implemented
-	std::cerr << "Not yet implemented\n";
-	exit(1);
-	return _sign;
+    int _sign = + 1;
+    // To be implemented
+    std::cerr << "Not yet implemented\n";
+    exit(1);
+    return _sign;
     
 }
 
@@ -579,13 +578,13 @@ orientation(const dpoint<__NT,__DIM> p[__DIM+1])
 template < typename __NT >
 inline __NT
 orientation(
-	    const dpoint<__NT,2>& p,
-	    const dpoint<__NT,2>& q,
-	    const dpoint<__NT,2>& r
-	    )
+        const dpoint<__NT,2>& p,
+        const dpoint<__NT,2>& q,
+        const dpoint<__NT,2>& r
+        )
 {
    // 2D speaciliazation for orientation
-	std::cout << "FATAL";
+    std::cout << "FATAL";
   exit(1);
   return ((p[0]-r[0])*(q[1]-r[1]))-((q[0]-r[0])*(p[1]-r[1]));
 }
@@ -596,10 +595,10 @@ extern "C" double orient2d(double *p, double *q, double *r);
 template < >
 inline double
 orientation<double>(
-	    const dpoint<double,2>& p,
-	    const dpoint<double,2>& q,
-	    const dpoint<double,2>& r
-	    )
+        const dpoint<double,2>& p,
+        const dpoint<double,2>& q,
+        const dpoint<double,2>& r
+        )
 {
    // 2D speaciliazation for orientation
   double pp[2] = { p[0], p[1] };
@@ -612,10 +611,10 @@ orientation<double>(
 template < >
 inline float
 orientation<float>(
-	    const dpoint<float,2>& p,
-	    const dpoint<float,2>& q,
-	    const dpoint<float,2>& r
-	    )
+        const dpoint<float,2>& p,
+        const dpoint<float,2>& q,
+        const dpoint<float,2>& r
+        )
 {
    // 2D speaciliazation for orientation
   double pp[2] = { p[0], p[1] };
@@ -626,7 +625,7 @@ orientation<float>(
 
 
 
-};	// Namespace Ends here
+};    // Namespace Ends here
 
 
 

@@ -1,13 +1,11 @@
-
-namespace tpp {
-
 /*! \file assert.hpp
     \brief Implements a better 'Assert'
  */
 
+namespace tpp {
+
 #ifndef REVIVER_ASSERT_HPP
 #define REVIVER_ASSERT_HPP
-
 
 /*! \def MyAssertFunction
     \brief Function used by 'Assert' function in _DEBUG mode.
