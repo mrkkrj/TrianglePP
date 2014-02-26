@@ -7,8 +7,8 @@ This is an updated version of Piyush Kumar's ("http://compgeom.com/~piyush) OO/C
 
 It can create Delaunay triangulation and constrainied Delaunay triangulations.
 
-I have ported the original impl. to Visual C++ (VC9, i.e. VisStudio 2008) and extended it for constrainied triangulations.
+I have ported the original impl. to Visual C++ (VC9, i.e. VisStudio 2008) and extended it for constrainied triangulations. See trpp_example.cpp for usage patterns.
 
-See trpp_example.cpp for usage patterns.
+For for backgroud info on the implementation see "Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps
 
 This code is released under LPGL licence.
