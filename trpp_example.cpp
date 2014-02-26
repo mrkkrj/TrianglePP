@@ -1,16 +1,11 @@
-
-
-
 /*! \file trpp_example.cpp
     \brief example usage of the Triangle++ wrapper
  */
-
 
 #include "tpp_interface.hpp"
 #include <vector>
 
 using namespace tpp;
-
 
 // ---
 int main()
