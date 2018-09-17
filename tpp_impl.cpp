@@ -13,7 +13,10 @@
 #define ANSI_DECLARATORS
 #define TRILIBRARY
 //#define CDT_ONLY // (de)activate -q option!
+#ifndef _WIN64
+// the MS x64 compilers do not use FPU - SSE is default, thus no extended precision problems!
 #define CPU86
+#endif
 
 // mrkkrj::: DEBUG trace 
 //    - needed when debugging on Windows without console
