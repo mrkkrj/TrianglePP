@@ -12,6 +12,6 @@ For for backgroud info on the implementation see *"Triangle: Engineering a 2D Qu
 
 This code is released under LPGL licence.
 
-__Update:__
+## Update:
 
-The code is now preliminary ported to x64 Windows. The project file was updated to Visual Studio 2015, the x64 target was added, and the asserts and crashes when running the example program were fixed. It wasn't thorougly tested though, and produces some warnings at the moment. 
+The code is now preliminary ported to x64 Windows. The project file was updated to Visual Studio 2015, the x64 target was added, and the asserts/crashes when running the example program were fixed. It **wasn't thorougly tested though**, and produces some warnings at the moment. 
