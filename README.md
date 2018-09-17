@@ -11,3 +11,7 @@ I have ported the original impl. to Visual C++ (VC9, i.e. VisStudio 2008), exten
 For for backgroud info on the implementation see *"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator"* by JP Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps
 
 This code is released under LPGL licence.
+
+__Update:__
+
+The code is now preliminary ported to x64 Windows. The project file was updated to Visual Studio 2015, the x64 target was added, and the asserts and crashes when running the example program were fixed. It wasn't thorougly tested though, and produces some warnings at the moment. 
