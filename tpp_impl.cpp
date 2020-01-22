@@ -45,6 +45,7 @@
 
 #include "triangle_impl.hpp"
 #include "tpp_interface.hpp"
+#include <sstream>
 // END changed --
 
 #include <new>
@@ -57,13 +58,63 @@ namespace tpp {
 using std::cout;
 using std::cerr;
 
+/*!
+*/
+Delaunay::Delaunay(std::vector<Point>& v)
+	: m_minAngle(0.0f),
+	  m_maxArea(0.0f),
+	  m_Triangulated(false)
+{
+	m_PList.assign(v.begin(), v.end());
+}
+
+/*!
+*/
+Delaunay::~Delaunay() {
+	struct triangulateio* pin = (struct triangulateio*)m_in;
+
+	Triwrap* pdelclass = (Triwrap*)m_delclass;
+
+	Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
+	Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
+
+	pdelclass->triangledeinit(tpmesh, tpbehavior);
+
+	delete tpmesh;
+	delete tpbehavior;
+	delete pin;
+	delete pdelclass;
+}
+
+/*!
+*/
+void Delaunay::Triangulate(bool quality, bool trace) {
+	std::string options = "nz";  // n: need neighbors, z: index from 0
+
+	if (quality) {
+		options.append("q");
+		if (m_minAngle > 0) {
+			options.append(formatFloatConstraint(m_minAngle));
+		}
+		if (m_maxArea > 0) {
+			options.append("a" + formatFloatConstraint(m_maxArea));
+		}
+	}
+
+	if (!trace)
+		options.append("Q"); // Q: no trace, no debug
+	else
+		options.append("V"); // trace & debug
+
+	Triangulate(options);
+}
 
 /*!
   Triangulate the points stored in m_PList.
-  \note (mrkkrj) Copy-pasted from parts of the original Triangle's triangulate() function!
-  \author Piyush Kumar
+  \note (mrkkrj) copy-pasted from parts of the original Triangle's triangulate() function!
+  \author Piyush Kumar (originally)
 */
-void Delaunay::Triangulate(std::string& triswitches){
+void Delaunay::Triangulate(std::string& triswitches) {
     typedef struct triangulateio  TriangStruct;
     typedef struct triangulateio* pTriangStruct;
 
@@ -167,24 +218,6 @@ void Delaunay::Triangulate(std::string& triswitches){
 
 /*!
 */
-Delaunay::~Delaunay(){
-        struct triangulateio *pin = (struct triangulateio *)m_in;
-
-    Triwrap *pdelclass =  (Triwrap *)m_delclass;
-
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
-    Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
-
-    pdelclass->triangledeinit(tpmesh, tpbehavior);
-
-    delete tpmesh;
-    delete tpbehavior;
-    delete pin;
-    delete pdelclass;	
-}
-
-/*!
-*/
 void Delaunay::writeoff(std::string& fname){
     if(!m_Triangulated) {
         cerr << "FATAL: Write called before triangulation\n";
@@ -246,6 +279,14 @@ int Delaunay::vertexId(vIterator const &vit){
     return ((int *)vit.vloop)[tpmesh->vertexmarkindex];
 }
 
+/*!
+  added mrkkrj:
+*/
+std::string Delaunay::formatFloatConstraint(float f) const {
+	std::ostringstream ss;
+	ss << f;
+	return ss.str();
+}
 
 ///////////////////////////////
 //

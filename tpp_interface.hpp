@@ -57,6 +57,8 @@ You can download the latest version of the source code from <a href="triangle++.
         
 \section changelog Change Log
 
+22/01/20: mrkkrj – added support for custom constraints (angle and area) <br>
+17/09/18: mrkkrj – ported to 64-bit (preliminary, not thorougly tested!) <br>
 11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney() <br>
 10/15/11: mrkkrj - added support for the "quality triangulation" option, added some debug support<br>
 08/24/11: mrkkrj - Ported to VisualStudio, added comp. operators, reformatted and added some comments<br>
@@ -114,44 +116,37 @@ public:
         work hard... (mrkkrj - true! spare your time, use an adapter class.) 
     */
     typedef reviver::dpoint <double, 2> Point; 
-
-private:	
-    std::vector<Point> m_PList;	/*! Stores the input point list. */
-    void* m_in;					/*! Used for intput to triangle  */
-    void* m_delclass;			/*! Triangle is wrapped in this pointer. */
-    void* m_pmesh;				/*! pointer to triangle mesh */
-    void* m_pbehavior;
-    bool m_Triangulated;
-
-    void Triangulate(std::string& triswitches);
-
-public:
+	
     //! The main constructor.
     /*!
       Takes a vector of 2 dimensional points where each of the coordinates is 
       expressed as double.
     */
-    Delaunay(std::vector<Point>& v){
-        m_PList.assign(v.begin(), v.end());
-        m_Triangulated = false;
-    }
+	Delaunay(std::vector<Point>& v);
 
     //! Delaunay Triangulate the input points
     /*!
       This function calls triangle to delaunay triangulate points given as input 
       to the constructor of this class.
-      \param quality  enforce ninimal angle of 20°.
+      \param quality enforce ninimal angle (default: 20°) and, minimal area (only if explicitely set)
     */
-    void Triangulate(bool quality = false, bool trace = false) { 
-        std::string options = "nz";  // n: need neighbors, z: index from 0
-        if(quality) options.append("q");
-        if(!trace) 
-            options.append("Q"); // Q: no trace, no debug
-        else 
-            options.append("V"); // trace & debug
-        
-        Triangulate(options); 
-    }
+	void Triangulate(bool quality = false, bool trace = false);
+
+	//! Set a quality constraint for the triangulation
+	/*!
+	  \param angle min. resulting angle, if angle <= 0, the constraint will be removed.
+	*/
+	void setMinAngle(float angle) {
+		m_minAngle = angle;
+	}
+
+	//! Set a quality constraint for the triangulation
+	/*!
+	  \param area max. triangle area, if area <= 0, the constraint will be removed.
+	*/
+	void setMaxArea(float area) {
+		m_maxArea = area;
+	}
 
     //! Output a geomview .off file containing the delaunay triangulation
     /*!
@@ -484,12 +479,28 @@ public:
 };
 
 private: 
+	void Triangulate(std::string& triswitches);
+
     // added mrkkrj - helper functions for face iterator access methods 
     //    HACK:: double* as not to export internal impl.
     void SetPoint(Point& point, double* vertexptr); 
     int GetVertexIndex(fIterator const & fit, double* vertexptr); 
+	// added mrkkrj 
+	std::string formatFloatConstraint(float f) const;
 
     friend class fIterator;
+
+private:
+	std::vector<Point> m_PList;	/*! Stores the input point list. */
+	void* m_in;					/*! Used for intput to triangle  */
+	void* m_delclass;			/*! Triangle is wrapped in this pointer. */
+	void* m_pmesh;				/*! pointer to triangle mesh */
+	void* m_pbehavior;
+	bool m_Triangulated;
+
+	// added mrkkrj: constraints
+	float m_minAngle;
+	float m_maxArea;
 
 }; // Class Delaunay
 
