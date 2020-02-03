@@ -113,7 +113,8 @@ class Delaunay {
 public:
     //! Point Typedef
     /*! Warning: If you want to use your own point class, you might have to 
-        work hard... (mrkkrj - true! spare your time, use an adapter class.) 
+        work hard...         
+         - mrkkrj: true! spare your time, use an adapter class.
     */
     typedef reviver::dpoint <double, 2> Point; 
 	
@@ -493,7 +494,7 @@ private:
 private:
 	std::vector<Point> m_PList;	/*! Stores the input point list. */
 	void* m_in;					/*! Used for intput to triangle  */
-	void* m_delclass;			/*! Triangle is wrapped in this pointer. */
+	void* m_delclass;			/*! Triangle impl. is wrapped in this pointer. */
 	void* m_pmesh;				/*! pointer to triangle mesh */
 	void* m_pbehavior;
 	bool m_Triangulated;
