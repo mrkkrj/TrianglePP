@@ -54,10 +54,16 @@ protected:
    void mouseMoveEvent(QMouseEvent* ev) override;
    void mouseReleaseEvent(QMouseEvent* ev) override;
 
+private slots:
+   void deletPointAtLastPos();
+   void startMovingPoint();
+
 private:
    void drawLineTo(const QPoint& endPos);
    void drawPointAt(const QPoint& pos);
    void resizeImage(QImage& img, const QSize& newSz); 
+   bool pointClicked(const QPoint& clickPos, int& pointIndex) const;
+   void showPointCtxMenu(const QPoint& pos);
 
    DrawMode mode_;
    int penWidth_;

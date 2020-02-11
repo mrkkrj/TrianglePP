@@ -1,6 +1,5 @@
 
 ![triangle-PP's logo](triangle-PP-sm.jpg)
-
 Triangle++ 
 ==========
 

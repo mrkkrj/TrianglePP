@@ -5,12 +5,14 @@
 #include "DrawingArea.h"
 
 #include <QtWidgets>
+
 #if defined(QT_PRINTSUPPORT_LIB)
-#include <QtPrintSupport/qtprintsupportglobal.h>
-#if QT_CONFIG(printdialog)
-#include <QPrinter>
-#include <QPrintDialog>
-#endif
+#  include <QtPrintSupport/qtprintsupportglobal.h>
+#  if QT_CONFIG(printdialog)
+#     define TRPP_HAS_PRINTER_SUPPORT true
+#     include <QPrinter>
+#     include <QPrintDialog>
+#  endif
 #endif
 
 
@@ -154,32 +156,24 @@ bool DrawingArea::saveImage(const QString& fileName, const char* fileFormat)
 
 void DrawingArea::printImage()
 {
-#if 0
-
-   // OPEN TODO::::
-
-#if QT_CONFIG(printdialog)
-
+#ifdef TRPP_HAS_PRINTER_SUPPORT 
    QPrinter printer(QPrinter::HighResolution);
-   QPrintDialog printDialog(&printer, this);
+   QPrintDialog dlg(&printer, this);
 
-   if (printDialog.exec() == QDialog::Accepted) 
+   if (dlg.exec() == QDialog::Accepted) 
    {
       QPainter painter(&printer);
       QRect rect = painter.viewport();
 
-      QSize size = img_.size();
-      size.scale(rect.size(), Qt::KeepAspectRatio);
+      QSize sz = img_.size();
+      sz.scale(rect.size(), Qt::KeepAspectRatio);
 
-      painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
+      painter.setViewport(rect.x(), rect.y(), sz.width(), sz.height());
       painter.setWindow(img_.rect());
 
       painter.drawImage(0, 0, img_);
    }
 #endif 
-   // TODO::: end ---
-
-#endif
 }
 
 
@@ -207,6 +201,20 @@ void DrawingArea::mousePressEvent(QMouseEvent* ev)
       if (mode_ == DrawLines)
       {
          lineStarted_ = true;
+      }
+   }
+   else if (ev->button() == Qt::RightButton)
+   {
+      if (mode_ == DrawPoints)
+      {
+         int idx = -1;
+
+         if (pointClicked(ev->pos(), idx))
+         {
+            startPos_ = points_[idx];
+            showPointCtxMenu(ev->pos());
+            return;
+         }
       }
    }
 }
@@ -270,6 +278,43 @@ void DrawingArea::resizeEvent(QResizeEvent* ev)
 }
 
 
+// private slots
+
+void DrawingArea::deletPointAtLastPos()
+{
+   int idx = points_.indexOf(startPos_);
+
+   if (idx != -1)
+   {
+      points_.remove(idx);
+      imgDirty_ = true;
+
+      auto pointColor = penColor_;
+      penColor_ = Qt::white;
+
+      // overpaint
+      drawPointAt(startPos_);
+
+      // restore color
+      penColor_ = pointColor;
+   }
+}
+
+
+void DrawingArea::startMovingPoint()
+{
+   int idx = points_.indexOf(startPos_);
+
+   if (idx != -1)
+   {
+      // OPEN TODO::: next
+
+      // ...
+
+   }
+}
+
+
 // private methods
 
 void DrawingArea::drawLineTo(const QPoint& endPos)
@@ -304,7 +349,7 @@ void DrawingArea::drawPointAt(const QPoint& pos)
       painter.setBrush(QBrush(penColor_));
       painter.drawEllipse(pos, pointSize_ / 2, pointSize_ / 2);
       
-      // OPEN TODO:::
+      // OPEN TODO:::optimize ...
 #if 0
       int rad = (pointSize_ / 2) + 2;
       update(QRect(pos, pos).normalized().adjusted(-rad, -rad, +rad, +rad));
@@ -330,4 +375,39 @@ void DrawingArea::resizeImage(QImage& img, const QSize& newSize)
    painter.drawImage(QPoint(0, 0), img);
 
    img = resized;
+}
+
+
+bool DrawingArea::pointClicked(const QPoint& clickPos, int& pointIndex) const
+{
+   for (auto& pt : points_)
+   {
+      // use cheap approximation:
+      if (qAbs(clickPos.manhattanLength() - pt.manhattanLength()) <= pointSize_ / 2)
+      {
+         pointIndex = points_.indexOf(pt);
+         return true;
+      }
+   }
+
+   return false;
+}
+
+
+void DrawingArea::showPointCtxMenu(const QPoint& pos)
+{
+   QMenu ctxtMenu(tr(""), this);
+
+   QAction action1("Delete Point", this);
+   connect(&action1, &QAction::triggered, this, &DrawingArea::deletPointAtLastPos);
+   ctxtMenu.addAction(&action1);
+
+   // OPEN TODO::: next...
+#if 0 
+   QAction action2("Move Point", this);
+   connect(&action2, &QAction::triggered, this, &DrawingArea::startMovingPoint);
+   ctxtMenu.addAction(&action2);
+#endif
+
+   ctxtMenu.exec(mapToGlobal(startPos_));
 }

@@ -9,18 +9,50 @@
 using namespace tpp;
 
 
+namespace {
+
+   // impl. helpers
+   QPoint getDelaunayResultPoint(
+         std::vector<Delaunay::Point>& delaunayInput, 
+         int resultIndex, 
+         const Delaunay::Point& resultPoint)
+   {
+      double x;
+      double y;
+
+      // new vertices might have been added to enforce constraints!
+      if (resultIndex == -1)
+      {
+         x = resultPoint[0]; // an added vertex, it's data copied to resultPoint
+         y = resultPoint[1];
+      }
+      else
+      {
+         x = delaunayInput[resultIndex][0];
+         y = delaunayInput[resultIndex][1];
+      }
+
+      return QPoint(x, y);
+   }
+
+}
+
+
 // public methods
 
 TrianglePPTest::TrianglePPTest(QWidget *parent)
     : QMainWindow(parent),
-      mode_(ManualMode)
+      mode_(ManualMode),
+      useConstraints_(false)
 {
    ui.setupUi(this);
 
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
+   ui.optionsToolButton->setText(QChar(0x2630)); // trigram for heaven 
 
    setGenerateButtonText();
 }
+
 
 void TrianglePPTest::on_generatePointsPushButton_clicked()
 {
@@ -34,8 +66,10 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
       ui.drawAreaWidget->clearImage();
 
       // make random points
+
       // OPEN TODO:::
       Q_ASSERT(false && "NYI!!!");
+      // OPEN TODO::: end ---
 
       break;
    default:
@@ -69,39 +103,30 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    }
 
    Delaunay trGenerator(delaunayInput);
-   trGenerator.Triangulate();
+   trGenerator.Triangulate(useConstraints_);
 
    // iterate over triangles
    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
    {
       // access data
-      int originIdx = trGenerator.Org(fit);
-      int destIdx = trGenerator.Dest(fit);
-      int apexIdx = trGenerator.Apex(fit);
-            
-      double x1 = delaunayInput[originIdx][0]; // example
-      double y1 = delaunayInput[originIdx][1];
+      Delaunay::Point p1;
+      Delaunay::Point p2;
+      Delaunay::Point p3;
+
+      int originIdx = trGenerator.Org(fit, &p1);
+      int destIdx = trGenerator.Dest(fit, &p2);
+      int apexIdx = trGenerator.Apex(fit, &p3);
+
+      auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
+      {
+         return getDelaunayResultPoint(delaunayInput, index, dpoint);
+      };
 
       // draw triangle
-      ui.drawAreaWidget->drawLine(
-         QPoint(delaunayInput[originIdx][0], delaunayInput[originIdx][1]),
-         QPoint(delaunayInput[destIdx][0], delaunayInput[destIdx][1]));
-
-      ui.drawAreaWidget->drawLine(
-         QPoint(delaunayInput[destIdx][0], delaunayInput[destIdx][1]),
-         QPoint(delaunayInput[apexIdx][0], delaunayInput[apexIdx][1]));
-
-      ui.drawAreaWidget->drawLine(
-         QPoint(delaunayInput[apexIdx][0], delaunayInput[apexIdx][1]),
-         QPoint(delaunayInput[originIdx][0], delaunayInput[originIdx][1]));
+      ui.drawAreaWidget->drawLine(getResultPoint(originIdx, p1), getResultPoint(destIdx, p2));
+      ui.drawAreaWidget->drawLine(getResultPoint(destIdx, p2), getResultPoint(apexIdx, p3));
+      ui.drawAreaWidget->drawLine(getResultPoint(apexIdx, p3), getResultPoint(originIdx, p1));
    }
-
-
-   // 2. use costraints
-   
-   // OPEN TODO:::::
-
-   
 }
 
 
@@ -111,6 +136,21 @@ void TrianglePPTest::on_pointModeComboBox_currentIndexChanged(int index)
 
    mode_ = PointGenerationMode(index); // 0 == ManualMode!
    setGenerateButtonText();
+}
+
+
+void TrianglePPTest::on_useConstraintsCheckBox_toggled(bool checked)
+{
+   useConstraints_ = checked;
+}
+
+
+void TrianglePPTest::on_optionsToolButton_clicked()
+{
+
+   // NYI !!!!!!!!!!!!!!!!!
+   // -- show options
+
 }
 
 
