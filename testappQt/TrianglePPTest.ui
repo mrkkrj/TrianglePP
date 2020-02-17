@@ -43,6 +43,11 @@
           <string>Automatic</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>From Image</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -97,6 +102,12 @@
       </item>
       <item>
        <widget class="QToolButton" name="optionsToolButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Settings</string>
         </property>
@@ -128,7 +139,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -24,7 +24,7 @@ private:
     Ui::TrianglePPTestClass ui;
 
     enum PointGenerationMode { 
-       ManualMode = 0, AutomaticMode 
+       ManualMode = 0, AutomaticMode, FromImageMode 
     } mode_;
 
     bool useConstraints_;

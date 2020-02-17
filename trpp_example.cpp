@@ -6,9 +6,10 @@
 #include <vector>
 #include "trpp_example.h"
 
+
 using namespace tpp;
 
-// ---
+
 int main()
 {
     // prepare input
@@ -43,12 +44,12 @@ int main()
     {
        if (i == 0)
        {
-          // 2a. triangulate with default constraints (min angle = 20°)	
+          // 2_a. triangulate with default constraints (min angle = 20°)	
           trGenerator.Triangulate(withConstraints);
        }
        else
        {
-          // 2b. triangulate with custom constraints (angle = 30.5°, area = 5.5)	
+          // 2_b. triangulate with custom constraints (angle = 30.5°, area = 5.5)	
           trGenerator.setMinAngle(30.5f);
           trGenerator.setMaxArea(5.5f);
           trGenerator.Triangulate(withConstraints);

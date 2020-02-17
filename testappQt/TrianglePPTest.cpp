@@ -62,16 +62,29 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
       // reset
       ui.drawAreaWidget->clearImage();
       break;
+
    case AutomaticMode:
       ui.drawAreaWidget->clearImage();
 
       // make random points
 
-      // OPEN TODO:::
-      Q_ASSERT(false && "NYI!!!");
+      // OPEN TODO:::--> random points
+      Q_ASSERT(false && "AutomaticMode ---> NYI!!!");
       // OPEN TODO::: end ---
 
       break;
+
+   case FromImageMode:
+      ui.drawAreaWidget->clearImage();
+
+      // make random points
+
+      // OPEN TODO::: --> image processing, characteristic points
+      Q_ASSERT(false && "FromImageMode ---> NYI!!!");
+      // OPEN TODO::: end ---
+
+      break;
+
    default:
       Q_ASSERT(false);
    }
@@ -165,6 +178,9 @@ void TrianglePPTest::setGenerateButtonText()
       break;
    case AutomaticMode:
       ui.generatePointsPushButton->setText(tr("Generate Points"));
+      break;      
+   case FromImageMode:
+      ui.generatePointsPushButton->setText(tr("Find Points"));
       break;
    default:
       ui.generatePointsPushButton->setText("???");
