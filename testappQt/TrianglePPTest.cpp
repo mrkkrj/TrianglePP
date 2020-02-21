@@ -1,9 +1,20 @@
+
+
+// OPEN TODO:: file header
+
+
 #include "TrianglePPTest.h"
+#include "TrianglePpOptions.h"
 
 #include <tpp_interface.hpp>
-#include <vector>
 
 #include <QMessageBox>
+
+#include <vector>
+#include <random>
+
+
+#include <random>
 
 
 using namespace tpp;
@@ -11,20 +22,26 @@ using namespace tpp;
 
 namespace {
 
+   // impl. constants
+   const int c_defaultMinPoints = 3;
+   const int c_defaultMaxPoints = 100;
+   const int c_defaultMinAngle = 20; // default min. angle used by the original Triangle package!
+
    // impl. helpers
    QPoint getDelaunayResultPoint(
          std::vector<Delaunay::Point>& delaunayInput, 
          int resultIndex, 
-         const Delaunay::Point& resultPoint)
+         const Delaunay::Point& stPoint)
    {
       double x;
       double y;
 
       // new vertices might have been added to enforce constraints!
+      // ( aka Steiner points )
       if (resultIndex == -1)
       {
-         x = resultPoint[0]; // an added vertex, it's data copied to resultPoint
-         y = resultPoint[1];
+         x = stPoint[0]; // an added vertex, it's data copied to resultPoint
+         y = stPoint[1];
       }
       else
       {
@@ -43,14 +60,26 @@ namespace {
 TrianglePPTest::TrianglePPTest(QWidget *parent)
     : QMainWindow(parent),
       mode_(ManualMode),
-      useConstraints_(false)
+      useConstraints_(false),
+      triangulated_(false),
+      minAngle_(-1),
+      maxArea_(-1),
+      minPoints_(-1),
+      maxPoints_(-1)
 {
    ui.setupUi(this);
 
+   // NYI:
+   ui.tesselatePointsPushButton->hide();
+   // ---
+   
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
-   ui.optionsToolButton->setText(QChar(0x2630)); // trigram for heaven 
+   ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)
 
    setGenerateButtonText();
+
+   // drawing area changes:
+   connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
 }
 
 
@@ -60,24 +89,18 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
    {
    case ManualMode:
       // reset
-      ui.drawAreaWidget->clearImage();
+      clearDisplay();
       break;
 
    case AutomaticMode:
-      ui.drawAreaWidget->clearImage();
-
-      // make random points
-
-      // OPEN TODO:::--> random points
-      Q_ASSERT(false && "AutomaticMode ---> NYI!!!");
-      // OPEN TODO::: end ---
-
+      clearDisplay();
+      generateRandomPoints();
       break;
 
    case FromImageMode:
-      ui.drawAreaWidget->clearImage();
+      clearDisplay();
 
-      // make random points
+      // find characteristic points in the image
 
       // OPEN TODO::: --> image processing, characteristic points
       Q_ASSERT(false && "FromImageMode ---> NYI!!!");
@@ -108,7 +131,7 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
       return;
    }
 
-   // 1. standard triangulation
+   // triangulate
    std::vector<Delaunay::Point> delaunayInput;
    for (auto& point : drawnPoints)
    {
@@ -116,19 +139,38 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    }
 
    Delaunay trGenerator(delaunayInput);
-   trGenerator.Triangulate(useConstraints_);
 
+   if (useConstraints_)
+   {
+      if (minAngle_ > 0)
+      {
+         trGenerator.setMinAngle(minAngle_);
+      }
+      if (maxArea_ > 0)
+      {
+         trGenerator.setMaxArea(maxArea_);
+      }
+   }
+   else
+   {
+      trGenerator.setMinAngle(-1);
+      trGenerator.setMaxArea(-1);
+   }
+
+   trGenerator.Triangulate(useConstraints_);
+   triangulated_ = true;
+   
    // iterate over triangles
    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
    {
-      // access data
-      Delaunay::Point p1;
-      Delaunay::Point p2;
-      Delaunay::Point p3;
+      // Steiner points?
+      Delaunay::Point sp1;
+      Delaunay::Point sp2;
+      Delaunay::Point sp3;
 
-      int originIdx = trGenerator.Org(fit, &p1);
-      int destIdx = trGenerator.Dest(fit, &p2);
-      int apexIdx = trGenerator.Apex(fit, &p3);
+      int originIdx = trGenerator.Org(fit, &sp1);
+      int destIdx = trGenerator.Dest(fit, &sp2);
+      int apexIdx = trGenerator.Apex(fit, &sp3);
 
       auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
       {
@@ -136,10 +178,16 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
       };
 
       // draw triangle
-      ui.drawAreaWidget->drawLine(getResultPoint(originIdx, p1), getResultPoint(destIdx, p2));
-      ui.drawAreaWidget->drawLine(getResultPoint(destIdx, p2), getResultPoint(apexIdx, p3));
-      ui.drawAreaWidget->drawLine(getResultPoint(apexIdx, p3), getResultPoint(originIdx, p1));
+      ui.drawAreaWidget->drawLine(getResultPoint(originIdx, sp1), getResultPoint(destIdx, sp2));
+      ui.drawAreaWidget->drawLine(getResultPoint(destIdx, sp2), getResultPoint(apexIdx, sp3));
+      ui.drawAreaWidget->drawLine(getResultPoint(apexIdx, sp3), getResultPoint(originIdx, sp1));
    }
+}
+
+
+void TrianglePPTest::on_tesselatePointsPushButton_clicked()
+{
+   QMessageBox::critical(this, tr("TODO"), tr("Not yet implemented!"));
 }
 
 
@@ -155,19 +203,46 @@ void TrianglePPTest::on_pointModeComboBox_currentIndexChanged(int index)
 void TrianglePPTest::on_useConstraintsCheckBox_toggled(bool checked)
 {
    useConstraints_ = checked;
+
+   // ??? good idea?
+#if 0
+   // re-triangulate!
+   on_triangualtePointsPushButton_clicked();
+#endif
 }
 
 
 void TrianglePPTest::on_optionsToolButton_clicked()
 {
+   QMenu ctxtMenu(tr(""), this);
 
-   // NYI !!!!!!!!!!!!!!!!!
-   // -- show options
+   QAction action1("Options", this);
+   connect(&action1, &QAction::triggered, this, &TrianglePPTest::showTrianguationOptions);
+   ctxtMenu.addAction(&action1);
 
+   QAction action2("Close", this);
+   connect(&action2, &QAction::triggered, this, &TrianglePPTest::close);
+   ctxtMenu.addAction(&action2);
+   
+   ctxtMenu.exec(mapToGlobal(ui.optionsToolButton->geometry().bottomLeft()));
 }
 
 
 // private methods
+
+void TrianglePPTest::onTriangulationPointDeleted(const QPoint& pos)
+{
+   if (!triangulated_)
+   {
+      return;
+   }
+
+   // find adjacent vertices, remove them...
+   //  -- OR: just re-triangulate!
+
+   on_triangualtePointsPushButton_clicked();
+}
+
 
 void TrianglePPTest::setGenerateButtonText()
 {
@@ -186,4 +261,64 @@ void TrianglePPTest::setGenerateButtonText()
       ui.generatePointsPushButton->setText("???");
       Q_ASSERT(false && "unknown draw mode");
    }
+}
+
+
+void TrianglePPTest::generateRandomPoints()
+{
+   std::random_device r;
+   std::default_random_engine reng(r());
+
+   // 1. dice out a number
+   int minPoints = minPoints_ <= 0 ? c_defaultMinPoints : minPoints_;
+   int maxPoints = maxPoints_ <= 0 ? c_defaultMaxPoints : maxPoints_;
+
+   std::uniform_int_distribution<int> udistr(minPoints, maxPoints);
+   int count = udistr(reng);
+
+   statusBar()->showMessage(QString("Generated %1 points").arg(count));
+
+   // 2. dice out points
+   auto ptSize = ui.drawAreaWidget->getPointSize();
+
+   std::uniform_int_distribution<int> udistrWidth(0 + ptSize / 2, ui.drawAreaWidget->width() - 1 - (ptSize / 2));
+   std::uniform_int_distribution<int> udistrHeight(0 + ptSize / 2, ui.drawAreaWidget->height() - 1 - (ptSize / 2));
+
+   for (int i = 0; i < count; ++i)
+   {
+      // OPEN TODO:: 
+      //  -- check minimum distance to other points!!!
+
+      ui.drawAreaWidget->drawPoint({ udistrWidth(reng), udistrHeight(reng) });
+   }     
+}
+
+
+void TrianglePPTest::showTrianguationOptions()
+{
+   TrianglePpOptions dlg(this);
+
+   dlg.fillContents(
+         minAngle_ > 0 ? minAngle_ : c_defaultMinAngle,
+         maxArea_ > 0 ? maxArea_ : -1,
+         minPoints_ > 0 ? minPoints_ : c_defaultMinPoints,
+         maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints);
+
+   dlg.exec();
+
+   if (dlg.result() == QDialog::Accepted)
+   {
+      minAngle_ = (dlg.getMinAngle() == c_defaultMinAngle) ? -1 : dlg.getMinAngle();
+      maxArea_ = dlg.getMaxArea();
+      minPoints_ = (dlg.getMinPointCount() == c_defaultMinPoints) ? -1 : dlg.getMinPointCount();
+      maxPoints_ = (dlg.getMaxPointCount() == c_defaultMaxPoints) ? -1 : dlg.getMaxPointCount();
+   }
+}
+
+
+void TrianglePPTest::clearDisplay()
+{
+   ui.drawAreaWidget->clearImage();
+   statusBar()->showMessage("");
+   triangulated_ = false;
 }

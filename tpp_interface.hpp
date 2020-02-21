@@ -105,6 +105,7 @@ namespace tpp {
   Additionally, the inner helper C++ class Triwrap groups the original Triangle's C functions.
   
   \author Piyush Kumar
+
   \note   (mrkkrj) For for backgroud info on the Triangle's implementation see "Triangle: 
           Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk: 
           www.cs.cmu.edu/~quake-papers/triangle.ps
@@ -284,7 +285,7 @@ public:
       c.  These vertices occur in counterclockwise order about the triangle.  
       Remember to call Triangulate before using this function. Do not use it on a null iterator.
     */
-    int Org (fIterator const & fit, Point* point = 0);
+    int Org(fIterator const & fit, Point* point = 0);
 
 
     //! Access the destination (Dest) vertex of a face.
@@ -486,6 +487,7 @@ private:
     //    HACK:: double* as not to export internal impl.
     void SetPoint(Point& point, double* vertexptr); 
     int GetVertexIndex(fIterator const & fit, double* vertexptr); 
+
 	// added mrkkrj 
 	std::string formatFloatConstraint(float f) const;
 

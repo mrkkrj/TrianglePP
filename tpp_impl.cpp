@@ -8,14 +8,16 @@
 // changed mrkkrj --
 //#include <triangle_impl.hpp>
 //#include <tpp_interface.hpp>
+
 #define NO_TIMER
 #define DREDUCED
 #define ANSI_DECLARATORS
 #define TRILIBRARY
 //#define CDT_ONLY // (de)activate -q option!
+
 #ifndef _WIN64
-// the MS x64 compilers do not use FPU - SSE is default, thus no extended precision problems!
-#define CPU86
+// the MS x64 compilers do not use FPU (as SSE is the default) thus no extended precision problems!
+#  define CPU86
 #endif
 
 // mrkkrj::: DEBUG trace 
@@ -101,10 +103,11 @@ void Delaunay::Triangulate(bool quality, bool trace) {
 		}
 	}
 
-	if (!trace)
-		options.append("Q"); // Q: no trace, no debug
-	else
+   if (!trace) {
+      options.append("Q"); // Q: no trace, no debug
+   } else {
 		options.append("V"); // trace & debug
+   }
 
 	Triangulate(options);
 }
@@ -112,7 +115,7 @@ void Delaunay::Triangulate(bool quality, bool trace) {
 /*!
   Triangulate the points stored in m_PList.
   \note (mrkkrj) copy-pasted from parts of the original Triangle's triangulate() function!
-  \author Piyush Kumar (originally)
+  \author Piyush Kumar (originally), mrkkrj (extracted version)
 */
 void Delaunay::Triangulate(std::string& triswitches) {
     typedef struct triangulateio  TriangStruct;
@@ -123,7 +126,7 @@ void Delaunay::Triangulate(std::string& triswitches) {
 
 #if DETAIL_DEBUG_TRIANGLE
     size_t posV = triswitches.find("V");
-    if(posV != std::string::npos){
+    if(posV != std::string::npos) {
         triswitches.insert(posV, "V"); // detailed trace!
     }
 #endif
@@ -173,8 +176,8 @@ void Delaunay::Triangulate(std::string& triswitches) {
     //                     - use it as segments in formskeleton()!!
     // end TODO::
 
-  /* Ensure that no vertex can be mistaken for a triangular bounding */
-  /*   box vertex in insertvertex().                                 */
+    // Ensure that no vertex can be mistaken for a triangular bounding 
+    //   box vertex in insertvertex().
     tpmesh->infvertex1 = (Triwrap::vertex) NULL;
     tpmesh->infvertex2 = (Triwrap::vertex) NULL;
     tpmesh->infvertex3 = (Triwrap::vertex) NULL;

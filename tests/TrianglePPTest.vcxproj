@@ -62,7 +62,7 @@
       <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -82,31 +82,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\tpp_assert.cpp" />
-    <ClCompile Include="..\tpp_impl.cpp" />
-    <ClCompile Include="DrawingArea.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="TrianglePpOptions.cpp" />
-    <ClCompile Include="TrianglePPTest.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="TrianglePPTest.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="TrianglePpOptions.ui" />
-    <QtUic Include="TrianglePPTest.ui">
-      <Include Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Include>
-    </QtUic>
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="TrianglePPTest.qrc" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="DrawingArea.h" />
+    <ClCompile Include="..\tpp_impl.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DBG_TO_FILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="trpp_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\tpp_interface.hpp" />
-    <QtMoc Include="TrianglePpOptions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

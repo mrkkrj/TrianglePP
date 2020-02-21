@@ -978,7 +978,8 @@ typedef unsigned long int_ptr_type;
 /*   extracted from the two least significant bits of the pointer.           */
 
 #ifdef _WIN64
-// changed mrkkrj -- OPEN TODO:: somehow typedef doesn't work for this macro!
+// changed mrkkrj 
+//  -- OPEN TODO:: somehow the above typedef doesn't work for this macro!
 #define decode(ptr, otri)                                                       \
   (otri).orient = (int) ((unsigned long long) (ptr) & (unsigned long long) 3l); \
   (otri).tri = (triangle *)                                                     \

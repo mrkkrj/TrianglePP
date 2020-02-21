@@ -46,6 +46,12 @@ public:
     void clearImage();
     void printImage();
 
+signals:
+   void pointAdded(const QPoint& pos);
+   void pointDeleted(const QPoint& pos);
+   void lineAdded(const QPoint& start, const QPoint& end);
+   void lineDeleted(const QPoint& start, const QPoint& end);
+
 protected:
    void paintEvent(QPaintEvent* ev) override;
    void resizeEvent(QResizeEvent* ev) override;

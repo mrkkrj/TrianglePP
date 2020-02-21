@@ -287,16 +287,18 @@ void DrawingArea::deletPointAtLastPos()
    if (idx != -1)
    {
       points_.remove(idx);
-      imgDirty_ = true;
 
+      // overpaint
       auto pointColor = penColor_;
       penColor_ = Qt::white;
 
-      // overpaint
       drawPointAt(startPos_);
 
       // restore color
       penColor_ = pointColor;
+
+      imgDirty_ = true;
+      emit pointDeleted(startPos_);
    }
 }
 

@@ -32,6 +32,7 @@ find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
 
 set(Form_Files
     "./TrianglePPTest.ui"
+    "./TrianglePpOptions.ui"
 )
 source_group("Form Files" FILES ${Form_Files})
 
@@ -51,6 +52,7 @@ source_group("Header Files\\tpp" FILES ${Header_Files__tpp})
 
 set(Header_Files
     "DrawingArea.h"
+    "TrianglePpOptions.h"
     "TrianglePPTest.h"
 )
 source_group("Header Files" FILES ${Header_Files})
@@ -63,6 +65,7 @@ source_group("Source Files\\tpp" FILES ${Source_Files__tpp})
 
 set(Source_Files
     "DrawingArea.cpp"
+    "TrianglePpOptions.cpp"
     "TrianglePPTest.cpp"
     "main.cpp"
 )
