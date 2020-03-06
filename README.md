@@ -3,7 +3,7 @@
 
 # Triangle++
 
-Triangle++ (or TrianglePP) is an updated version of an C++/OO-[wrapper by Piyush Kumar]((https://bitbucket.org/piyush/triangle/overview) for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C.
+Triangle++ (or TrianglePP) is an updated version of an C++/OO-[wrapper by Piyush Kumar](https://bitbucket.org/piyush/triangle/overview) for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C.
 
 It can create Delaunay triangulations and constrained Delaunay triangulations. 
 
