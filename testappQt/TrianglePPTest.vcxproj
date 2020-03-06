@@ -59,7 +59,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -73,6 +73,7 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>..\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,8 +82,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\tpp_assert.cpp" />
-    <ClCompile Include="..\tpp_impl.cpp" />
+    <ClCompile Include="..\source\tpp_assert.cpp" />
+    <ClCompile Include="..\source\tpp_impl.cpp" />
     <ClCompile Include="DrawingArea.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TrianglePpOptions.cpp" />
@@ -105,7 +106,7 @@
     <QtMoc Include="DrawingArea.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\tpp_interface.hpp" />
+    <ClInclude Include="..\source\tpp_interface.hpp" />
     <QtMoc Include="TrianglePpOptions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

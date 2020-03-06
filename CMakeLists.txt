@@ -19,18 +19,17 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ################################################################################
 
 set(Header_Files
-    "trpp_example.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files__trpp
-    "dpoint.hpp"
-    "tpp_assert.cpp"
-    "tpp_assert.hpp"
-    "tpp_impl.cpp"
-    "tpp_interface.hpp"
-    "triangle.h"
-    "triangle_impl.hpp"
+    "source/dpoint.hpp"
+    "source/tpp_assert.cpp"
+    "source/tpp_assert.hpp"
+    "source/tpp_impl.cpp"
+    "source/tpp_interface.hpp"
+    "source/triangle.h"
+    "source/triangle_impl.hpp"
 )
 source_group("Source Files\\trpp" FILES ${Source_Files__trpp})
 
@@ -59,7 +58,7 @@ endif()
 # Include directories
 ################################################################################
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/.;"
+	"${CMAKE_CURRENT_SOURCE_DIR}/source;"
 )
 
 ################################################################################

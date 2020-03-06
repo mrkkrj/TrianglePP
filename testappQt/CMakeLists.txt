@@ -46,7 +46,6 @@ source_group("Resource Files" FILES ${Resource_Files})
 # Source groups
 ################################################################################
 set(Header_Files__tpp
-    "../tpp_interface.hpp"
 )
 source_group("Header Files\\tpp" FILES ${Header_Files__tpp})
 
@@ -58,8 +57,8 @@ set(Header_Files
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files__tpp
-    "../tpp_assert.cpp"
-    "../tpp_impl.cpp"
+    "../source/tpp_assert.cpp"
+    "../source/tpp_impl.cpp"
 )
 source_group("Source Files\\tpp" FILES ${Source_Files__tpp})
 
@@ -93,8 +92,7 @@ endif()
 ################################################################################
 # Include directories
 ################################################################################
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/..;"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../source;"
     "${CMAKE_CURRENT_SOURCE_DIR}/GeneratedFiles;"
 )
 

@@ -4,7 +4,6 @@
 
 #include "tpp_interface.hpp"
 #include <vector>
-#include "trpp_example.h"
 
 
 using namespace tpp;
@@ -86,6 +85,12 @@ int main()
           }
        }
     }
+
+    // OPEN TODO --->
+
+    // 3. Voronoi diagrams
+    //trGenerator.Tesselate(...);
+
 }
 
 // --- eof ---

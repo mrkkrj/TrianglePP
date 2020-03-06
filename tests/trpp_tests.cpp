@@ -70,12 +70,14 @@ int main()
     {
        if (i == 0)
        {
+          // 2.1
           std::cout << "\nTEST: default constraints (min angle = 20°) \n";
           
           trGenerator.Triangulate(withConstraints, dbgOutput);
        }
        else if (i == 1)
        {
+          // 2.2
           std::cout << "\nTEST: custom constraints (angle = 30.5°, area = 5.5) \n";
           
           trGenerator.setMinAngle(30.5f);
@@ -84,11 +86,13 @@ int main()
        }
        else if (i == 2)
        {
-          // bug hunt - 44 deg results in an endless loop 
-          //  --> triangles too tiny for the floating point precision!
+          // 2.3
           std::cout << "\nTEST: custom constraints (angle = 44°) \n";
-                    
+          
+          // bug hunt - 44 deg results in an endless loop 
+          //  --> triangles too tiny for the floating point precision! 
           trGenerator.setMinAngle(44.0f);
+          trGenerator.setMaxArea(-1);
           trGenerator.Triangulate(withConstraints, dbgOutput);
        }
 

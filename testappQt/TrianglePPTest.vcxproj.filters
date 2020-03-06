@@ -40,14 +40,14 @@
     <ClCompile Include="DrawingArea.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\tpp_assert.cpp">
-      <Filter>Source Files\tpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\tpp_impl.cpp">
-      <Filter>Source Files\tpp</Filter>
-    </ClCompile>
     <ClCompile Include="TrianglePpOptions.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\tpp_assert.cpp">
+      <Filter>Source Files\tpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\tpp_impl.cpp">
+      <Filter>Source Files\tpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,7 +75,7 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\tpp_interface.hpp">
+    <ClInclude Include="..\source\tpp_interface.hpp">
       <Filter>Header Files\tpp</Filter>
     </ClInclude>
   </ItemGroup>

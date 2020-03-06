@@ -63,59 +63,67 @@ using std::cerr;
 /*!
 */
 Delaunay::Delaunay(std::vector<Point>& v)
-	: m_minAngle(0.0f),
-	  m_maxArea(0.0f),
-	  m_Triangulated(false)
+   : m_minAngle(0.0f),
+     m_maxArea(0.0f),
+     m_Triangulated(false)
 {
-	m_PList.assign(v.begin(), v.end());
+   m_PList.assign(v.begin(), v.end());
 }
 
 /*!
 */
 Delaunay::~Delaunay() {
-	struct triangulateio* pin = (struct triangulateio*)m_in;
+   struct triangulateio* pin = (struct triangulateio*)m_in;
 
-	Triwrap* pdelclass = (Triwrap*)m_delclass;
+   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
 
-	Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
-	Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
+   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
+   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
 
-	pdelclass->triangledeinit(tpmesh, tpbehavior);
+   pTriangleWrap->triangledeinit(tpmesh, tpbehavior);
 
-	delete tpmesh;
-	delete tpbehavior;
-	delete pin;
-	delete pdelclass;
+   delete tpmesh;
+   delete tpbehavior;
+   delete pin;
+   delete pTriangleWrap;
 }
 
 /*!
 */
 void Delaunay::Triangulate(bool quality, bool trace) {
-	std::string options = "nz";  // n: need neighbors, z: index from 0
+   std::string options = "nz";  // n: need neighbors, z: index from 0
 
-	if (quality) {
-		options.append("q");
-		if (m_minAngle > 0) {
-			options.append(formatFloatConstraint(m_minAngle));
-		}
-		if (m_maxArea > 0) {
-			options.append("a" + formatFloatConstraint(m_maxArea));
-		}
-	}
+   if (quality) {
+      options.append("q");
+      if (m_minAngle > 0) {
+         options.append(formatFloatConstraint(m_minAngle));
+      }
+      if (m_maxArea > 0) {
+         options.append("a" + formatFloatConstraint(m_maxArea));
+      }
+   }
+
+#if 0 // --> OPEN TODO::
+   // TEST::
+   else {
+      options.append("v"); // Voronoi
+   }
+#endif
 
    if (!trace) {
       options.append("Q"); // Q: no trace, no debug
    } else {
-		options.append("V"); // trace & debug
+      options.append("V"); // trace & debug
    }
 
-	Triangulate(options);
+   Triangulate(options);
 }
 
 /*!
   Triangulate the points stored in m_PList.
   \note (mrkkrj) copy-pasted from parts of the original Triangle's triangulate() function!
-  \author Piyush Kumar (originally), mrkkrj (extracted version)
+  \author Piyush Kumar (originally), 
+          mrkkrj (extracted it, debug outputs, extensions)
 */
 void Delaunay::Triangulate(std::string& triswitches) {
     typedef struct triangulateio  TriangStruct;
@@ -144,8 +152,8 @@ void Delaunay::Triangulate(std::string& triswitches) {
     pin->numberofregions = 0;
     pin->regionlist = (REAL *) NULL;
 
-    m_delclass = new Triwrap;
-    Triwrap *pdelclass = (Triwrap *)m_delclass;
+    m_triangleWrap = new Triwrap;
+    Triwrap* pTriangleWrap = (Triwrap *)m_triangleWrap;
     triswitches.push_back('\0');
     char *ptris = &triswitches[0];
 
@@ -156,20 +164,20 @@ void Delaunay::Triangulate(std::string& triswitches) {
     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
 
     // parse the options:
-    pdelclass->parsecommandline(1, &ptris, tpbehavior);
+    pTriangleWrap->parsecommandline(1, &ptris, tpbehavior);
 
     // initialize data structs
-    pdelclass->triangleinit(tpmesh);
+    pTriangleWrap->triangleinit(tpmesh);
     tpmesh->steinerleft = tpbehavior->steiner; // added mrkkrj
 
-    pdelclass->transfernodes(
+    pTriangleWrap->transfernodes(
                 tpmesh, tpbehavior, pin->pointlist, 
                 pin->pointattributelist,
                 pin->pointmarkerlist, pin->numberofpoints,
                 pin->numberofpointattributes);
 
     // do it!
-    tpmesh->hullsize = pdelclass->delaunay(tpmesh, tpbehavior);
+    tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);
 
     // OPEN TODO:: mrkkrj
     //    if(concave hull) - compute concave hull with the chi-algorithm,
@@ -187,14 +195,14 @@ void Delaunay::Triangulate(std::string& triswitches) {
         tpmesh->checksegments = 1;          /* Segments will be introduced next. */
         if (!tpbehavior->refine) {
           /* Insert PSLG segments and/or convex hull segments. */
-          pdelclass->formskeleton(tpmesh, tpbehavior, pin->segmentlist,
+          pTriangleWrap->formskeleton(tpmesh, tpbehavior, pin->segmentlist,
                                   pin->segmentmarkerlist, pin->numberofsegments);
         }
     }
 
 #ifndef CDT_ONLY 
     if (tpbehavior->quality && (tpmesh->triangles.items > 0)) {
-        pdelclass->enforcequality(tpmesh, tpbehavior);        /* Enforce angle and area constraints. */
+        pTriangleWrap->enforcequality(tpmesh, tpbehavior);        /* Enforce angle and area constraints. */
     }
 #endif /* not CDT_ONLY */
 
@@ -205,14 +213,14 @@ void Delaunay::Triangulate(std::string& triswitches) {
 
         if (!tpbehavior->refine) {
           /* Carve out holes and concavities. */
-          pdelclass->carveholes(tpmesh, tpbehavior, NULL, tpmesh->holes, NULL, tpmesh->regions);
+          pTriangleWrap->carveholes(tpmesh, tpbehavior, NULL, tpmesh->holes, NULL, tpmesh->regions);
         }
     } 
 //#endif
 
     /* Calculate the number of edges. */
     tpmesh->edges = (3l * tpmesh->triangles.items + tpmesh->hullsize) / 2l;
-    pdelclass->numbernodes(tpmesh, tpbehavior);
+    pTriangleWrap->numbernodes(tpmesh, tpbehavior);
     TRACE2i("<- Triangulate: triangles= ", tpmesh->triangles.items);
 
     m_Triangulated = true;
@@ -230,11 +238,11 @@ void Delaunay::writeoff(std::string& fname){
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
 
-    Triwrap *pdelclass =  (Triwrap *)m_delclass;
+    Triwrap *pTriangleWrap =  (Triwrap *)m_triangleWrap;
     char *pfname = new char[fname.size()+1];
     strcpy(pfname , fname.c_str());
 
-    pdelclass->writeoff(tpmesh, tpbehavior, pfname, 0, NULL);
+    pTriangleWrap->writeoff(tpmesh, tpbehavior, pfname, 0, NULL);
     delete [] pfname;
 }
 
@@ -305,10 +313,10 @@ Delaunay::vIterator::vIterator(Delaunay* adel) {
 
      Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) adel->m_pmesh;
      Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) adel->m_pbehavior;
-     Triwrap *pdelclass =  (Triwrap *)adel->m_delclass;
+     Triwrap *pTriangleWrap =  (Triwrap *)adel->m_triangleWrap;
 
-     pdelclass->traversalinit(&( tpmesh->vertices ) );
-     vloop = pdelclass->vertextraverse(tpmesh);
+     pTriangleWrap->traversalinit(&( tpmesh->vertices ) );
+     vloop = pTriangleWrap->vertextraverse(tpmesh);
 
      while
         (
@@ -317,7 +325,7 @@ Delaunay::vIterator::vIterator(Delaunay* adel) {
           ((int *)vloop)[tpmesh->vertexmarkindex+1] == UNDEADVERTEX
         )
     ) 
-    vloop = (void *) pdelclass->vertextraverse(tpmesh);
+    vloop = (void *) pTriangleWrap->vertextraverse(tpmesh);
 }
 
 /*!
@@ -342,7 +350,7 @@ Delaunay::vIterator Delaunay::vIterator::operator++() {
      Triwrap::__pbehavior * tpbehavior = 
                 (Triwrap::__pbehavior *) MyDelaunay->m_pbehavior;
 
-     Triwrap *pdelclass =  (Triwrap *) MyDelaunay->m_delclass;
+     Triwrap *pTriangleWrap =  (Triwrap *) MyDelaunay->m_triangleWrap;
 
      while
         (
@@ -351,8 +359,8 @@ Delaunay::vIterator Delaunay::vIterator::operator++() {
               ((int *)vloop)[tpmesh->vertexmarkindex+1] == UNDEADVERTEX
             )
         )
-        vloop = (void *) pdelclass->vertextraverse(tpmesh);
-        vloop = (void *) pdelclass->vertextraverse(tpmesh);
+        vloop = (void *) pTriangleWrap->vertextraverse(tpmesh);
+        vloop = (void *) pTriangleWrap->vertextraverse(tpmesh);
 
         vIterator vit;
         vit.vloop = vloop;
@@ -399,12 +407,12 @@ Delaunay::fIterator::fIterator(Delaunay* adel) {
      MyDelaunay = adel;
 
      Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) adel->m_pmesh;
-     Triwrap *pdelclass =  (Triwrap *)adel->m_delclass;
+     Triwrap *pTriangleWrap =  (Triwrap *)adel->m_triangleWrap;
 
-     pdelclass->traversalinit(&( tpmesh->triangles ) );
+     pTriangleWrap->traversalinit(&( tpmesh->triangles ) );
      // floop = new trianglelooptype;
      trianglelooptype *ploop = (trianglelooptype *)(&floop);
-     ploop->tri    = pdelclass->triangletraverse(tpmesh);
+     ploop->tri    = pTriangleWrap->triangletraverse(tpmesh);
      ploop->orient = 0;
 
 }
@@ -434,9 +442,9 @@ void Delaunay::fIterator::operator++() {
      Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) MyDelaunay->m_pmesh;
      
      trianglelooptype *ploop = (trianglelooptype *)(&floop);
-     Triwrap *pdelclass =  (Triwrap *) MyDelaunay->m_delclass;
+     Triwrap *pTriangleWrap =  (Triwrap *) MyDelaunay->m_triangleWrap;
 
-     ploop->tri = pdelclass->triangletraverse(tpmesh);
+     ploop->tri = pTriangleWrap->triangletraverse(tpmesh);
      // cout << "tri val = " << ploop->tri << endl;
 }
 
@@ -631,7 +639,7 @@ Delaunay::fIterator Delaunay::locate(int vertexid){
 
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
-    Triwrap  *pdelclass               = (Triwrap *)              m_delclass;
+    Triwrap  *pTriangleWrap               = (Triwrap *)              m_triangleWrap;
 
     horiz.tri = tpmesh->dummytri;
     horiz.orient = 0;
@@ -641,7 +649,7 @@ Delaunay::fIterator Delaunay::locate(int vertexid){
     dv[1] = m_PList[vertexid][1];
 
     /* Search for a triangle containing `newvertex'. */
-    int intersect = pdelclass->locate(tpmesh, tpbehavior, dv, &horiz);
+    int intersect = pTriangleWrap->locate(tpmesh, tpbehavior, dv, &horiz);
     Assert(intersect != Triwrap::ONVERTEX, "Something went wrong in point location\n"); // added mrkkrj
     
     if(intersect != Triwrap::ONVERTEX) { // Not on vertex!
