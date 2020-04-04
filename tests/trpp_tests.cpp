@@ -22,6 +22,22 @@ int main()
     delaunayInput.push_back(Delaunay::Point(3,3));
     delaunayInput.push_back(Delaunay::Point(1.5, 2.125));
 
+    // impl. helper
+    auto getTriangulationPt = [&](int keypointIdx, const Delaunay::Point& sPoint, double& x, double& y)
+    {
+       if (keypointIdx == -1)
+       {
+          x = sPoint[0]; // added Steiner point, it's data copied to sPoint
+          y = sPoint[1];
+       }
+       else
+       {
+          // point from original data
+          x = delaunayInput[keypointIdx][0];
+          y = delaunayInput[keypointIdx][1];
+       }
+    };
+
 
     // 1. standard triangulation
     std::cout << "TEST: standard triangulation \n";
@@ -48,23 +64,8 @@ int main()
 
     // 2. triangulate with constraints
     bool withConstraints = true;
-    bool dbgOutput = true;
+    tpp::DebugOutputLevel dbgOutput = tpp::Info;
     int nrOfConstraintTests = 3;
-
-    auto getTriangulationPt = [&](int keypointIdx, const Delaunay::Point& sPoint, double& x, double& y)
-    {
-       if (keypointIdx == -1)
-       {
-          x = sPoint[0]; // added Steiner point, it's data copied to sPoint
-          y = sPoint[1];
-       }
-       else
-       {
-          // point from original data
-          x = delaunayInput[keypointIdx][0];
-          y = delaunayInput[keypointIdx][1];
-       }
-    };
 
     for (int i = 0; i < nrOfConstraintTests; ++i)
     {
@@ -89,6 +90,9 @@ int main()
           // 2.3
           std::cout << "\nTEST: custom constraints (angle = 44°) \n";
           
+          // TEST:::
+          //tpp::DebugOutputLevel dbgOutput = tpp::Debug; // OPEN TODO::: remove!!!
+
           // bug hunt - 44 deg results in an endless loop 
           //  --> triangles too tiny for the floating point precision! 
           trGenerator.setMinAngle(44.0f);
@@ -124,6 +128,15 @@ int main()
                     << "{" << x2 << "," << y3 << "}\n";
        }
     }
+    
+    // 3. Voronoi diagrams
+    trGenerator.Tesselate(withConstraints);
+
+    std::cout << "\nTEST: Voronoi --> OPEN TODO::: \n";
+
+    // OPEN TODO:::
+    
+
 
     std::cout << "TEST: completed ---" << std::endl;
 }

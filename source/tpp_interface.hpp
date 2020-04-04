@@ -6,7 +6,7 @@
 
     The following description pertains to the original version, the current version
     was ported to VisualStudio. Thus it doesn't need Python scripts, and is supposed
-    to be used as it is in your program.
+    to be used *as it is* in your program!
  */
 
 
@@ -95,6 +95,13 @@
 //! The main namespace in which the Triangle++ project lives
 namespace tpp {
 
+   // (mrkkrj)
+   enum DebugOutputLevel {
+      None, 
+      Info,    // most useful; it gives information on algorithmic progress and much more detailed statistics
+      Vertex,  // gives vertex-by-vertex details, and prints so much that Triangle runs much more slowly
+      Debug    // gives information only a debugger could love
+   };
 
    //!  The main Delaunay Class that wraps around Triangle.
    /*!
@@ -104,7 +111,7 @@ namespace tpp {
      class reviver::dpoint (but for this application it only uses the d=2 case).
      Additionally, the inner helper C++ class Triwrap groups the original Triangle's C functions.
 
-     \author Piyush Kumar
+     \author Piyush Kumar, mrkkrj
 
      \note   (mrkkrj) For for backgroud info on the Triangle's implementation see "Triangle:
              Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk:
@@ -126,13 +133,26 @@ namespace tpp {
       */
       Delaunay(std::vector<Point>& v);
 
+      //! The main destructor.
+      /*!
+        Does memory cleanup mostly.
+      */
+      ~Delaunay();
+
       //! Delaunay Triangulate the input points
       /*!
         This function calls triangle to delaunay triangulate points given as input
         to the constructor of this class.
         \param quality enforce ninimal angle (default: 20°) and, minimal area (only if explicitely set)
       */
-      void Triangulate(bool quality = false, bool trace = false);
+      void Triangulate(bool quality = false, DebugOutputLevel = None);
+
+      //! Voronoi Tesselate the input points
+      /*!
+        This function calls triangle to create a voronoi diagram with points given as input
+        to the constructor of this class.
+      */
+      void Tesselate(DebugOutputLevel traceLvl = None);
 
       //! Set a quality constraint for the triangulation
       /*!
@@ -149,6 +169,12 @@ namespace tpp {
       void setMaxArea(float area) {
          m_maxArea = area;
       }
+
+      //! Set a user test function for the triangulation
+      /*!
+        OPEN TODO::: (use the -u switch!!!!)
+      */
+      void setUserConstraint(bool (*f)()) {};
 
       //! Output a geomview .off file containing the delaunay triangulation
       /*!
@@ -184,12 +210,6 @@ namespace tpp {
       */
       int hull_size();
 
-      //! The main destructor.
-      /*!
-        Does memory cleanup mostly.
-      */
-      ~Delaunay();
-
 
       ///////////////////////////////
       //
@@ -200,9 +220,9 @@ namespace tpp {
       //!  The vertex iterator for the Delaunay class
       class vIterator {
       private:
-         vIterator(Delaunay*);  //! To set container
-         Delaunay* MyDelaunay;   //! Which container do I point
+         vIterator(Delaunay* tiangulator);   //! To set container
 
+         Delaunay* MyDelaunay;   //! Which container do I point
          void* vloop;            //! Triangles Internal data.
 
       public:
@@ -222,7 +242,7 @@ namespace tpp {
       vIterator vend();
 
       //! Given an iterator, find its index in the input vector of points.
-      int vertexId(vIterator const&);
+      int vertexId(vIterator const& vit);
 
       //! Given an index, return the actual double Point
       const Point& point_at_vertex_id(int i) { return m_PList[i]; };
@@ -250,9 +270,9 @@ namespace tpp {
 
          typedef struct tdata  poface;
 
-         fIterator(Delaunay*);  //! To set container
-         Delaunay* MyDelaunay;   //! Which container do I point
+         fIterator(Delaunay* tiangulator);  //! To set container
 
+         Delaunay* MyDelaunay;   //! Which container do I point
          //void *floop;          //! Triangles Internal data.
          poface floop;
 
@@ -464,6 +484,72 @@ namespace tpp {
       fIterator locate(int vertexid); // OPEN:: doesn't seem to be working!
 
 
+      ///////////////////////////////
+      //
+      // Voronoi Points Iterator 
+      //  (added mrkkrj)
+      //
+      ///////////////////////////////
+
+      //!  The Voronoi points iterator for the Delaunay class
+      class vvIterator {
+      private:
+         vvIterator(Delaunay* tiangulator);   //! To set container
+
+         Delaunay* MyDelaunay;   //! Which container do I point
+         void* vvloop;            //! Triangle's Internal data.
+         int vvindex;
+
+      public:
+         vvIterator operator++();
+         vvIterator() :vvloop(NULL), vvindex(0) {};
+         Point& operator*() const;
+         ~vvIterator();
+
+         friend class Delaunay;
+         friend bool operator==(vvIterator const&, vvIterator const&);
+         friend bool operator!=(vvIterator const&, vvIterator const&);
+      };
+
+      //! Voronoi Points iterator begin function
+      vvIterator vvbegin() { return vvIterator(this); };
+      //! Voronoi Points iterator end function
+      vvIterator vvend();
+
+
+      ///////////////////////////////
+      //
+      // Voronoi Edges Iterator 
+      //  (added mrkkrj)
+      //
+      ///////////////////////////////
+
+      //!  The Voronoi edges iterator for the Delaunay class
+      class veIterator {
+      private:
+         veIterator(Delaunay* tiangulator);   //! To set container
+
+         Delaunay* MyDelaunay;   //! Which container do I point
+         void* veloop;           //! Triangle's Internal data.
+         int veindex;
+
+      public:
+         veIterator operator++();
+         veIterator() :veloop(NULL), veindex(0) {};
+         Point& operator*() const;
+         ~veIterator();
+
+         friend class Delaunay;
+         //friend bool operator==(veIterator const&, veIterator const&);
+         //friend bool operator!=(veIterator const&, veIterator const&);
+      };
+
+      //! Voronoi Points iterator begin function
+      veIterator vebegin() { return veIterator(this); };
+      //! Voronoi Points iterator end function
+      veIterator veend();
+
+
       //--------------------------------------
       // added mrkkrj - helper for Points 
       //    OPEN:: compiler cannot instantiate less<> with operator<() for Point, why?!
@@ -492,6 +578,7 @@ namespace tpp {
 
       // added mrkkrj 
       std::string formatFloatConstraint(float f) const;
+      void setDebugLevelOption(std::string options, DebugOutputLevel traceLvl);
 
       friend class fIterator;
 
@@ -502,6 +589,9 @@ namespace tpp {
       void* m_pmesh;          /*! pointer to triangle mesh */
       void* m_pbehavior;
       bool m_Triangulated;
+
+      // added mrkkrj:
+      void* m_vorout;          /*! pointer to Voronoi output */
 
       // added mrkkrj: constraints
       float m_minAngle;

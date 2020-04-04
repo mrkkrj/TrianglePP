@@ -21,33 +21,43 @@
 #endif
 
 // mrkkrj::: DEBUG trace 
-//    - needed when debugging on Windows without console
-//#define DBG_TO_FILE 1
-#ifdef DBG_TO_FILE
-#	include <cstdio>
-    FILE* g_debugFile = 0;
-#	define TRACE(a) { fprintf(g_debugFile, "%s\n", a); fflush(g_debugFile); }
-#	define TRACE2i(a,b) { fprintf(g_debugFile, "%s%d\n", a, b); fflush(g_debugFile); }
-#	define TRACE2s(a,b) { fprintf(g_debugFile, "%s%s\n", a, b); fflush(g_debugFile); }
-#	define TRACE2b(a,b) { fprintf(g_debugFile, "%s%s\n", a, b?"true ":"false"); fflush(g_debugFile); }
-#	define INIT_TRACE(a) { g_debugFile = fopen(a, "w"); \
+//    - needed when debugging a GUI app. on Windows without console
+
+//#define TRIANGLE_DBG_TO_FILE 1
+
+#ifdef TRIANGLE_DBG_TO_FILE
+#   include <cstdio>
+
+    FILE* g_debugFile = nullptr;
+
+    // TR string
+#   define TRACE(a) { if(g_debugFile) { fprintf(g_debugFile, "%s\n", a); fflush(g_debugFile); } }
+   // TR string + integer 
+#   define TRACE2i(a,b) { if(g_debugFile) { fprintf(g_debugFile, "%s%d\n", a, b); fflush(g_debugFile); } }
+    // TR string + string 
+#   define TRACE2s(a,b) { if(g_debugFile) { fprintf(g_debugFile, "%s%s\n", a, b); fflush(g_debugFile); } }
+    // TR string + boolean 
+#   define TRACE2b(a,b) { if(g_debugFile) { fprintf(g_debugFile, "%s%s\n", a, b ? "true " : "false"); fflush(g_debugFile); } }
+
+#   define INIT_TRACE(a) { g_debugFile = fopen(a, "w"); \
                            if(!g_debugFile) std::cerr << "ERROR: Cannot open trace file: " << a << std::endl; }
-#	define END_TRACE() { fclose(g_debugFile); }
+#   define END_TRACE() { if(g_debugFile) { fclose(g_debugFile); } }
 #else
-#	define TRACE(a) 
-#	define TRACE2i(a,b) 
-#	define TRACE2s(a,b) 
-#	define TRACE2b(a,b) 
-#	define INIT_TRACE(a) 
-#	define END_TRACE() 
+#   define TRACE(a)
+#   define TRACE2i(a,b) 
+#   define TRACE2s(a,b) 
+#   define TRACE2b(a,b) 
+#   define INIT_TRACE(a) 
+#   define END_TRACE() 
 #endif
 
-#define DETAIL_DEBUG_TRIANGLE 0
+#define TRIANGLE_DETAIL_DEBUG 0
 // end DEBUG trace
 
 #include "triangle_impl.hpp"
 #include "tpp_interface.hpp"
 #include <sstream>
+#include <cassert>
 // END changed --
 
 #include <new>
@@ -63,9 +73,14 @@ using std::cerr;
 /*!
 */
 Delaunay::Delaunay(std::vector<Point>& v)
-   : m_minAngle(0.0f),
-     m_maxArea(0.0f),
-     m_Triangulated(false)
+   : m_in(nullptr),
+     m_triangleWrap(nullptr),
+     m_pmesh(nullptr),
+     m_pbehavior(nullptr),
+     m_Triangulated(false),
+     m_vorout(nullptr),
+     m_minAngle(0.0f),
+     m_maxArea(0.0f)
 {
    m_PList.assign(v.begin(), v.end());
 }
@@ -74,6 +89,7 @@ Delaunay::Delaunay(std::vector<Point>& v)
 */
 Delaunay::~Delaunay() {
    struct triangulateio* pin = (struct triangulateio*)m_in;
+   struct triangulateio* pvorout = (struct triangulateio*)m_vorout;
 
    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
 
@@ -85,12 +101,13 @@ Delaunay::~Delaunay() {
    delete tpmesh;
    delete tpbehavior;
    delete pin;
+   delete pvorout;
    delete pTriangleWrap;
 }
 
 /*!
 */
-void Delaunay::Triangulate(bool quality, bool trace) {
+void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
    std::string options = "nz";  // n: need neighbors, z: index from 0
 
    if (quality) {
@@ -103,18 +120,7 @@ void Delaunay::Triangulate(bool quality, bool trace) {
       }
    }
 
-#if 0 // --> OPEN TODO::
-   // TEST::
-   else {
-      options.append("v"); // Voronoi
-   }
-#endif
-
-   if (!trace) {
-      options.append("Q"); // Q: no trace, no debug
-   } else {
-      options.append("V"); // trace & debug
-   }
+   setDebugLevelOption(options, traceLvl);
 
    Triangulate(options);
 }
@@ -123,39 +129,36 @@ void Delaunay::Triangulate(bool quality, bool trace) {
   Triangulate the points stored in m_PList.
   \note (mrkkrj) copy-pasted from parts of the original Triangle's triangulate() function!
   \author Piyush Kumar (originally), 
-          mrkkrj (extracted it, debug outputs, extensions)
+          mrkkrj (extracted it, debug output to file, corections, extensions)
 */
 void Delaunay::Triangulate(std::string& triswitches) {
-    typedef struct triangulateio  TriangStruct;
-    typedef struct triangulateio* pTriangStruct;
-
     INIT_TRACE("triangle.out.txt");
     TRACE("Triangulate ->");
 
-#if DETAIL_DEBUG_TRIANGLE
+#if TRIANGLE_DETAIL_DEBUG
     size_t posV = triswitches.find("V");
     if(posV != std::string::npos) {
         triswitches.insert(posV, "V"); // detailed trace!
     }
 #endif
 
-    m_in = new TriangStruct;
-    pTriangStruct pin = (struct triangulateio *)m_in;
+    m_in = new triangulateio;
+    triangulateio* pin = (struct triangulateio *)m_in;
     
     pin->numberofpoints = (int)m_PList.size();
     pin->numberofpointattributes = (int)0;
     pin->pointlist = static_cast<double *>((void *)(&m_PList[0])) ;
-    pin->pointattributelist = NULL;
-    pin->pointmarkerlist = (int *) NULL;
+    pin->pointattributelist = nullptr;
+    pin->pointmarkerlist = (int *) nullptr;
     pin->numberofsegments = 0;
     pin->numberofholes = 0;
     pin->numberofregions = 0;
-    pin->regionlist = (REAL *) NULL;
+    pin->regionlist = (REAL *) nullptr;
 
     m_triangleWrap = new Triwrap;
     Triwrap* pTriangleWrap = (Triwrap *)m_triangleWrap;
     triswitches.push_back('\0');
-    char *ptris = &triswitches[0];
+    char *pTriswitches = &triswitches[0];
 
     m_pmesh = new Triwrap::__pmesh;
     m_pbehavior = new Triwrap::__pbehavior;
@@ -164,7 +167,7 @@ void Delaunay::Triangulate(std::string& triswitches) {
     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
 
     // parse the options:
-    pTriangleWrap->parsecommandline(1, &ptris, tpbehavior);
+    pTriangleWrap->parsecommandline(1, &pTriswitches, tpbehavior);
 
     // initialize data structs
     pTriangleWrap->triangleinit(tpmesh);
@@ -176,7 +179,7 @@ void Delaunay::Triangulate(std::string& triswitches) {
                 pin->pointmarkerlist, pin->numberofpoints,
                 pin->numberofpointattributes);
 
-    // do it!
+    // triangulate!
     tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);
 
     // OPEN TODO:: mrkkrj
@@ -186,9 +189,9 @@ void Delaunay::Triangulate(std::string& triswitches) {
 
     // Ensure that no vertex can be mistaken for a triangular bounding 
     //   box vertex in insertvertex().
-    tpmesh->infvertex1 = (Triwrap::vertex) NULL;
-    tpmesh->infvertex2 = (Triwrap::vertex) NULL;
-    tpmesh->infvertex3 = (Triwrap::vertex) NULL;
+    tpmesh->infvertex1 = (Triwrap::vertex) nullptr;
+    tpmesh->infvertex2 = (Triwrap::vertex) nullptr;
+    tpmesh->infvertex3 = (Triwrap::vertex) nullptr;
 
     // added mrkkrj: support for the -q option
     if (tpbehavior->usesegments && (tpmesh->triangles.items > 0)) {
@@ -213,7 +216,7 @@ void Delaunay::Triangulate(std::string& triswitches) {
 
         if (!tpbehavior->refine) {
           /* Carve out holes and concavities. */
-          pTriangleWrap->carveholes(tpmesh, tpbehavior, NULL, tpmesh->holes, NULL, tpmesh->regions);
+          pTriangleWrap->carveholes(tpmesh, tpbehavior, nullptr, tpmesh->holes, nullptr, tpmesh->regions);
         }
     } 
 //#endif
@@ -226,6 +229,65 @@ void Delaunay::Triangulate(std::string& triswitches) {
     m_Triangulated = true;
     END_TRACE();
 }
+
+/*!
+*/
+void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
+   std::string options = "nz";  // n: need neighbors, z: index from 0
+
+   setDebugLevelOption(options, traceLvl);
+
+   // "If the triangulated domain is"
+   //"  convex and has no holes, you can use -D switch to force Triangle to"
+   //"  construct a conforming Delaunay triangulation instead of a CCDT, so the"
+   //"  Voronoi diagram will be valid."
+
+   options.append("D"); // Voronoi precondition
+   options.append("v"); // Voronoi
+
+   Triangulate(options);
+
+   // now use the triangulation for a Voronoi diagram
+   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+
+   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
+   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
+
+   // OPEN TODO::: check these preconditions!!!!
+   if (tpmesh->holes != 0) {
+
+   }
+   
+   // OPEN TODO:::!!!!!!!! !!!!!!! !!!!!!!!!!!
+
+   m_vorout = new triangulateio;
+   triangulateio* pvorout = (struct triangulateio*)m_vorout;
+
+   pvorout->numberofpoints = tpmesh->triangles.items;
+   pvorout->numberofpointattributes = tpmesh->nextras;
+   pvorout->numberofedges = tpmesh->edges;
+
+   pvorout->pointlist = nullptr;
+   pvorout->pointattributelist = nullptr;
+   pvorout->pointmarkerlist = nullptr;
+   pvorout->numberofsegments = 0;
+   pvorout->numberofholes = 0;
+   pvorout->numberofregions = 0;
+   pvorout->regionlist = nullptr;
+   pvorout->edgelist = nullptr;
+   pvorout->edgemarkerlist = nullptr;
+   pvorout->normlist = nullptr;
+
+   pTriangleWrap->writevoronoi(
+         tpmesh, tpbehavior,
+         &pvorout->pointlist, &pvorout->pointattributelist,
+         &pvorout->pointmarkerlist, &pvorout->edgelist,
+         &pvorout->edgemarkerlist, &pvorout->normlist);
+
+      // OPEN TODO::: end ---
+
+}
+
 
 /*!
 */
@@ -242,7 +304,7 @@ void Delaunay::writeoff(std::string& fname){
     char *pfname = new char[fname.size()+1];
     strcpy(pfname , fname.c_str());
 
-    pTriangleWrap->writeoff(tpmesh, tpbehavior, pfname, 0, NULL);
+    pTriangleWrap->writeoff(tpmesh, tpbehavior, pfname, 0, nullptr);
     delete [] pfname;
 }
 
@@ -299,6 +361,28 @@ std::string Delaunay::formatFloatConstraint(float f) const {
 	return ss.str();
 }
 
+/*!
+  added mrkkrj:
+*/
+void Delaunay::setDebugLevelOption(std::string options, DebugOutputLevel traceLvl) {
+   switch (traceLvl) {
+   case None:
+      options.append("Q"); // Q: no trace, no debug
+      break;
+   case Info:
+      options.append("V"); // trace & debug
+      break;
+   case Vertex:
+      options.append("VV"); // more trace & debug
+      break;
+   case Debug:
+      options.append("VVVV"); // much, much more!
+      break;
+   default:
+      assert(false && "unknown trace level");
+   }
+}
+
 ///////////////////////////////
 //
 // Vertex Iterator Impl.
@@ -307,13 +391,13 @@ std::string Delaunay::formatFloatConstraint(float f) const {
 
 /*!
 */
-Delaunay::vIterator::vIterator(Delaunay* adel) {
+Delaunay::vIterator::vIterator(Delaunay* tiangulator) {
      typedef Triwrap::vertex vertex;
-     MyDelaunay = adel;
+     MyDelaunay = tiangulator;
 
-     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) adel->m_pmesh;
-     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) adel->m_pbehavior;
-     Triwrap *pTriangleWrap =  (Triwrap *)adel->m_triangleWrap;
+     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) tiangulator->m_pmesh;
+     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) tiangulator->m_pbehavior;
+     Triwrap *pTriangleWrap =  (Triwrap *)tiangulator->m_triangleWrap;
 
      pTriangleWrap->traversalinit(&( tpmesh->vertices ) );
      vloop = pTriangleWrap->vertextraverse(tpmesh);
@@ -337,7 +421,7 @@ Delaunay::vIterator::~vIterator(){
 */
 Delaunay::vIterator Delaunay::vend(){
     vIterator vit;
-    vit.vloop = ((Triwrap::vertex) NULL);
+    vit.vloop = ((Triwrap::vertex) nullptr);
     return vit;
 }
 
@@ -400,14 +484,14 @@ bool operator!=(Delaunay::vIterator const &vit1,
 
 /*!
 */
-Delaunay::fIterator::fIterator(Delaunay* adel) {
+Delaunay::fIterator::fIterator(Delaunay* tiangulator) {
      typedef Triwrap::vertex vertex;
-     typedef Triwrap::__otriangle trianglelooptype;
+     typedef Triwrap::__otriangle trianglelooptype; // oriented triangle
 
-     MyDelaunay = adel;
+     MyDelaunay = tiangulator;
 
-     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) adel->m_pmesh;
-     Triwrap *pTriangleWrap =  (Triwrap *)adel->m_triangleWrap;
+     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) tiangulator->m_pmesh;
+     Triwrap *pTriangleWrap =  (Triwrap *)tiangulator->m_triangleWrap;
 
      pTriangleWrap->traversalinit(&( tpmesh->triangles ) );
      // floop = new trianglelooptype;
@@ -427,7 +511,7 @@ Delaunay::fIterator::~fIterator(){
 Delaunay::fIterator Delaunay::fend(){
     fIterator fit;
     typedef Triwrap::__otriangle trianglelooptype;
-    fit.floop.tri = (double ***) NULL;
+    fit.floop.tri = (double ***) nullptr;
     return fit;
 }
 
@@ -603,7 +687,7 @@ Delaunay::fIterator Delaunay::Sym(fIterator const & fit){
          return retval;
      }
      
-     retval.floop.tri = NULL;
+     retval.floop.tri = nullptr;
      retval.floop.orient = 0;
      return retval;
 }
@@ -802,5 +886,143 @@ void Delaunay::trianglesAroundVertex(int vertexid, std::vector<int>& ivv){
     }
 
 }
+
+
+///////////////////////////////
+//
+// Voronoi Point Iterator Impl.
+//
+///////////////////////////////
+
+/*!
+*/
+Delaunay::vvIterator::vvIterator(Delaunay* tiangulator) {
+   MyDelaunay = tiangulator;
+
+   triangulateio* pvorout = (struct triangulateio*)tiangulator->m_vorout;
+   vvloop = pvorout->pointlist;
+   vvindex = 0;
+}
+
+/*!
+*/
+Delaunay::vvIterator::~vvIterator() {
+}
+
+/*!
+*/
+Delaunay::vvIterator Delaunay::vvend() {
+   vvIterator vvit;
+   vvit.vvloop = nullptr;
+   vvit.vvindex = 0;
+   vvit.MyDelaunay = nullptr;
+   return vvit;
+}
+
+/*!
+*/
+Delaunay::vvIterator Delaunay::vvIterator::operator++() {
+   triangulateio* pvorout = (struct triangulateio*)MyDelaunay->m_vorout;
+
+   vvIterator vit;
+   vit.vvloop = vvloop;
+   vit.vvindex = vvindex;
+   vit.MyDelaunay = MyDelaunay;
+
+   if (vvindex / 2 < pvorout->numberofpoints) {
+      vvindex += 2;
+   }
+   else {
+      vvindex = 0;
+      vvloop = nullptr;
+   }
+
+   return vit;
+}
+
+/*!
+*/
+Delaunay::Point& Delaunay::vvIterator::operator*() const {
+   return *((Point*)vvloop);
+}
+
+/*!
+*/
+bool operator==(Delaunay::vvIterator const& vit1,
+                Delaunay::vvIterator const& vit2) {
+   if (vit1.vvloop == vit2.vvloop && 
+       vit1.vvindex == vit2.vvindex) return true;
+   return false;
+}
+
+/*!
+*/
+bool operator!=(Delaunay::vvIterator const& vit1,
+                Delaunay::vvIterator const& vit2) {
+   if (vit1.vvloop != vit2.vvloop ||
+       vit1.vvindex != vit2.vvindex) return true;
+   return false;
+}
+
+
+///////////////////////////////
+//
+// Voronoi Edge Iterator Impl.
+//  --> OPEN TODO:: WIP, only started
+//
+///////////////////////////////
+
+/*!
+*/
+Delaunay::veIterator::veIterator(Delaunay* tiangulator) {
+   MyDelaunay = tiangulator;
+
+   triangulateio* pvorout = (struct triangulateio*)tiangulator->m_vorout;
+   veloop = pvorout->edgelist;
+   veindex = 0;
+}
+
+/*!
+*/
+Delaunay::veIterator::~veIterator() {
+}
+
+/*!
+*/
+Delaunay::veIterator Delaunay::veend() {
+   veIterator veit;
+   veit.veloop = nullptr;
+   veit.veindex = 0;
+   return veit;
+}
+
+/*!
+*/
+Delaunay::veIterator Delaunay::veIterator::operator++() {
+   triangulateio* pvorout = (struct triangulateio*)MyDelaunay->m_vorout;
+   veloop = pvorout->edgelist;
+   if (veindex < pvorout->numberofedges) {
+      ++veindex;
+   }
+   else {
+      veindex = 0;
+      veloop == nullptr;
+   }
+
+   veIterator vit;
+   vit.veloop = veloop;
+   vit.MyDelaunay = MyDelaunay;
+
+   return vit;
+}
+
+/*!
+*/
+Delaunay::Point& Delaunay::veIterator::operator*() const {
+   triangulateio* pvorout = (struct triangulateio*)MyDelaunay->m_vorout;
+
+   return *((Point*)(pvorout + veindex));
+}
+
 
 } // namespace tpp ends.

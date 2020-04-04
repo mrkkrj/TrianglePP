@@ -4,7 +4,7 @@
 
 These are the preliminary test cases for the Triangle++ package. 
 
- - Note that the Visual Studio solution uses the "*DBG_TO_FILE*" define in the Debug mode to enable log output to the *triangle.out.txt* file.
+ - Note that the Visual Studio solution uses the "*TRIANGLE_DBG_TO_FILE*" define in the Debug mode to enable log output to the *triangle.out.txt* file.
 
 ## TODOs:
  - Test 2.3: 64-bit version **freezes** for 44 degrees min. angle constraint! Float value range problem?

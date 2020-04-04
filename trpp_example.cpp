@@ -85,11 +85,22 @@ int main()
           }
        }
     }
-
-    // OPEN TODO --->
-
+        
     // 3. Voronoi diagrams
-    //trGenerator.Tesselate(...);
+    trGenerator.Tesselate();
+
+    // iterate over Voronoi points
+    for (Delaunay::vvIterator fit = trGenerator.vvbegin(); fit != trGenerator.vvend(); ++fit)
+    {
+       // access data
+       auto point = *fit;
+       double x1 = point[0];
+       double y1 = point[1];
+    }
+
+    // OPEN TODO ---> Voronoi edges
+
+    // ..........
 
 }
 
