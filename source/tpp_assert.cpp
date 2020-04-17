@@ -17,22 +17,22 @@ namespace tpp {
     Details.
 */
 bool MyAssertFunction( bool b, const char* desc, int line, const char* file){
-	// changed mrkkrj --
+    // changed mrkkrj --
 #if _WINDOWS
-	(void)desc;
-	(void)line;
-	(void)file;
-	assert(b); // use integration with Visual Studio!
-	(void)b;
-	return true;
+    (void)desc;
+    (void)line;
+    (void)file;
+    assert(b); // use integration with Visual Studio!
+    (void)b;
+   return true;
 #else
-	// Original:
-	if (b) return true;
-	std::cerr << "\n\nAssertion Failure\n";
-	std::cerr << "Description : " << desc << std::endl;
-	std::cerr << "Filename    : " << file << std::endl;
-	std::cerr << "Line No     : " << line << std::endl;
-	exit(1);
+    // Original:
+    if (b) return true;
+    std::cerr << "\n\nAssertion Failure\n";
+    std::cerr << "Description : " << desc << std::endl;
+    std::cerr << "Filename    : " << file << std::endl;
+    std::cerr << "Line No     : " << line << std::endl;
+    exit(1);
 #endif
 }
 

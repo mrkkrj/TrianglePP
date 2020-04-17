@@ -122,7 +122,7 @@ namespace tpp {
       //! Point Typedef
       /*! Warning: If you want to use your own point class, you might have to
           work hard...
-           - mrkkrj: true! spare your time, use an adapter class.
+           - mrkkrj: true!!! - spare your time, use an adapter class.
       */
       typedef reviver::dpoint <double, 2> Point;
 
@@ -147,10 +147,13 @@ namespace tpp {
       */
       void Triangulate(bool quality = false, DebugOutputLevel = None);
 
-      //! Voronoi Tesselate the input points
+      //! Voronoi-tesselate the input points (added  mrkkrj)
       /*!
-        This function calls triangle to create a voronoi diagram with points given as input
+        This function calls triangle to create a Voronoi diagram with points given as input
         to the constructor of this class.
+
+        Note that a Voronoi diagram can be only created if the underlying triangulation is convex 
+        and doesn't have holes!
       */
       void Tesselate(DebugOutputLevel traceLvl = None);
 
@@ -187,28 +190,42 @@ namespace tpp {
         \return Number of Edges
         Remember to call Triangulate before using this function.
       */
-      int nedges();
+      int nedges() const;
 
       //! Number of triangles in the triangulation
       /*!
         \return Number of Triangles
         Remember to call Triangulate before using this function.
       */
-      int ntriangles();
+      int ntriangles() const;
 
       //! Number of vertices in the triangulation
       /*!
         \return Number of Vertices
         Remember to call Triangulate before using this function.
       */
-      int nvertices();
+      int nvertices() const;
 
       //! Number of vertices on the convex hull.
       /*!
         \return Number of vertices on the convex hull.
         Remember to call Triangulate before using this function.
       */
-      int hull_size();
+      int hull_size() const;
+
+      //! Number of Voronoi points in the tesselation
+      /*!
+        \return Number of Points
+        Remember to call Tesselate before using this function.
+      */
+      int nvpoints() const;
+
+      //! Number of Voronoi edges in the tesselation
+      /*!
+        \return Number of Edges
+        Remember to call Tesselate before using this function.
+      */
+      int nvedges() const;
 
 
       ///////////////////////////////
@@ -227,7 +244,7 @@ namespace tpp {
 
       public:
          vIterator operator++();
-         vIterator() :vloop(NULL) {};
+         vIterator() :vloop(nullptr) {};
          Point& operator*() const;
          ~vIterator();
 
@@ -242,7 +259,7 @@ namespace tpp {
       vIterator vend();
 
       //! Given an iterator, find its index in the input vector of points.
-      int vertexId(vIterator const& vit);
+      int vertexId(vIterator const& vit) const;
 
       //! Given an index, return the actual double Point
       const Point& point_at_vertex_id(int i) { return m_PList[i]; };
@@ -278,7 +295,7 @@ namespace tpp {
 
       public:
          void operator++();
-         fIterator() { floop.tri = NULL; };
+         fIterator() { floop.tri = nullptr; };
          ~fIterator();
 
          friend class Delaunay;
@@ -380,7 +397,7 @@ namespace tpp {
       */
       inline bool empty(fIterator const& fit)
       {
-         return fit.floop.tri == NULL;
+         return fit.floop.tri == nullptr;
       };
 
 
@@ -454,16 +471,16 @@ namespace tpp {
       /*  rprev(abc) -> b**                                                        */
 
 
-          //! Calculate incident triangles around a vertex.
-          /*!
-            \param vertexid The vertex for which you want incident triangles.
-                \param ivv Returns triangles around a vertex in counterclockwise order.
+      //! Calculate incident triangles around a vertex.
+      /*!
+      \param vertexid The vertex for which you want incident triangles.
+            \param ivv Returns triangles around a vertex in counterclockwise order.
 
-            Note that behaviour is undefined if vertexid is greater than
-            number of vertices - 1. Remember to call Triangulate before using this function.
-            All triangles returned have Org(triangle) = vertexid.
-            All triangles returned are in counterclockwise order.
-          */
+      Note that behaviour is undefined if vertexid is greater than
+      number of vertices - 1. Remember to call Triangulate before using this function.
+      All triangles returned have Org(triangle) = vertexid.
+      All triangles returned are in counterclockwise order.
+      */
       void trianglesAroundVertex(int vertexid, std::vector<int>& ivv);
 
 
@@ -493,18 +510,19 @@ namespace tpp {
 
       //!  The Voronoi points iterator for the Delaunay class
       class vvIterator {
+      public:
+         vvIterator();
+         vvIterator operator++();
+         Point& operator*() const;
+         void advance(int steps);
+
       private:
          vvIterator(Delaunay* tiangulator);   //! To set container
 
-         Delaunay* MyDelaunay;   //! Which container do I point
+         Delaunay* m_delaunay;    //! Which container do I point to
          void* vvloop;            //! Triangle's Internal data.
          int vvindex;
-
-      public:
-         vvIterator operator++();
-         vvIterator() :vvloop(NULL), vvindex(0) {};
-         Point& operator*() const;
-         ~vvIterator();
+         int vvcount;
 
          friend class Delaunay;
          friend bool operator==(vvIterator const&, vvIterator const&);
@@ -526,28 +544,50 @@ namespace tpp {
 
       //!  The Voronoi edges iterator for the Delaunay class
       class veIterator {
+      public:
+         veIterator();
+         veIterator operator++();
+         int startPointId() const;
+         int endPointId(Point& normvec) const;
+
       private:
          veIterator(Delaunay* tiangulator);   //! To set container
 
-         Delaunay* MyDelaunay;   //! Which container do I point
+         Delaunay* m_delaunay;   //! Which container do I point to
          void* veloop;           //! Triangle's Internal data.
          int veindex;
-
-      public:
-         veIterator operator++();
-         veIterator() :veloop(NULL), veindex(0) {};
-         Point& operator*() const;
-         ~veIterator();
+         int vecount;
 
          friend class Delaunay;
-         //friend bool operator==(veIterator const&, veIterator const&);
-         //friend bool operator!=(veIterator const&, veIterator const&);
+         friend bool operator==(veIterator const&, veIterator const&);
+         friend bool operator!=(veIterator const&, veIterator const&);
       };
 
       //! Voronoi Points iterator begin function
       veIterator vebegin() { return veIterator(this); };
       //! Voronoi Points iterator end function
       veIterator veend();
+
+
+      //! Access the origin (Org) vertex of an edge. (added mrkkrj)
+      /*!
+        \param eit  Voronoi Edge iterator.
+        \return The start point of the Voronoi edge,
+
+        Remember to call Tesselate before using this function. Do not use it on a null iterator.
+      */
+      const Point& Org(veIterator const& eit);
+
+
+      //! Access the destination (Dest) vertex of an edge. (added mrkkrj)
+      /*!
+        \param eit  Voronoi Edge iterator.
+        \param finiteEdge true for finite edges, false for inifinte rays.
+        \return The end point of the Voronoi edge, for infinite rays the normal vector of the ray
+
+        Remember to call Tesselate before using this function. Do not use it on a null iterator.
+      */
+      Point Dest(veIterator const& eit, bool& finiteEdge);
 
 
       //--------------------------------------
@@ -575,10 +615,12 @@ namespace tpp {
       //    HACK:: double* as not to export internal impl.
       void SetPoint(Point& point, double* vertexptr);
       int GetVertexIndex(fIterator const& fit, double* vertexptr);
+      int GetFirstIndexNumber() const;
 
       // added mrkkrj 
       std::string formatFloatConstraint(float f) const;
       void setDebugLevelOption(std::string options, DebugOutputLevel traceLvl);
+      void freeTriangleDataStructs();
 
       friend class fIterator;
 

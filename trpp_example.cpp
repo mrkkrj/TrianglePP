@@ -4,6 +4,7 @@
 
 #include "tpp_interface.hpp"
 #include <vector>
+#include <cassert>
 
 
 using namespace tpp;
@@ -19,10 +20,9 @@ int main()
     delaunayInput.push_back(Delaunay::Point(0,2));
     delaunayInput.push_back(Delaunay::Point(3,3));
 
-
     // 1. standard triangulation
     Delaunay trGenerator(delaunayInput);
-    trGenerator.Triangulate();   
+    trGenerator.Triangulate();
 
     // iterate over triangles
     for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
@@ -36,58 +36,51 @@ int main()
         double y1 = delaunayInput[keypointIdx1][1];
     }
 
-
-    // 2. triangulate with constraints
+    // 2. triangulation with constraints
     bool withConstraints = true;
 
-    for (int i = 0; i < 2; ++i)
+    // set custom constraints
+    //  - if nothing set, the default constraint is minAngle = 20.0 deg
+    trGenerator.setMinAngle(30.5f);
+    trGenerator.setMaxArea(1.5f);
+
+    trGenerator.Triangulate(withConstraints);
+
+    // iterate over triangles
+    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-       if (i == 0)
+       Delaunay::Point sp1;
+       Delaunay::Point sp2;
+       Delaunay::Point sp3;
+
+       int keypointIdx1 = trGenerator.Org(fit, &sp1);
+       int keypointIdx2 = trGenerator.Dest(fit, &sp2);
+       int keypointIdx3 = trGenerator.Apex(fit, &sp3);
+
+       // new vertices might have been added to enforce constraints!
+       //  (i.e. Steiner points)
+       if (keypointIdx1 == -1)
        {
-          // 2_a. triangulate with _default_ constraints (min angle = 20°)	
-          trGenerator.Triangulate(withConstraints);
+          double x1 = sp1[0]; // an added vertex, it's data copied to sp1
+          double y1 = sp1[1];
        }
        else
        {
-          // 2_b. triangulate with _custom_ constraints (angle = 30.5°, area = 1.5)	
-          trGenerator.setMinAngle(30.5f);
-          trGenerator.setMaxArea(1.5f);
-          trGenerator.Triangulate(withConstraints);
-       }
+          // a point from original data
+          double x1 = delaunayInput[keypointIdx1][0];
+          double y1 = delaunayInput[keypointIdx1][1];
 
-       // iterate over triangles
-       for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
-       {
-          Delaunay::Point sp1;
-          Delaunay::Point sp2;
-          Delaunay::Point sp3;
-
-          int keypointIdx1 = trGenerator.Org(fit, &sp1);
-          int keypointIdx2 = trGenerator.Dest(fit, &sp2);
-          int keypointIdx3 = trGenerator.Apex(fit, &sp3);
-
-          // new vertices might have been added to enforce constraints!
-          // (== Steiner points)
-          if (keypointIdx1 == -1)
-          {
-             double x1 = sp1[0]; // an added vertex, it's data copied to sp1
-             double y1 = sp1[1];
-          }
-          else
-          {
-             // a point from original data
-             double x1 = delaunayInput[keypointIdx1][0];
-             double y1 = delaunayInput[keypointIdx1][1];
-
-             // but that will work too!
-             x1 = sp1[0];
-             x1 = sp1[1];
-          }
+          // but that will work too!
+          x1 = sp1[0];
+          x1 = sp1[1];
        }
     }
-        
-    // 3. Voronoi diagrams
+
+    // 3. creation of a Voronoi diagram
     trGenerator.Tesselate();
+
+    auto vPointCount = trGenerator.nvpoints();
+    auto vEdgesCount = trGenerator.nvedges();
 
     // iterate over Voronoi points
     for (Delaunay::vvIterator fit = trGenerator.vvbegin(); fit != trGenerator.vvend(); ++fit)
@@ -98,10 +91,30 @@ int main()
        double y1 = point[1];
     }
 
-    // OPEN TODO ---> Voronoi edges
+    // ... and Voronoi edges
+    for (Delaunay::veIterator fit = trGenerator.vebegin(); fit != trGenerator.veend(); ++fit)
+    {       
+       bool infiniteRay = false;
+       Delaunay::Point p1 = trGenerator.Org(fit);
+       Delaunay::Point p2 = trGenerator.Dest(fit, infiniteRay);
 
-    // ..........
+       // access data
+       double xstart = p1[0];
+       double ystart = p1[1];
 
+       if(infiniteRay)
+       {
+          // an inifinite ray, thus no endpoint coordinates!
+          auto rayNormalXValue = p2[0];
+          auto rayNormalYValue = p2[1];
+          assert(!(rayNormalXValue == 0.0 && rayNormalYValue == 0.0));
+       }
+       else
+       {
+          double xend = p2[0];
+          double yend = p2[1];
+       }
+    }
 }
 
 // --- eof ---

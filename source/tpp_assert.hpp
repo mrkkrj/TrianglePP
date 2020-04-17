@@ -1,5 +1,6 @@
 /*! \file assert.hpp
-    \brief Implements a better 'Assert'
+    \brief Implements a better 'Assert'. 
+           Used in the reviver::dpoint inplementation.
  */
 
 namespace tpp {
@@ -9,8 +10,6 @@ namespace tpp {
 
 /*! \def MyAssertFunction
     \brief Function used by 'Assert' function in _DEBUG mode.
-   
-    Details.
 */
 extern bool MyAssertFunction( bool b, const char* desc, int line, const char* file);
 

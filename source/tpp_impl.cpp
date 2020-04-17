@@ -9,11 +9,12 @@
 //#include <triangle_impl.hpp>
 //#include <tpp_interface.hpp>
 
+// configuaration of the Triangle.h code:
 #define NO_TIMER
 #define DREDUCED
 #define ANSI_DECLARATORS
 #define TRILIBRARY
-//#define CDT_ONLY // (de)activate -q option!
+//#define CDT_ONLY // no, we want all algorithms!
 
 #ifndef _WIN64
 // the MS x64 compilers do not use FPU (as SSE is the default) thus no extended precision problems!
@@ -88,21 +89,7 @@ Delaunay::Delaunay(std::vector<Point>& v)
 /*!
 */
 Delaunay::~Delaunay() {
-   struct triangulateio* pin = (struct triangulateio*)m_in;
-   struct triangulateio* pvorout = (struct triangulateio*)m_vorout;
-
-   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
-   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
-
-   pTriangleWrap->triangledeinit(tpmesh, tpbehavior);
-
-   delete tpmesh;
-   delete tpbehavior;
-   delete pin;
-   delete pvorout;
-   delete pTriangleWrap;
+   freeTriangleDataStructs();
 }
 
 /*!
@@ -134,6 +121,10 @@ void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
 void Delaunay::Triangulate(std::string& triswitches) {
     INIT_TRACE("triangle.out.txt");
     TRACE("Triangulate ->");
+
+    if (m_Triangulated) {
+       freeTriangleDataStructs();
+    }
 
 #if TRIANGLE_DETAIL_DEBUG
     size_t posV = triswitches.find("V");
@@ -203,11 +194,9 @@ void Delaunay::Triangulate(std::string& triswitches) {
         }
     }
 
-#ifndef CDT_ONLY 
     if (tpbehavior->quality && (tpmesh->triangles.items > 0)) {
         pTriangleWrap->enforcequality(tpmesh, tpbehavior);        /* Enforce angle and area constraints. */
     }
-#endif /* not CDT_ONLY */
 
 //#if 0 -> mrkkrj
     if (tpbehavior->poly && (tpmesh->triangles.items > 0)) {
@@ -253,12 +242,10 @@ void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
    Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
 
-   // OPEN TODO::: check these preconditions!!!!
+   // OPEN TODO::: check these preconditions??
    if (tpmesh->holes != 0) {
 
    }
-   
-   // OPEN TODO:::!!!!!!!! !!!!!!! !!!!!!!!!!!
 
    m_vorout = new triangulateio;
    triangulateio* pvorout = (struct triangulateio*)m_vorout;
@@ -283,18 +270,15 @@ void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
          &pvorout->pointlist, &pvorout->pointattributelist,
          &pvorout->pointmarkerlist, &pvorout->edgelist,
          &pvorout->edgemarkerlist, &pvorout->normlist);
-
-      // OPEN TODO::: end ---
-
 }
-
 
 /*!
 */
 void Delaunay::writeoff(std::string& fname){
     if(!m_Triangulated) {
         cerr << "FATAL: Write called before triangulation\n";
-        exit(1);
+        //exit(1);
+        throw std::runtime_error("FATAL: Write called before triangulation");
     }
 
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
@@ -310,21 +294,21 @@ void Delaunay::writeoff(std::string& fname){
 
 /*!
 */
-int Delaunay::nedges(){
+int Delaunay::nedges() const {
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
     return tpmesh->edges;
 }
 
 /*!
 */
-int Delaunay::ntriangles(){
+int Delaunay::ntriangles() const {
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
     return tpmesh->triangles.items;	
 }
 
 /*!
 */
-int Delaunay::nvertices(){
+int Delaunay::nvertices() const {
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
     Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
     int outvertices;
@@ -340,25 +324,50 @@ int Delaunay::nvertices(){
 
 /*!
 */
-int Delaunay::hull_size(){
+int Delaunay::hull_size() const {
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
     return  tpmesh->hullsize;	
 }
 
 /*!
 */
-int Delaunay::vertexId(vIterator const &vit){
+int Delaunay::vertexId(vIterator const &vit) const {
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) vit.MyDelaunay->m_pmesh;
     return ((int *)vit.vloop)[tpmesh->vertexmarkindex];
+}
+
+/*!
+*/
+int Delaunay::nvedges() const {
+   triangulateio* pvorout = (struct triangulateio*)m_vorout;
+   if (!pvorout) {
+      return 0;
+   }
+   else {
+      return pvorout->numberofedges;
+   }
+}
+
+
+/*!
+*/
+int Delaunay::nvpoints() const {
+   triangulateio* pvorout = (struct triangulateio*)m_vorout;
+   if (!pvorout) {
+      return 0;
+   }
+   else {
+      return pvorout->numberofpoints;
+   }
 }
 
 /*!
   added mrkkrj:
 */
 std::string Delaunay::formatFloatConstraint(float f) const {
-	std::ostringstream ss;
-	ss << f;
-	return ss.str();
+    std::ostringstream ss;
+    ss << f;
+    return ss.str();
 }
 
 /*!
@@ -381,6 +390,34 @@ void Delaunay::setDebugLevelOption(std::string options, DebugOutputLevel traceLv
    default:
       assert(false && "unknown trace level");
    }
+}
+
+/*!
+  added mrkkrj:
+*/
+void Delaunay::freeTriangleDataStructs()
+{
+   struct triangulateio* pin = (struct triangulateio*)m_in;
+   struct triangulateio* pvorout = (struct triangulateio*)m_vorout;
+
+   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+
+   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
+   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
+
+   pTriangleWrap->triangledeinit(tpmesh, tpbehavior);
+
+   delete tpmesh;
+   delete tpbehavior;
+   delete pin;
+   delete pvorout;
+   delete pTriangleWrap;
+
+   tpmesh = nullptr;
+   tpbehavior = nullptr;
+   pin = nullptr;
+   pvorout = nullptr;
+   pTriangleWrap = nullptr;
 }
 
 ///////////////////////////////
@@ -583,6 +620,12 @@ int Delaunay::GetVertexIndex(fIterator const & fit, /*Triwrap::vertex*/ double* 
      return ((unsigned)ret < m_PList.size()) ? ret : -1;
 }
 
+/*!
+*/
+int Delaunay::GetFirstIndexNumber() const {
+   Triwrap::__pbehavior* pbehavior = (Triwrap::__pbehavior*)m_pbehavior;
+   return pbehavior->firstnumber;
+}
 
 /*!
   A triangle abc has origin (org) a, destination (dest) b, and apex (apex)   
@@ -896,17 +939,22 @@ void Delaunay::trianglesAroundVertex(int vertexid, std::vector<int>& ivv){
 
 /*!
 */
-Delaunay::vvIterator::vvIterator(Delaunay* tiangulator) {
-   MyDelaunay = tiangulator;
-
-   triangulateio* pvorout = (struct triangulateio*)tiangulator->m_vorout;
-   vvloop = pvorout->pointlist;
-   vvindex = 0;
+Delaunay::vvIterator::vvIterator()
+   : m_delaunay(nullptr), vvloop(nullptr), vvindex(0), vvcount(0) {
 }
 
 /*!
 */
-Delaunay::vvIterator::~vvIterator() {
+Delaunay::vvIterator::vvIterator(Delaunay* tiangulator) {
+   m_delaunay = tiangulator;
+   triangulateio* pvorout = (struct triangulateio*)tiangulator->m_vorout;
+
+   // TEST::: I hope so!
+   assert(tiangulator->GetFirstIndexNumber() == 0);
+
+   vvloop = pvorout->pointlist;
+   vvindex = 0;
+   vvcount = pvorout->numberofpoints;
 }
 
 /*!
@@ -915,27 +963,21 @@ Delaunay::vvIterator Delaunay::vvend() {
    vvIterator vvit;
    vvit.vvloop = nullptr;
    vvit.vvindex = 0;
-   vvit.MyDelaunay = nullptr;
+   vvit.vvcount = 0;
+   vvit.m_delaunay = nullptr;
+   
    return vvit;
 }
 
 /*!
 */
 Delaunay::vvIterator Delaunay::vvIterator::operator++() {
-   triangulateio* pvorout = (struct triangulateio*)MyDelaunay->m_vorout;
-
    vvIterator vit;
    vit.vvloop = vvloop;
    vit.vvindex = vvindex;
-   vit.MyDelaunay = MyDelaunay;
+   vit.m_delaunay = m_delaunay;
 
-   if (vvindex / 2 < pvorout->numberofpoints) {
-      vvindex += 2;
-   }
-   else {
-      vvindex = 0;
-      vvloop = nullptr;
-   }
+   advance(1);
 
    return vit;
 }
@@ -943,48 +985,71 @@ Delaunay::vvIterator Delaunay::vvIterator::operator++() {
 /*!
 */
 Delaunay::Point& Delaunay::vvIterator::operator*() const {
-   return *((Point*)vvloop);
+   Point::NT* pointlist = (Point::NT*)vvloop;
+
+   // UB! -> but also in original code...OPEN TODO::: !!!
+   return *((Point*)(pointlist + vvindex));
 }
 
 /*!
 */
-bool operator==(Delaunay::vvIterator const& vit1,
-                Delaunay::vvIterator const& vit2) {
-   if (vit1.vvloop == vit2.vvloop && 
-       vit1.vvindex == vit2.vvindex) return true;
+void Delaunay::vvIterator::advance(int steps) {
+   int stepSize = 2;
+   assert(Point().dim() == stepSize);
+
+   if (vvindex/stepSize + steps < vvcount) {
+      vvindex += steps * stepSize;
+   }
+   else {
+      // at end
+      vvindex = 0;
+      vvloop = nullptr;
+   }
+
+   assert(vvindex / stepSize < vvcount);
+}
+
+/*!
+*/
+bool operator==(Delaunay::vvIterator const& lhs,
+                Delaunay::vvIterator const& rhs) {
+   if (lhs.vvloop == rhs.vvloop && 
+       lhs.vvindex == rhs.vvindex) return true;
    return false;
 }
 
 /*!
 */
-bool operator!=(Delaunay::vvIterator const& vit1,
-                Delaunay::vvIterator const& vit2) {
-   if (vit1.vvloop != vit2.vvloop ||
-       vit1.vvindex != vit2.vvindex) return true;
-   return false;
+bool operator!=(Delaunay::vvIterator const& lhs,
+                Delaunay::vvIterator const& rhs) {
+   return !(lhs == rhs);
 }
 
 
 ///////////////////////////////
 //
 // Voronoi Edge Iterator Impl.
-//  --> OPEN TODO:: WIP, only started
 //
 ///////////////////////////////
 
 /*!
 */
-Delaunay::veIterator::veIterator(Delaunay* tiangulator) {
-   MyDelaunay = tiangulator;
-
-   triangulateio* pvorout = (struct triangulateio*)tiangulator->m_vorout;
-   veloop = pvorout->edgelist;
-   veindex = 0;
+Delaunay::veIterator::veIterator()
+   : m_delaunay(nullptr), veloop(nullptr), veindex(0), vecount(0) {
 }
 
 /*!
 */
-Delaunay::veIterator::~veIterator() {
+Delaunay::veIterator::veIterator(Delaunay* tiangulator) {
+   m_delaunay = tiangulator;
+   triangulateio* pvorout = (struct triangulateio*)tiangulator->m_vorout;
+
+   // TEST::: I hope so!
+   assert(tiangulator->GetFirstIndexNumber() == 0);
+
+   veloop = pvorout->edgelist; 
+   veindex = 0; 
+   vecount = pvorout->numberofedges;
 }
 
 /*!
@@ -993,36 +1058,123 @@ Delaunay::veIterator Delaunay::veend() {
    veIterator veit;
    veit.veloop = nullptr;
    veit.veindex = 0;
+   veit.vecount = 0;
+   veit.m_delaunay = nullptr;
+   
    return veit;
 }
 
 /*!
 */
 Delaunay::veIterator Delaunay::veIterator::operator++() {
-   triangulateio* pvorout = (struct triangulateio*)MyDelaunay->m_vorout;
-   veloop = pvorout->edgelist;
-   if (veindex < pvorout->numberofedges) {
-      ++veindex;
+   veIterator veit;
+   veit.veloop = veloop;
+   veit.veindex = veindex;
+   veit.m_delaunay = m_delaunay;
+
+   // an edge is represented as 2 integer indexes!
+   if (veindex / 2 + 1 < vecount ) {
+       veindex += 2;
    }
    else {
       veindex = 0;
-      veloop == nullptr;
+      veloop = nullptr;
    }
 
-   veIterator vit;
-   vit.veloop = veloop;
-   vit.MyDelaunay = MyDelaunay;
-
-   return vit;
+   assert(veindex / 2 < vecount);
+   return veit;
 }
 
 /*!
 */
-Delaunay::Point& Delaunay::veIterator::operator*() const {
-   triangulateio* pvorout = (struct triangulateio*)MyDelaunay->m_vorout;
+int Delaunay::veIterator::startPointId() const {
+   if (!veloop) {
+      assert(false);
+      return -1;
+   }
 
-   return *((Point*)(pvorout + veindex));
+   auto edgelist = (int*)veloop;
+   return edgelist[veindex];
 }
 
+/*!
+*/
+int Delaunay::veIterator::endPointId(Point& normvec) const {
+   if (!veloop) {
+      assert(false);
+      return -1;
+   }
+
+   assert(veindex / 2 < vecount);
+   auto edgelist = (int*)veloop;
+   int idx = edgelist[veindex + 1];
+   
+   if (idx == -1) {
+      triangulateio* pvorout = (struct triangulateio*)m_delaunay->m_vorout;
+      auto normlist = pvorout->normlist;
+            
+      // normlist has same no. of elements as edgelist!
+      normvec[0] = normlist[veindex];
+      normvec[1] = normlist[veindex + 1];
+
+      assert(!(normvec[0] == 0.0 && normvec[1] == 0.0));
+   }
+   else {
+      normvec[0] = 0.0;
+      normvec[1] = 0.0;
+   }
+
+   return idx;
+}
+
+/*!
+*/
+bool operator==(Delaunay::veIterator const& lhs,
+                Delaunay::veIterator const& rhs) {
+   if (lhs.veloop == rhs.veloop &&
+       lhs.veindex == rhs.veindex) return true;
+   return false;
+}
+
+/*!
+*/
+bool operator!=(Delaunay::veIterator const& lhs,
+                Delaunay::veIterator const& rhs) {
+   return !(lhs == rhs);
+}
+
+/*!
+*/
+const Delaunay::Point& Delaunay::Org(veIterator const& eit)
+{
+   auto pointId = eit.startPointId();
+
+   vvIterator vit(this);
+   vit.advance(pointId);
+   return *vit;
+}
+
+/*!
+*/
+Delaunay::Point Delaunay::Dest(veIterator const& eit, bool& finiteEdge)
+{
+   // OPEN TODO::: optimization --- use const& as return value!
+
+   Point normvec;
+
+   auto pointId = eit.endPointId(normvec);
+   finiteEdge = pointId != -1;
+
+   if (pointId == -1) {
+      assert(normvec.sqr_length() != 0.0);
+      return normvec;
+   } else {
+      assert(normvec.sqr_length() == 0.0);
+      
+      vvIterator vit(this);
+      vit.advance(pointId);
+      return *vit;
+   }
+}
 
 } // namespace tpp ends.
