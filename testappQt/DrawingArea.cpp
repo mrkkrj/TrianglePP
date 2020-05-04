@@ -102,6 +102,29 @@ void DrawingArea::drawPoint(const QPoint& pos)
 }
 
 
+void DrawingArea::clearPoint(const QPoint& pos)
+{
+   int idx = points_.indexOf(pos);
+
+   if (idx != -1)
+   {
+      points_.remove(idx);
+
+      // overpaint
+      auto pointColor = penColor_;
+      penColor_ = Qt::white;
+
+      drawPointAt(pos);
+
+      // restore color
+      penColor_ = pointColor;
+
+      imgDirty_ = true;
+      emit pointDeleted(pos);
+   }
+}
+
+
 void DrawingArea::drawLine(const QPoint& from, const QPoint& to)
 {
    startPos_ = from;
@@ -282,24 +305,7 @@ void DrawingArea::resizeEvent(QResizeEvent* ev)
 
 void DrawingArea::deletPointAtLastPos()
 {
-   int idx = points_.indexOf(startPos_);
-
-   if (idx != -1)
-   {
-      points_.remove(idx);
-
-      // overpaint
-      auto pointColor = penColor_;
-      penColor_ = Qt::white;
-
-      drawPointAt(startPos_);
-
-      // restore color
-      penColor_ = pointColor;
-
-      imgDirty_ = true;
-      emit pointDeleted(startPos_);
-   }
+   clearPoint(startPos_);
 }
 
 

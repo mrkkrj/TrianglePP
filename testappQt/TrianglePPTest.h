@@ -33,6 +33,7 @@ private:
    void generateRandomPoints();
    void showTrianguationOptions();
    void clearDisplay();
+   void clearVoronoiPoints();
 
 private:
     Ui::TrianglePPTestClass ui;
@@ -48,4 +49,6 @@ private:
     int maxArea_;
     int minPoints_;
     int maxPoints_;
+
+    QVector<QPoint> voronoiPoints_;
 };

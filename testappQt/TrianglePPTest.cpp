@@ -14,9 +14,6 @@
 #include <random>
 
 
-#include <random>
-
-
 using namespace tpp;
 
 
@@ -70,7 +67,7 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
    ui.setupUi(this);
 
    // NYI:
-   ui.tesselatePointsPushButton->hide();
+   //ui.tesselatePointsPushButton->hide();
    // ---
    
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
@@ -116,9 +113,13 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
 
 void TrianglePPTest::on_triangualtePointsPushButton_clicked()
 {
-   // reset all lines
+   // remove Voronoi points
+   clearVoronoiPoints();
+
+   // reset triangulation lines
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
    ui.drawAreaWidget->clearImage();
+   ui.drawAreaWidget->setDrawColor(Qt::blue);
 
    for (auto& point : drawnPoints)
    {
@@ -187,7 +188,74 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
 
 void TrianglePPTest::on_tesselatePointsPushButton_clicked()
 {
-   QMessageBox::critical(this, tr("TODO"), tr("Not yet implemented!"));
+   //QMessageBox::critical(this, tr("TODO"), tr("Not yet implemented!"));
+
+   clearVoronoiPoints();
+
+   // get the original points
+   auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
+
+   std::vector<Delaunay::Point> delaunayInput;
+   for (auto& point : drawnPoints)
+   {
+      delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
+   }
+
+   Delaunay trGenerator(delaunayInput);
+   trGenerator.Tesselate();
+
+   // draw Voronoi points
+   ui.drawAreaWidget->setDrawColor(Qt::red);
+
+   for (Delaunay::vvIterator fit = trGenerator.vvbegin(); fit != trGenerator.vvend(); ++fit)
+   {
+      // access data
+      auto point = *fit;
+      double x = point[0];
+      double y = point[1];
+
+      ui.drawAreaWidget->drawPoint(QPoint(x, y));
+      voronoiPoints_.append(QPoint(x, y));
+   }
+
+   // ... and Voronoi edges
+   for (Delaunay::veIterator fit = trGenerator.vebegin(); fit != trGenerator.veend(); ++fit)
+   {
+      bool finiteEdge = false;
+      Delaunay::Point p1 = trGenerator.Org(fit);
+      Delaunay::Point p2 = trGenerator.Dest(fit, finiteEdge);
+
+      // access data
+      double xstart = p1[0];
+      double ystart = p1[1];
+
+      if (!finiteEdge)
+      {
+         // an inifinite ray, thus no endpoint coordinates!
+         auto rayNormalXValue = p2[0];
+         auto rayNormalYValue = p2[1];
+         assert(!(rayNormalXValue == 0.0 && rayNormalYValue == 0.0));
+
+         double xend = rayNormalXValue;
+         double yend = rayNormalYValue;
+
+         // move vector to the start point
+         xend += xstart;
+         yend += ystart;
+
+         // OPEN TODO:: project to the boundaries
+         // ...
+
+         ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xend, yend));
+      }
+      else
+      {
+         double xend = p2[0];
+         double yend = p2[1];
+
+         ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xend, yend));
+      }
+   }
 }
 
 
@@ -321,4 +389,16 @@ void TrianglePPTest::clearDisplay()
    ui.drawAreaWidget->clearImage();
    statusBar()->showMessage("");
    triangulated_ = false;
+   ui.drawAreaWidget->setDrawColor(Qt::blue);
+}
+
+
+void TrianglePPTest::clearVoronoiPoints()
+{
+   for (auto& pt : voronoiPoints_)
+   {
+      ui.drawAreaWidget->clearPoint(pt);
+   }
+
+   voronoiPoints_.clear();
 }

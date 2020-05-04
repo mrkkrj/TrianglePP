@@ -37,6 +37,7 @@ public:
     bool isModified() const;
 
     void drawPoint(const QPoint& pos);
+    void clearPoint(const QPoint& pos);
     void drawLine(const QPoint& from, const QPoint& to);
 
     QVector<QPoint> getPointCoordinates() const;

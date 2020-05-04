@@ -57,6 +57,7 @@
 
  \section changelog Change Log
 
+ 17/04/20: mrkkrj – added support Voronoi tesselation <br>
  22/01/20: mrkkrj – added support for custom constraints (angle and area) <br>
  17/09/18: mrkkrj – ported to 64-bit (preliminary, not thorougly tested!) <br>
  11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney() <br>

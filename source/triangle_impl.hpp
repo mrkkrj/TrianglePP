@@ -15179,7 +15179,7 @@ char **argv;
     findcircumcenter(m, b, torg, tdest, tapex, circumcenter, &xi, &eta, 0);
 #ifdef TRILIBRARY
     /* X and y coordinates. */
-    plist[coordindex++] = circumcenter[0];
+     plist[coordindex++] = circumcenter[0];
     plist[coordindex++] = circumcenter[1];
     for (i = 2; i < 2 + m->nextras; i++) {
       /* Interpolate the vertex attributes at the circumcenter. */
