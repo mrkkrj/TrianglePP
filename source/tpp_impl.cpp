@@ -231,7 +231,7 @@ void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
    //"  construct a conforming Delaunay triangulation instead of a CCDT, so the"
    //"  Voronoi diagram will be valid."
 
-   options.append("D"); // Voronoi precondition
+   //options.append("D"); // Voronoi precondition ??? not really!!!
    options.append("v"); // Voronoi
 
    Triangulate(options);

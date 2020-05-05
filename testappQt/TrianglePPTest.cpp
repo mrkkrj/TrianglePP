@@ -192,6 +192,8 @@ void TrianglePPTest::on_tesselatePointsPushButton_clicked()
 
    clearVoronoiPoints();
 
+   // OPEN TODO::: clear Voronoi lines / ALL lines ???
+
    // get the original points
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
 
@@ -256,6 +258,8 @@ void TrianglePPTest::on_tesselatePointsPushButton_clicked()
          ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xend, yend));
       }
    }
+
+   ui.drawAreaWidget->setDrawColor(Qt::blue);
 }
 
 
