@@ -49,6 +49,7 @@ private:
     int maxArea_;
     int minPoints_;
     int maxPoints_;
+    bool useConformingDelaunay_;
 
     QVector<QPoint> voronoiPoints_;
 };

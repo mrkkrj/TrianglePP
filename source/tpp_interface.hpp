@@ -140,13 +140,21 @@ namespace tpp {
       */
       ~Delaunay();
 
-      //! Delaunay Triangulate the input points
+      //! Delaunay Triangulate the input points (Constrained)
       /*!
-        This function calls triangle to delaunay triangulate points given as input
-        to the constructor of this class.
-        \param quality enforce ninimal angle (default: 20°) and, minimal area (only if explicitely set)
+        This function calls Triangle.h to Delaunay-triangulate points given as input to the 
+        constructor of this class. Here a Constrained triangualtion will be created.
+
+        \param quality enforce minimal angle (default: 20°) and, minimal area (only if explicitely set)
       */
       void Triangulate(bool quality = false, DebugOutputLevel = None);
+
+      //! Delaunay Triangulate the input points (Conforming)
+      /*!
+        This function calls Triangle.h to Delaunay-triangulate points given as input to the
+        constructor of this class. Here a Conforming triangualtion will be created.
+      */
+      void TriangulateConf(DebugOutputLevel = None);
 
       //! Voronoi-tesselate the input points (added  mrkkrj)
       /*!
@@ -155,8 +163,10 @@ namespace tpp {
 
         Note that a Voronoi diagram can be only created if the underlying triangulation is convex 
         and doesn't have holes!
+
+        \param useConformingDelaunay use conforming Delaunay triangulation as base for the Voronoi diagram
       */
-      void Tesselate(DebugOutputLevel traceLvl = None);
+      void Tesselate(bool useConformingDelaunay = false, DebugOutputLevel traceLvl = None);
 
       //! Set a quality constraint for the triangulation
       /*!
@@ -173,6 +183,13 @@ namespace tpp {
       void setMaxArea(float area) {
          m_maxArea = area;
       }
+
+      //! Are the constrainst sane?
+      /*!
+        \possible true if is highly probable for triangualtion to succeed
+        \return true if triangualtion is guaranteed to succeed
+      */
+      bool checkConstraints(bool& possible);
 
       //! Set a user test function for the triangulation
       /*!
@@ -636,7 +653,7 @@ namespace tpp {
       // added mrkkrj:
       void* m_vorout;          /*! pointer to Voronoi output */
 
-      // added mrkkrj: constraints
+      // added mrkkrj: quality constraints
       float m_minAngle;
       float m_maxArea;
 

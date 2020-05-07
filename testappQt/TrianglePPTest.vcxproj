@@ -109,6 +109,9 @@
     <ClInclude Include="..\source\tpp_interface.hpp" />
     <QtMoc Include="TrianglePpOptions.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\source\README.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
-    <height>237</height>
+    <width>307</width>
+    <height>302</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,40 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="minAngleLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Min. Point Count: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Max. Area: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="2">
+      <widget class="QLineEdit" name="maxPointCountLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="4">
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -32,20 +66,7 @@
        </property>
       </spacer>
      </item>
-     <item row="6" column="4">
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="5" column="4">
+     <item row="7" column="4">
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -58,8 +79,15 @@
        </property>
       </spacer>
      </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="QLabel" name="label_6">
+     <item row="11" column="1">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Conforming Delaunay: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0" colspan="2">
+      <widget class="QLabel" name="label_8">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -67,17 +95,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Triangualtion Constraints:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="2">
-      <widget class="QLineEdit" name="maxPointCountLineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+        <string>Triangulation Type:</string>
        </property>
       </widget>
      </item>
@@ -88,7 +106,37 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="2">
+     <item row="6" column="0" colspan="2">
+      <widget class="QLabel" name="label_5">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Point Generation:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="2">
+      <widget class="QCheckBox" name="conformingDelaunayCheckBox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QLineEdit" name="maxAreaLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="2">
       <widget class="QLineEdit" name="minPointCountLineEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -98,7 +146,21 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="8" column="1">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Max. Point Count: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>[deg]</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -111,39 +173,31 @@
        </property>
       </spacer>
      </item>
-     <item row="3" column="2">
-      <widget class="QLineEdit" name="maxAreaLineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="label_6">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
        </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Min. Point Count: </string>
+        <string>Triangualtion Constraints:</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QLineEdit" name="minAngleLineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="8" column="4">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Max. Area: </string>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
        </property>
-      </widget>
+      </spacer>
      </item>
      <item row="3" column="4">
       <spacer name="horizontalSpacer_2">
@@ -158,30 +212,20 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0" colspan="2">
-      <widget class="QLabel" name="label_5">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
+     <item row="10" column="1">
+      <widget class="QLabel" name="label_10">
        <property name="text">
-        <string>Point Generation:</string>
+        <string>Constrained Delaunay: </string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
-      <widget class="QLabel" name="label_4">
+     <item row="10" column="2">
+      <widget class="QCheckBox" name="constrainedDelaunayCheckBox">
        <property name="text">
-        <string>Max. Point Count: </string>
+        <string/>
        </property>
-      </widget>
-     </item>
-     <item row="2" column="3">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>[deg]</string>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

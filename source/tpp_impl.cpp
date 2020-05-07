@@ -113,6 +113,17 @@ void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
 }
 
 /*!
+*/
+void Delaunay::TriangulateConf(DebugOutputLevel traceLvl) {
+   std::string options = "nz";  // n: need neighbors, z: index from 0
+
+   options.append("D"); // conforming Delaunay!
+   setDebugLevelOption(options, traceLvl);
+
+   Triangulate(options);
+}
+
+/*!
   Triangulate the points stored in m_PList.
   \note (mrkkrj) copy-pasted from parts of the original Triangle's triangulate() function!
   \author Piyush Kumar (originally), 
@@ -221,9 +232,8 @@ void Delaunay::Triangulate(std::string& triswitches) {
 
 /*!
 */
-void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
+void Delaunay::Tesselate(bool useConformingDelaunay, DebugOutputLevel traceLvl) {
    std::string options = "nz";  // n: need neighbors, z: index from 0
-
    setDebugLevelOption(options, traceLvl);
 
    // "If the triangulated domain is"
@@ -232,6 +242,11 @@ void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
    //"  Voronoi diagram will be valid."
 
    //options.append("D"); // Voronoi precondition ??? not really!!!
+   if (useConformingDelaunay)
+   {
+      // an option for experimenting!
+      options.append("D");
+   }
    options.append("v"); // Voronoi
 
    Triangulate(options);
@@ -270,6 +285,29 @@ void Delaunay::Tesselate(DebugOutputLevel traceLvl) {
          &pvorout->pointlist, &pvorout->pointattributelist,
          &pvorout->pointmarkerlist, &pvorout->edgelist,
          &pvorout->edgemarkerlist, &pvorout->normlist);
+}
+
+/*!
+*/
+bool Delaunay::checkConstraints(bool& possible)
+{
+   //"     If the minimum angle is 28.6"
+   //"        degrees or smaller, Triangle is mathematically guaranteed to"
+   //"        terminate (assuming infinite precision arithmetic--Triangle may"
+   //"        fail to terminate if you run out of precision).  In practice,"
+   //"        Triangle often succeeds for minimum angles up to 34 degrees.  For"
+   //"        some meshes, however, you might need to reduce the minimum angle to"
+   //"        avoid problems associated with insufficient floating-point"
+   //"        precision."
+   if (m_minAngle <= 28.6)
+   {
+      return true;
+   }
+   else
+   {
+      possible = (m_minAngle <= 34.0);
+      return false;
+   }   
 }
 
 /*!

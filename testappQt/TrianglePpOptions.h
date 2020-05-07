@@ -20,11 +20,15 @@ public:
     int getMaxArea() const;
     int getMinPointCount() const;
     int getMaxPointCount() const;
+    bool useConformingDelaunay() const;
 
-    void fillContents(int minAngle, int maxArea = -1, int minPoints = -1, int maxPoints = -1);
+    void fillContents(int minAngle, int maxArea = -1, int minPoints = -1, int maxPoints = -1, bool confDelaunay = false);
 
-public slots:
+private slots:
+   void on_constrainedDelaunayCheckBox_clicked(bool checked);
+   void on_conformingDelaunayCheckBox_clicked(bool checked);
 
 private:
-    Ui::TrianglePpOptions ui;
+   void enableMinMaxAngle(bool enable);
+   Ui::TrianglePpOptions ui;
 };

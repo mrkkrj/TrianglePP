@@ -62,13 +62,10 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
       minAngle_(-1),
       maxArea_(-1),
       minPoints_(-1),
-      maxPoints_(-1)
+      maxPoints_(-1),
+      useConformingDelaunay_(false)
 {
    ui.setupUi(this);
-
-   // NYI:
-   //ui.tesselatePointsPushButton->hide();
-   // ---
    
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
    ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)
@@ -119,6 +116,8 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    // reset triangulation lines
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
    ui.drawAreaWidget->clearImage();
+
+   // but draw the points
    ui.drawAreaWidget->setDrawColor(Qt::blue);
 
    for (auto& point : drawnPoints)
@@ -158,7 +157,14 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
       trGenerator.setMaxArea(-1);
    }
 
-   trGenerator.Triangulate(useConstraints_);
+   if (useConformingDelaunay_)
+   {
+      trGenerator.TriangulateConf();
+   }
+   else
+   {
+      trGenerator.Triangulate(useConstraints_);
+   }
    triangulated_ = true;
    
    // iterate over triangles
@@ -197,6 +203,12 @@ void TrianglePPTest::on_tesselatePointsPushButton_clicked()
    // get the original points
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
 
+   if (drawnPoints.size() < 3)
+   {
+      QMessageBox::critical(this, tr("ERROR"), tr("Not enough points to tesselate!"));
+      return;
+   }
+
    std::vector<Delaunay::Point> delaunayInput;
    for (auto& point : drawnPoints)
    {
@@ -204,7 +216,7 @@ void TrianglePPTest::on_tesselatePointsPushButton_clicked()
    }
 
    Delaunay trGenerator(delaunayInput);
-   trGenerator.Tesselate();
+   trGenerator.Tesselate(useConformingDelaunay_);
 
    // draw Voronoi points
    ui.drawAreaWidget->setDrawColor(Qt::red);
@@ -374,7 +386,8 @@ void TrianglePPTest::showTrianguationOptions()
          minAngle_ > 0 ? minAngle_ : c_defaultMinAngle,
          maxArea_ > 0 ? maxArea_ : -1,
          minPoints_ > 0 ? minPoints_ : c_defaultMinPoints,
-         maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints);
+         maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints,
+         useConformingDelaunay_);
 
    dlg.exec();
 
@@ -384,6 +397,13 @@ void TrianglePPTest::showTrianguationOptions()
       maxArea_ = dlg.getMaxArea();
       minPoints_ = (dlg.getMinPointCount() == c_defaultMinPoints) ? -1 : dlg.getMinPointCount();
       maxPoints_ = (dlg.getMaxPointCount() == c_defaultMaxPoints) ? -1 : dlg.getMaxPointCount();
+      useConformingDelaunay_ = dlg.useConformingDelaunay();
+
+      ui.useConstraintsCheckBox->setEnabled(!useConformingDelaunay_);
+      if (useConformingDelaunay_)
+      {
+         ui.useConstraintsCheckBox->setChecked(false);
+      }
    }
 }
 
@@ -399,10 +419,14 @@ void TrianglePPTest::clearDisplay()
 
 void TrianglePPTest::clearVoronoiPoints()
 {
+   // do not need to re-triangulate here!
+   disconnect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
+
    for (auto& pt : voronoiPoints_)
    {
       ui.drawAreaWidget->clearPoint(pt);
    }
 
+   connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
    voronoiPoints_.clear();
 }
