@@ -37,9 +37,7 @@ The original *Triangle* library documentation can be found at: http://www.cs.cmu
 
 ## TODOs:
  - Test on 64-bit Linux
- - Investigate if there are memory leaks (I've just got that feeling...)
  - Add generation and visualization (in red) of Voronoi diagrams.
- - Fix: 64-bit version **freezes** for 44 degrees min. angle constraint! Maybe a float value range problem???
  - Port the Qt demo app to Emscripten
  - Move tests to Catch
  - add file export/import to the Qt demo app

@@ -191,6 +191,13 @@ namespace tpp {
       */
       bool checkConstraints(bool& possible);
 
+      //! Get minAngle intervals
+      /*!
+        \guaranteed up to this value triangualtion is guaranteed to succeed
+        \possible up to this value it is highly probable for triangualtion to succeed
+      */
+      static void getMinAngleBoundaries(float& guaranteed, float& possible);
+
       //! Set a user test function for the triangulation
       /*!
         OPEN TODO::: (use the -u switch!!!!)

@@ -312,6 +312,15 @@ bool Delaunay::checkConstraints(bool& possible)
 
 /*!
 */
+void Delaunay::getMinAngleBoundaries(float& guaranteed, float& possible)
+{
+   // see above:
+   guaranteed = 28.6;
+   possible = 34.0;
+}
+
+/*!
+*/
 void Delaunay::writeoff(std::string& fname){
     if(!m_Triangulated) {
         cerr << "FATAL: Write called before triangulation\n";

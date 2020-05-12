@@ -389,6 +389,10 @@ void TrianglePPTest::showTrianguationOptions()
          maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints,
          useConformingDelaunay_);
 
+   float guaranteed = 0, possible = 0;
+   Delaunay::getMinAngleBoundaries(guaranteed, possible);
+   dlg.setMinAngleBoundaries(guaranteed, possible);
+
    dlg.exec();
 
    if (dlg.result() == QDialog::Accepted)
@@ -420,13 +424,12 @@ void TrianglePPTest::clearDisplay()
 void TrianglePPTest::clearVoronoiPoints()
 {
    // do not need to re-triangulate here!
-   disconnect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
+   const QSignalBlocker blocker(ui.drawAreaWidget);
 
    for (auto& pt : voronoiPoints_)
    {
       ui.drawAreaWidget->clearPoint(pt);
    }
 
-   connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
    voronoiPoints_.clear();
 }

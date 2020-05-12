@@ -390,8 +390,8 @@ bool DrawingArea::pointClicked(const QPoint& clickPos, int& pointIndex) const
 {
    for (auto& pt : points_)
    {
-      // use cheap approximation:
-      if (qAbs(clickPos.manhattanLength() - pt.manhattanLength()) <= pointSize_ / 2)
+      if (qAbs(clickPos.x() - pt.x()) <= pointSize_ / 2 &&
+          qAbs(clickPos.y() - pt.y()) <= pointSize_ / 2)
       {
          pointIndex = points_.indexOf(pt);
          return true;
