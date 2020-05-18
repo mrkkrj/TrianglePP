@@ -189,7 +189,14 @@ namespace tpp {
         \possible true if is highly probable for triangualtion to succeed
         \return true if triangualtion is guaranteed to succeed
       */
-      bool checkConstraints(bool& possible);
+      bool checkConstraints(bool& possible) const;
+
+      //! Are the constrainst sane, take two
+      /*!
+        \relaxed report highly probable as correct too, as error otherwise
+        \return true if triangualtion is guaranteed to succeed, or at least higly probable to
+      */
+      bool checkConstraintsOpt(bool relaxed) const;
 
       //! Get minAngle intervals
       /*!

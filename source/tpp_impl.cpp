@@ -289,7 +289,7 @@ void Delaunay::Tesselate(bool useConformingDelaunay, DebugOutputLevel traceLvl) 
 
 /*!
 */
-bool Delaunay::checkConstraints(bool& possible)
+bool Delaunay::checkConstraints(bool& possible) const
 {
    //"     If the minimum angle is 28.6"
    //"        degrees or smaller, Triangle is mathematically guaranteed to"
@@ -308,6 +308,23 @@ bool Delaunay::checkConstraints(bool& possible)
       possible = (m_minAngle <= 34.0);
       return false;
    }   
+}
+
+/*!
+*/
+bool Delaunay::checkConstraintsOpt(bool relaxed) const
+{
+   bool possible = false;
+   bool ret = checkConstraints(possible);
+
+   if (!ret && relaxed)
+   {
+      return possible;
+   }
+   else
+   {
+      return ret;
+   }
 }
 
 /*!

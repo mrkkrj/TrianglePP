@@ -38,6 +38,19 @@ int main()
        }
     };
 
+    // impl. helper
+    auto checkConstraints = [](const Delaunay& del) -> bool
+    {
+       bool relaxedTest = true;
+
+       if (!del.checkConstraintsOpt(relaxedTest))
+       {
+          std::cout << "TEST: constraints out of bounds, skip! \n";
+          return false;
+       }
+       return true;
+    };
+
 
     // 1. standard triangulation
     std::cout << "TEST: standard triangulation \n";
@@ -83,6 +96,12 @@ int main()
           
           trGenerator.setMinAngle(30.5f);
           trGenerator.setMaxArea(5.5f);
+
+          if (!checkConstraints(trGenerator))
+          {
+             continue;
+          }
+
           trGenerator.Triangulate(withConstraints, dbgOutput);
        }
        else if (i == 2)
@@ -90,13 +109,16 @@ int main()
           // 2.3
           std::cout << "\nTEST: custom constraints (angle = 44°) \n";
           
-          // TEST:::
-          //tpp::DebugOutputLevel dbgOutput = tpp::Debug; // OPEN TODO::: remove!!!
-
-          // bug hunt - 44 deg results in an endless loop 
+          // 44 deg results in an endless loop 
           //  --> triangles too tiny for the floating point precision! 
           trGenerator.setMinAngle(44.0f);
           trGenerator.setMaxArea(-1);
+
+          if (!checkConstraints(trGenerator))
+          {
+             continue;
+          }
+
           trGenerator.Triangulate(withConstraints, dbgOutput);
        }
 
@@ -130,12 +152,26 @@ int main()
     }
     
     // 3. Voronoi diagrams
-    trGenerator.Tesselate(withConstraints);
+    std::cout << "\nTEST: Voronoi tesselation \n";
 
-    std::cout << "\nTEST: Voronoi --> OPEN TODO::: \n";
+    trGenerator.Tesselate();
+       
+    // iterate over Voronoi points
+    for (Delaunay::vvIterator vit = trGenerator.vvbegin(); vit != trGenerator.vvend(); ++vit)
+    {
+       Delaunay::Point vp = *vit;
+       double x1 = vp[0];
+       double y1 = vp[1];
+
+       std::cout << " -- Voronoi point: "
+          << "{" << x1 << "," << y1 << "}\n";
+    }
+    
 
     // OPEN TODO:::
-    
+
+    // iterate over Voronoi edges !!!!
+    // use conforming Delaunay as base !!!!
 
 
     std::cout << "TEST: completed ---" << std::endl;

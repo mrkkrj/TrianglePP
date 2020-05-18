@@ -7,13 +7,13 @@
 
 It can create Delaunay triangulations, constrained Delaunay triangulations and Voronoi diagrams.
 
-I have ported the original impl. to Visual C++ (VC9, i.e. VisualStudio 2008), extended it for constrainied triangulations plus Voronoi diagrams and added some bugfixes. 
+I have ported the original wrapper to Visual C++ (VC9, i.e. VisualStudio 2008), done some bugfixes, and extended it for constrainied triangulations ands Voronoi diagrams. 
 
 This code is released under LPGL licence.
 
 ## Update:
 
-The code is now preliminary ported to x64 Windows. The project file was updated to Visual Studio 2015/2019, the x64 target was added, and the asserts & crashes when running the example program were fixed. It **wasn't thorougly tested though**, and produces some warnings at the moment. 
+The code is now preliminary ported to x64 Windows. The project file was updated to Visual Studio 2015/2019, the x64 target was added, and the asserts & crashes when running the example program were fixed. It **wasn't thorougly tested though**.
 
 *CMake* support for both the example program and the GUI demonstrator were added too recently.
 
@@ -36,8 +36,8 @@ For backgroud info on the original implementation see "*Triangle: Engineering a 
 The original *Triangle* library documentation can be found at: http://www.cs.cmu.edu/~quake/triangle.html. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
 
 ## TODOs:
- - Test on 64-bit Linux
- - Add generation and visualization (in red) of Voronoi diagrams.
+ - Test it on 64-bit Linux
  - Port the Qt demo app to Emscripten
  - Move tests to Catch
  - add file export/import to the Qt demo app
+
