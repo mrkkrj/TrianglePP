@@ -5,7 +5,7 @@
 
 *Triangle++* (aka *TrianglePP*) is an updated version of Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C.
 
-It can create Delaunay triangulations, constrained Delaunay triangulations and Voronoi diagrams.
+It can create **Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
 
 I have ported the original wrapper to Visual C++ (VC9, i.e. VisualStudio 2008), done some bugfixes, and extended it for constrainied triangulations ands Voronoi diagrams. 
 
@@ -26,6 +26,11 @@ If compiled with *TRIANGLE_DBG_TO_FILE* define, debug traces will be written to 
 Additionally, under *testappQt* you'll find a GUI programm to play with the triangulations:
 
 ![triangle-PP's GUI test program](triangle-pp-testApp.gif)
+
+and also with tesselations:
+
+![triangle-PP's GUI test program 2](triangle-pp-testApp-Voronoi.jpg)
+
 
 ## Theory:
 
