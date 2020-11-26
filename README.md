@@ -27,9 +27,13 @@ Additionally, under *testappQt* you'll find a GUI programm to play with the tria
 
 ![triangle-PP's GUI test program](triangle-pp-testApp.gif)
 
+, constrained triangulations:
+
+![triangle-PP's GUI screenshot](triangle-pp-testApp-Constrained.jpg)
+
 and also with tesselations:
 
-![triangle-PP's GUI test program 2](triangle-pp-testApp-Voronoi.jpg)
+![triangle-PP's GUI screenshot 1](triangle-pp-testApp-Voronoi.jpg)
 
 
 ## Theory:

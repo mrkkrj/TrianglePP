@@ -8,6 +8,11 @@
 #include "ui_TrianglePPTest.h"
 
 
+namespace tpp {
+   class Delaunay;
+}
+
+
 // OPEN TODO::: class header ...
 
 class TrianglePPTest : public QMainWindow
@@ -34,6 +39,8 @@ private:
    void showTrianguationOptions();
    void clearDisplay();
    void clearVoronoiPoints();
+   void drawVoronoiTesselation(tpp::Delaunay& trGenerator);
+   void configDelaunay(tpp::Delaunay& trGenerator);
 
 private:
     Ui::TrianglePPTestClass ui;
