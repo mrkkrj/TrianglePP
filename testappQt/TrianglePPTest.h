@@ -37,6 +37,7 @@ private:
    void setGenerateButtonText();
    void generateRandomPoints();
    void showTrianguationOptions();
+   void showInfo();
    void clearDisplay();
    void clearVoronoiPoints();
    void drawVoronoiTesselation(tpp::Delaunay& trGenerator);

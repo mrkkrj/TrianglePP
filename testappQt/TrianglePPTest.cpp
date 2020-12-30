@@ -97,7 +97,8 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
       // find characteristic points in the image
 
       // OPEN TODO::: --> image processing, characteristic points
-      Q_ASSERT(false && "FromImageMode ---> NYI!!!");
+      //Q_ASSERT(false && "FromImageMode ---> NYI!!!");
+      QMessageBox::critical(this/*qApp->activeModalWidget()*/, "ERROR", "FromImage mode ---> NYI, sorry !!!");
       // OPEN TODO::: end ---
 
       break;
@@ -239,10 +240,14 @@ void TrianglePPTest::on_optionsToolButton_clicked()
    connect(&action1, &QAction::triggered, this, &TrianglePPTest::showTrianguationOptions);
    ctxtMenu.addAction(&action1);
 
-   QAction action2("Close", this);
-   connect(&action2, &QAction::triggered, this, &TrianglePPTest::close);
+   QAction action2("Info", this);
+   connect(&action2, &QAction::triggered, this, &TrianglePPTest::showInfo);
    ctxtMenu.addAction(&action2);
    
+   QAction action3("Close", this);
+   connect(&action3, &QAction::triggered, this, &TrianglePPTest::close);
+   ctxtMenu.addAction(&action3);
+
    ctxtMenu.exec(mapToGlobal(ui.optionsToolButton->geometry().bottomLeft()));
 }
 
@@ -347,6 +352,12 @@ void TrianglePPTest::showTrianguationOptions()
 }
 
 
+void TrianglePPTest::showInfo()
+{
+   QMessageBox::information(this, tr("INFO"), "A Qt-based demo for the TrianglePP library!");
+}
+
+
 void TrianglePPTest::clearDisplay()
 {
    ui.drawAreaWidget->clearImage();
@@ -410,16 +421,15 @@ void TrianglePPTest::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
          // move vector to the start point
          xend += xstart;
          yend += ystart;
+          
+         // extend to the boundaries
+         double slope = (yend - ystart) / (xend - xstart);
+         double intercept = yend - (slope * xend);
 
-         // OPEN TODO:: 
-         //  -- extend to the boundaries
-
-         // ...
-
-         .....................
-
-
-         ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xend, yend));
+         double xinfininty = (xend > xstart) ? 10000 : 0;
+         double yinfininty = xinfininty * slope + intercept;
+                  
+         ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xinfininty, yinfininty));
       }
       else
       {

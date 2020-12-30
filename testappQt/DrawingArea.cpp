@@ -417,5 +417,21 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
    ctxtMenu.addAction(&action2);
 #endif
 
+
+#if 0
+   // OPEN TODO::: show general ctx menu???
+
+   QAction action3("Start Segment", this);
+   connect(&action3, &QAction::triggered, this, &DrawingArea::startSegment);
+   ctxtMenu.addAction(&action3);
+
+   QAction action4("End Segment", this);
+   connect(&action4, &QAction::triggered, this, &DrawingArea::endSegment);
+   ctxtMenu.addAction(&action4);
+
+   // ............
+#endif
+
+
    ctxtMenu.exec(mapToGlobal(startPos_));
 }
