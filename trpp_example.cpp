@@ -36,15 +36,15 @@ int main()
         double y1 = delaunayInput[keypointIdx1][1];
     }
 
-    // 2. triangulation with constraints
-    bool withConstraints = true;
+    // 2. triangulation with quality constraints
+    bool enforceQuality = true;
 
     // set custom constraints
     //  - if nothing set, the default constraint is minAngle = 20.0 deg
     trGenerator.setMinAngle(30.5f);
     trGenerator.setMaxArea(1.5f);
 
-    trGenerator.Triangulate(withConstraints);
+    trGenerator.Triangulate(enforceQuality);
 
     // iterate over triangles
     for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
@@ -72,7 +72,7 @@ int main()
 
           // but that will work too!
           x1 = sp1[0];
-          x1 = sp1[1];
+          y1 = sp1[1];
        }
     }
 
@@ -114,6 +114,33 @@ int main()
           double xend = p2[0];
           double yend = p2[1];
        }
+    }
+
+	// 4. constrained Delaunay
+	std::vector<Delaunay::Point> segments;
+
+	segments.push_back(delaunayInput[2]);
+	segments.push_back(delaunayInput[1]);
+
+	trGenerator.setSegmentConstraint(segments);
+
+	trGenerator.Triangulate(!enforceQuality); // no qualityconstr, thus no Steiner points!
+	int triCount = trGenerator.ntriangles();
+
+    // iterate over triangles
+    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    {
+       Delaunay::Point sp1;
+       Delaunay::Point sp2;
+       Delaunay::Point sp3;
+
+       int keypointIdx1 = trGenerator.Org(fit, &sp1);
+       int keypointIdx2 = trGenerator.Dest(fit, &sp2);
+       int keypointIdx3 = trGenerator.Apex(fit, &sp3);
+
+       // access data
+       double x1 = delaunayInput[keypointIdx1][0];
+       double y1 = delaunayInput[keypointIdx1][1];
     }
 }
 

@@ -7,7 +7,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(TianglePPExample VERSION 0.1.0 LANGUAGES CXX)
+project(TrianglePPExample VERSION 0.1.0 LANGUAGES CXX)
 
 ################################################################################
 # Use solution folders feature

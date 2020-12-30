@@ -73,7 +73,7 @@ source_group("Source Files" FILES ${Source_Files})
 set(ALL_FILES
     ${Form_Files}
     ${Resource_Files} 
-	${Header_Files}
+    ${Header_Files}
     ${Header_Files__tpp}
     ${Source_Files}
     ${Source_Files__tpp}
@@ -92,8 +92,8 @@ endif()
 ################################################################################
 # Include directories
 ################################################################################
-    "${CMAKE_CURRENT_SOURCE_DIR}/../source;"
-    "${CMAKE_CURRENT_SOURCE_DIR}/GeneratedFiles;"
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/../source"
 )
 
 ################################################################################

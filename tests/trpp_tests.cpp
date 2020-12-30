@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <iostream>
-
+#include <cassert>
 
 using namespace tpp;
 
@@ -75,7 +75,7 @@ int main()
                   << "{" << delaunayInput[keypointIdx3][0] << "," << delaunayInput[keypointIdx3][1] << "}\n";
     }
 
-    // 2. triangulate with constraints
+    // 2. triangulate with quality constraints
     bool withConstraints = true;
     tpp::DebugOutputLevel dbgOutput = tpp::Info;
     int nrOfConstraintTests = 3;
@@ -173,8 +173,64 @@ int main()
     // iterate over Voronoi edges !!!!
     // use conforming Delaunay as base !!!!
 
+	
+	// OPEN TODO::: ...
 
-    std::cout << "TEST: completed ---" << std::endl;
+
+
+	// 4. segment-constrained triangulation
+	std::cout << "\nTEST: segment-constrainded triangluation (CDT) \n";
+
+	// prepare input 
+	//	- see "example constr segments.jpg" for visualisation!
+    std::vector<Delaunay::Point> constrDelaunayInput;
+    
+    constrDelaunayInput.push_back(Delaunay::Point(0, 0));
+    constrDelaunayInput.push_back(Delaunay::Point(0, 1));
+    constrDelaunayInput.push_back(Delaunay::Point(0, 3));
+
+    constrDelaunayInput.push_back(Delaunay::Point(2, 0));
+
+	constrDelaunayInput.push_back(Delaunay::Point(4, 1.25));
+	constrDelaunayInput.push_back(Delaunay::Point(4, 3));
+
+	constrDelaunayInput.push_back(Delaunay::Point(6, 0));
+	constrDelaunayInput.push_back(Delaunay::Point(8, 1.25));
+
+	constrDelaunayInput.push_back(Delaunay::Point(9, 0));
+	constrDelaunayInput.push_back(Delaunay::Point(9, 0.75));
+	constrDelaunayInput.push_back(Delaunay::Point(9, 3));
+	
+	// - reference triangulation
+	Delaunay trConstrGenerator(constrDelaunayInput);
+    trConstrGenerator.Triangulate(true); 
+
+	int triangleCt = trConstrGenerator.ntriangles();
+	
+	//assert(triangleCt == 11);
+	std::cout << " -- Unconstrained triangle count: " << triangleCt << "\n";
+
+	// prepare segments 
+	//	- see "example constr segments.jpg" for visualisation!
+    std::vector<Delaunay::Point> constrDelaunaySegments;
+
+	constrDelaunaySegments.push_back(Delaunay::Point(0, 1));
+	constrDelaunaySegments.push_back(Delaunay::Point(9, 0.75));
+
+	// - CDT triangulation
+
+	trConstrGenerator.setSegmentConstraint(constrDelaunaySegments);
+	trConstrGenerator.Triangulate(true); 
+
+	int triangleCdtCt = trConstrGenerator.ntriangles();
+	
+	//assert(triangleCdtCt == 11);
+	std::cout << " -- Constrained triangle count: " << triangleCdtCt << "\n";
+
+			
+	// 5. ready!
+	
+    std::cout << "\nTEST: completed ---" << std::endl;
 }
 
 // --- eof ---

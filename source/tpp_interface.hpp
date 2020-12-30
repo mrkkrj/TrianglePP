@@ -132,7 +132,7 @@ namespace tpp {
         Takes a vector of 2 dimensional points where each of the coordinates is
         expressed as double.
       */
-      Delaunay(std::vector<Point>& v);
+      Delaunay(const std::vector<Point>& points);
 
       //! The main destructor.
       /*!
@@ -140,10 +140,10 @@ namespace tpp {
       */
       ~Delaunay();
 
-      //! Delaunay Triangulate the input points (Constrained)
+      //! Delaunay Triangulate the input points (Quality)
       /*!
         This function calls Triangle.h to Delaunay-triangulate points given as input to the 
-        constructor of this class. Here a Constrained triangualtion will be created.
+        constructor of this class. Here a Quality triangualtion will be created.
 
         \param quality enforce minimal angle (default: 20°) and, minimal area (only if explicitely set)
       */
@@ -184,14 +184,24 @@ namespace tpp {
          m_maxArea = area;
       }
 
-      //! Are the constrainst sane?
+      //! Set the segments to constrain the triangulation
+      /*!
+        Takes a vector of 2 dimensional points where each consecutive pair of points describes a single segment.
+		Both endpoints of every segment are vertices of the input vector, and a segment may intersect other segments 
+		and vertices only at its endpoints.
+
+		\return true if the input is valid, false otherwise 
+      */
+	  bool setSegmentConstraint(const std::vector<Point>& segments);
+
+      //! Are the quality constrainst sane?
       /*!
         \possible true if is highly probable for triangualtion to succeed
         \return true if triangualtion is guaranteed to succeed
       */
       bool checkConstraints(bool& possible) const;
 
-      //! Are the constrainst sane, take two
+      //! Are the quality constrainst sane, take two
       /*!
         \relaxed report highly probable as correct too, as error otherwise
         \return true if triangualtion is guaranteed to succeed, or at least higly probable to
@@ -651,7 +661,7 @@ namespace tpp {
 
       // added mrkkrj 
       std::string formatFloatConstraint(float f) const;
-      void setDebugLevelOption(std::string options, DebugOutputLevel traceLvl);
+      void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
       void freeTriangleDataStructs();
 
       friend class fIterator;
@@ -670,6 +680,9 @@ namespace tpp {
       // added mrkkrj: quality constraints
       float m_minAngle;
       float m_maxArea;
+
+	  // added mrkkrj: segment constraints
+	  std::vector<int> m_SList;   
 
    }; // Class Delaunay
 
