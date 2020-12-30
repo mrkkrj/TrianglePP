@@ -27,7 +27,7 @@ Additionally, under *testappQt* you'll find a GUI programm to play with the tria
 
 ![triangle-PP's GUI test program](triangle-pp-testApp.gif)
 
-, constrained triangulations:
+quality-constrained triangulations:
 
 ![triangle-PP's GUI screenshot](triangle-pp-testApp-Constrained.jpg)
 
@@ -43,6 +43,8 @@ and also with tesselations:
 For backgroud info on the original implementation see "*Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator*" by J.P. Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps.
 
 The original *Triangle* library documentation can be found at: http://www.cs.cmu.edu/~quake/triangle.html. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
+
+DCT construction: *Fast segment insertion and incremental construction of constrained Delaunay triangulations*, Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 ## TODOs:
  - Test it on 64-bit Linux
