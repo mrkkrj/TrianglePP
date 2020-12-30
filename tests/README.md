@@ -8,7 +8,7 @@ These are the preliminary test cases for the Triangle++ package.
 
  - the test for constrained Delaunay uses following data:
 
-![example constr segments.jpg](example constr segments.jpg)
+![example-constr-segments.jpg](example_constr_segments.jpg)
 
 
 ## TODOs:
