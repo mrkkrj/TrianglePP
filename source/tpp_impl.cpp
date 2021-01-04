@@ -368,6 +368,7 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
 		const std::vector<Point>::iterator it = std::find(m_PList.begin(), m_PList.end(), segments[i]);
 		if (it == m_PList.end())
 		{
+         m_SList.clear();
 			return false;
 		}
 		else
@@ -380,6 +381,36 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
 
 	return true;
 }
+
+
+/*!
+  added mrkkrj:
+*/
+bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes)
+{
+   m_SList.clear();
+   m_SList.reserve(segmentPointIndexes.size());
+
+   for (int i = 0; i < segmentPointIndexes.size(); ++i)
+   {      
+      const int& pointIdx = segmentPointIndexes[i];
+      if (pointIdx < 0 ||
+          pointIdx >= m_PList.size())
+      {
+         m_SList.clear();
+         return false;
+      }
+      else
+      {
+         m_SList.push_back(pointIdx);
+      }
+   }
+
+   // OPEN TODO::: check for intersections!!!! 
+
+   return true;
+}
+
 
 /*!
 */

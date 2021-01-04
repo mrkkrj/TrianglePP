@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>635</width>
+    <width>715</width>
     <height>423</height>
    </rect>
   </property>
@@ -80,7 +80,7 @@
       <item>
        <widget class="QCheckBox" name="useConstraintsCheckBox">
         <property name="text">
-         <string>Use constraints</string>
+         <string>Quality constraints</string>
         </property>
        </widget>
       </item>
@@ -158,8 +158,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>635</width>
-     <height>21</height>
+     <width>715</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

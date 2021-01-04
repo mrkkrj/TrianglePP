@@ -25,7 +25,8 @@ DrawingArea::DrawingArea(QWidget* parent)
      pointSize_(6),
      penColor_(Qt::blue),
      lineStarted_(false),
-     imgDirty_(false)
+     imgDirty_(false),
+     lineStartPointIdx_(-1)
 {
    // get paint events only for parts that are newly visible
    setAttribute(Qt::WA_StaticContents);
@@ -323,6 +324,31 @@ void DrawingArea::startMovingPoint()
 }
 
 
+void DrawingArea::selectLineStartPoint()
+{
+   lineStartPointIdx_ = -1;
+   bool pointFound = pointClicked(startPos_, lineStartPointIdx_);
+
+   Q_ASSERT(pointFound);
+   Q_ASSERT(lineStartPointIdx_ != -1);
+}
+
+
+void DrawingArea::selectLineEndPoint()
+{
+   Q_ASSERT(lineStartPointIdx_ != -1);
+
+   int lineEndPointIdx = -1;
+   bool pointFound = pointClicked(startPos_, lineEndPointIdx);
+
+   Q_ASSERT(pointFound);
+   Q_ASSERT(lineEndPointIdx != -1);
+
+   emit linePointsSelected(lineStartPointIdx_, lineEndPointIdx);
+   lineStartPointIdx_ = -1;
+}
+
+
 // private methods
 
 void DrawingArea::drawLineTo(const QPoint& endPos)
@@ -418,20 +444,15 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
 #endif
 
 
-#if 0
-   // OPEN TODO::: show general ctx menu???
-
    QAction action3("Start Segment", this);
-   connect(&action3, &QAction::triggered, this, &DrawingArea::startSegment);
+   connect(&action3, &QAction::triggered, this, &DrawingArea::selectLineStartPoint);
    ctxtMenu.addAction(&action3);
+   action3.setEnabled(lineStartPointIdx_ == -1);
 
    QAction action4("End Segment", this);
-   connect(&action4, &QAction::triggered, this, &DrawingArea::endSegment);
+   connect(&action4, &QAction::triggered, this, &DrawingArea::selectLineEndPoint);
    ctxtMenu.addAction(&action4);
-
-   // ............
-#endif
-
+   action4.setEnabled(lineStartPointIdx_ != -1);
 
    ctxtMenu.exec(mapToGlobal(startPos_));
 }

@@ -24,6 +24,11 @@ namespace {
    const int c_defaultMaxPoints = 100;
    const int c_defaultMinAngle = 20; // default min. angle used by the original Triangle package!
 
+   const QColor c_TriangleColor = Qt::blue;
+   const QColor c_VoronoiColor = Qt::red;
+   const QColor c_SegmentColor = Qt::green;
+
+
    // impl. helpers
    QPoint getDelaunayResultPoint(
          std::vector<Delaunay::Point>& delaunayInput, 
@@ -74,6 +79,7 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
 
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
+   connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPTest::onSegmentEndpointsSelected);
 }
 
 
@@ -119,7 +125,7 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    ui.drawAreaWidget->clearImage();
 
    // ...but retain the points!
-   ui.drawAreaWidget->setDrawColor(Qt::blue);
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    for (auto& point : drawnPoints)
    {
@@ -175,6 +181,19 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
       ui.drawAreaWidget->drawLine(getResultPoint(destIdx, sp2), getResultPoint(apexIdx, sp3));
       ui.drawAreaWidget->drawLine(getResultPoint(apexIdx, sp3), getResultPoint(originIdx, sp1));
    }
+
+   // draw used constraint segments
+   ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+
+   for (int i = 0; i < segmentEndpointIndexes_.size(); ++i)
+   {
+      auto start = segmentEndpointIndexes_[i++];
+      auto end = segmentEndpointIndexes_[i];
+
+      ui.drawAreaWidget->drawLine(drawnPoints[start], drawnPoints[end]);
+   }
+
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 }
 
 
@@ -268,6 +287,19 @@ void TrianglePPTest::onTriangulationPointDeleted(const QPoint& pos)
 }
 
 
+void TrianglePPTest::onSegmentEndpointsSelected(int startPointIdx, int endPointIdx)
+{
+   ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+
+   auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
+   ui.drawAreaWidget->drawLine(drawnPoints[startPointIdx], drawnPoints[endPointIdx]);
+
+   segmentEndpointIndexes_ << startPointIdx << endPointIdx;
+
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+}
+
+
 void TrianglePPTest::setGenerateButtonText()
 {
    switch (mode_)
@@ -332,6 +364,7 @@ void TrianglePPTest::showTrianguationOptions()
    float guaranteed = 0, possible = 0;
    Delaunay::getMinAngleBoundaries(guaranteed, possible);
    dlg.setMinAngleBoundaries(guaranteed, possible);
+   dlg.setSegmentPointIndexes(segmentEndpointIndexes_);
 
    dlg.exec();
 
@@ -348,6 +381,8 @@ void TrianglePPTest::showTrianguationOptions()
       {
          ui.useConstraintsCheckBox->setChecked(false);
       }
+
+      segmentEndpointIndexes_ = dlg.getSegmentPointIndexes();
    }
 }
 
@@ -362,8 +397,11 @@ void TrianglePPTest::clearDisplay()
 {
    ui.drawAreaWidget->clearImage();
    statusBar()->showMessage("");
+   
    triangulated_ = false;
-   ui.drawAreaWidget->setDrawColor(Qt::blue);
+   segmentEndpointIndexes_.clear(); // forget them, bound to old points!
+
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 }
 
 
@@ -384,7 +422,7 @@ void TrianglePPTest::clearVoronoiPoints()
 void TrianglePPTest::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
 {
    // draw Voronoi points
-   ui.drawAreaWidget->setDrawColor(Qt::red);
+   ui.drawAreaWidget->setDrawColor(c_VoronoiColor);
 
    for (Delaunay::vvIterator fit = trGenerator.vvbegin(); fit != trGenerator.vvend(); ++fit)
    {
@@ -440,7 +478,7 @@ void TrianglePPTest::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
       }
    }
 
-   ui.drawAreaWidget->setDrawColor(Qt::blue);
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 }
 
 
@@ -462,4 +500,10 @@ void TrianglePPTest::configDelaunay(tpp::Delaunay& trGenerator)
       trGenerator.setMinAngle(-1);
       trGenerator.setMaxArea(-1);
    }
+
+   if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
+   {
+      QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
+   }
 }
+

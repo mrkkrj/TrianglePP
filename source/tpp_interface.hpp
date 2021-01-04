@@ -194,6 +194,14 @@ namespace tpp {
       */
 	  bool setSegmentConstraint(const std::vector<Point>& segments);
 
+     //! Set the segments to constrain the triangulation
+     /*!
+       Same as above, but usign indexes of the input points!
+
+     \return true if the input is valid, false otherwise
+     */
+     bool setSegmentConstraint(const std::vector<int>& segmentPointIndexes);
+
       //! Are the quality constrainst sane?
       /*!
         \possible true if is highly probable for triangualtion to succeed

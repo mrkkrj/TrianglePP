@@ -52,6 +52,7 @@ signals:
    void pointDeleted(const QPoint& pos);
    void lineAdded(const QPoint& start, const QPoint& end);
    void lineDeleted(const QPoint& start, const QPoint& end);
+   void linePointsSelected(int startIdx, int endIdx);
 
 protected:
    void paintEvent(QPaintEvent* ev) override;
@@ -64,6 +65,8 @@ protected:
 private slots:
    void deletPointAtLastPos();
    void startMovingPoint();
+   void selectLineStartPoint();
+   void selectLineEndPoint();
 
 private:
    void drawLineTo(const QPoint& endPos);
@@ -80,6 +83,8 @@ private:
    bool lineStarted_;
    QPoint startPos_;
    QVector<QPoint> points_;
+
+   int lineStartPointIdx_;
 
    QImage img_;
    bool imgDirty_;

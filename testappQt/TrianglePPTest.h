@@ -32,6 +32,7 @@ public slots:
 
 private slots:
    void onTriangulationPointDeleted(const QPoint& pos);
+   void onSegmentEndpointsSelected(int startPointIdx, int endPointIdx);
 
 private:
    void setGenerateButtonText();
@@ -60,4 +61,5 @@ private:
     bool useConformingDelaunay_;
 
     QVector<QPoint> voronoiPoints_;
+    QVector<int> segmentEndpointIndexes_;
 };

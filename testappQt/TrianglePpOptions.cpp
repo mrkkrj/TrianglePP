@@ -63,6 +63,25 @@ bool TrianglePpOptions::useConformingDelaunay() const
 }
 
 
+QVector<int> TrianglePpOptions::getSegmentPointIndexes() const
+{
+   if (ui.segmentPointsLineEdit->text().isEmpty())
+   {
+      return QVector<int>();
+   }
+
+   auto values = ui.segmentPointsLineEdit->text().split(",");
+   QVector<int> ret;
+
+   for (auto& v : values)
+   {
+      ret << v.toInt();
+   }
+
+   return ret;
+}
+
+
 void TrianglePpOptions::fillContents(int minAngle, int maxArea, int minPoints, int maxPoints, bool confDelaunay)
 {
    ui.minAngleLineEdit->setText(minAngle >= 0 ? QString::number(minAngle) : "");
@@ -78,7 +97,7 @@ void TrianglePpOptions::fillContents(int minAngle, int maxArea, int minPoints, i
 void TrianglePpOptions::setMinAngleBoundaries(float maxOk, float maxWarning)
 {
    minAngleOk_ = maxOk;
-   miAngleWaning_ = maxWarning;
+   miAngleWarning_ = maxWarning;
 
    // allow up to a warning!!!
 
@@ -86,6 +105,19 @@ void TrianglePpOptions::setMinAngleBoundaries(float maxOk, float maxWarning)
    validator->setLocale(QLocale::C); // always use point!
    ui.minAngleLineEdit->setValidator(nullptr);
    ui.minAngleLineEdit->setValidator(validator);
+}
+
+
+void TrianglePpOptions::setSegmentPointIndexes(const QVector<int>& segmentEndpoints)
+{
+   QList<QString> values;
+
+   for (auto& pt : segmentEndpoints)
+   {
+      values << QString::number(pt);
+   }
+
+   ui.segmentPointsLineEdit->setText(values.join(", "));
 }
 
 
@@ -139,6 +171,28 @@ void TrianglePpOptions::on_minAngleLineEdit_editingFinished()
                QString("Caution!\n\nThe triangualtion will very probably terminate, "
                        "but mathematically this is only guaranteed up to: \n\n  minAngle=%1 deg\n")
                   .arg(minAngleOk_));
+   }
+}
+
+
+void TrianglePpOptions::on_segmentPointsLineEdit_editingFinished()
+{
+   QString input = ui.segmentPointsLineEdit->text();
+
+   if (input.isEmpty())
+   {
+      return; // OK, resetted
+   }
+
+   // OPEN TODO::: better regex!!!
+
+   QRegularExpression r("{[0-9]|,| }*");
+   auto match = r.match(input);
+
+   if (!match.hasMatch())
+   {
+      QMessageBox::critical(this, "",
+         QString("Error!\n\n The required format is: number, number, number "));
    }
 }
 

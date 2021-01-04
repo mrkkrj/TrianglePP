@@ -116,16 +116,16 @@ int main()
        }
     }
 
-	// 4. constrained Delaunay
-	std::vector<Delaunay::Point> segments;
+    // 4. constrained Delaunay
+    std::vector<Delaunay::Point> segments;
 
-	segments.push_back(delaunayInput[2]);
-	segments.push_back(delaunayInput[1]);
+    segments.push_back(delaunayInput[2]);
+    segments.push_back(delaunayInput[1]);
 
-	trGenerator.setSegmentConstraint(segments);
+    trGenerator.setSegmentConstraint(segments);
 
-	trGenerator.Triangulate(!enforceQuality); // no qualityconstr, thus no Steiner points!
-	int triCount = trGenerator.ntriangles();
+    trGenerator.Triangulate(!enforceQuality); // no qualityconstr, thus no Steiner points!
+    int triCount = trGenerator.ntriangles();
 
     // iterate over triangles
     for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
