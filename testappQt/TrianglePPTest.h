@@ -33,6 +33,7 @@ public slots:
 private slots:
    void onTriangulationPointDeleted(const QPoint& pos);
    void onSegmentEndpointsSelected(int startPointIdx, int endPointIdx);
+   void onPointChangedToHoleMarker(int pointIdx, const QPoint& pos);
 
 private:
    void setGenerateButtonText();
@@ -43,6 +44,8 @@ private:
    void clearVoronoiPoints();
    void drawVoronoiTesselation(tpp::Delaunay& trGenerator);
    void configDelaunay(tpp::Delaunay& trGenerator);
+   bool isHoleMarker(const QPoint& point) const;
+   void drawHoleMarker(const QPoint& pos);
 
 private:
     Ui::TrianglePPTestClass ui;
@@ -62,4 +65,6 @@ private:
 
     QVector<QPoint> voronoiPoints_;
     QVector<int> segmentEndpointIndexes_;
+    QVector<int> holePointIndexes_; // OPEN TODO:: remove?
+    QVector<QPoint> holePoints_;
 };

@@ -187,12 +187,12 @@ namespace tpp {
       //! Set the segments to constrain the triangulation
       /*!
         Takes a vector of 2 dimensional points where each consecutive pair of points describes a single segment.
-		Both endpoints of every segment are vertices of the input vector, and a segment may intersect other segments 
-		and vertices only at its endpoints.
+      Both endpoints of every segment are vertices of the input vector, and a segment may intersect other segments 
+      and vertices only at its endpoints.
 
-		\return true if the input is valid, false otherwise 
+      \return true if the input is valid, false otherwise 
       */
-	  bool setSegmentConstraint(const std::vector<Point>& segments);
+      bool setSegmentConstraint(const std::vector<Point>& segments);
 
      //! Set the segments to constrain the triangulation
      /*!
@@ -201,6 +201,14 @@ namespace tpp {
      \return true if the input is valid, false otherwise
      */
      bool setSegmentConstraint(const std::vector<int>& segmentPointIndexes);
+
+     //! Set the holes to constrain the triangulation
+     /*!
+       Takes a vector of 2 dimensional points where each consecutive pair of points describes a single edge of a hole.
+
+     \return true if the input is valid, false otherwise
+     */
+     bool setHolesConstraint(const std::vector<Point>& holes);
 
       //! Are the quality constrainst sane?
       /*!
@@ -689,8 +697,10 @@ namespace tpp {
       float m_minAngle;
       float m_maxArea;
 
-	  // added mrkkrj: segment constraints
-	  std::vector<int> m_SList;   
+     // added mrkkrj: segment constraints
+     std::vector<int> m_SList;
+     // added mrkkrj: holes 
+     std::vector<Point> m_HList;
 
    }; // Class Delaunay
 

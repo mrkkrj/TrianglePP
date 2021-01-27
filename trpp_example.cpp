@@ -123,8 +123,9 @@ int main()
     segments.push_back(delaunayInput[1]);
 
     trGenerator.setSegmentConstraint(segments);
+    // trGenerator.setHolesConstraint(holes); --> also supported!
 
-    trGenerator.Triangulate(!enforceQuality); // no qualityconstr, thus no Steiner points!
+    trGenerator.Triangulate(!enforceQuality); // no quality constraint, thus no Steiner points!
     int triCount = trGenerator.ntriangles();
 
     // iterate over triangles

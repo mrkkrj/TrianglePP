@@ -135,9 +135,40 @@ void DrawingArea::drawLine(const QPoint& from, const QPoint& to)
 }
 
 
+void DrawingArea::drawText(const QPoint& pos, const QString& txt, const QFont* font)
+{
+   QPainter painter(&img_);
+   auto pen = QPen(penColor_);
+
+   painter.setPen(pen);
+   if (font)
+   {
+      painter.setFont(*font);
+   }
+
+   painter.drawText(pos, txt);
+
+#if 0 // OPEN TODO:::
+   // update only the changed region
+   int rad = (penWidth_ / 2) + 2;
+   update(QRect(pos, xxxx).normalized().adjusted(-rad, -rad, +rad, +rad));
+#else
+   update();
+#endif
+
+   imgDirty_ = true;
+}
+
+
 QVector<QPoint> DrawingArea::getPointCoordinates() const
 {
    return points_;
+}
+
+
+QVector<QPoint> DrawingArea::getHoleMarkerCoordinates() const
+{
+   return holeMarkerPoints_;
 }
 
 
@@ -208,6 +239,7 @@ void DrawingArea::clearImage()
    if (mode_ == DrawPoints)
    {
       points_.clear();
+      holeMarkerPoints_.clear();
    }
 
    imgDirty_ = true;
@@ -349,6 +381,20 @@ void DrawingArea::selectLineEndPoint()
 }
 
 
+void DrawingArea::changePointToHoleMarker()
+{
+   Q_ASSERT(lineStartPointIdx_ == -1);
+
+   int pointIdx = -1;
+   bool pointFound = pointClicked(startPos_, pointIdx);
+
+   Q_ASSERT(pointFound);
+   holeMarkerPoints_.append(startPos_);
+   
+   emit pointChangedToHoleMarker(pointIdx, startPos_);
+}
+
+
 // private methods
 
 void DrawingArea::drawLineTo(const QPoint& endPos)
@@ -444,6 +490,8 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
 #endif
 
 
+   // OPEN TODO:: not in the general-purpsose drawing widget!!!!
+
    QAction action3("Start Segment", this);
    connect(&action3, &QAction::triggered, this, &DrawingArea::selectLineStartPoint);
    ctxtMenu.addAction(&action3);
@@ -453,6 +501,11 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
    connect(&action4, &QAction::triggered, this, &DrawingArea::selectLineEndPoint);
    ctxtMenu.addAction(&action4);
    action4.setEnabled(lineStartPointIdx_ != -1);
+
+   QAction action5("Change to Hole Marker", this);
+   connect(&action5, &QAction::triggered, this, &DrawingArea::changePointToHoleMarker);
+   ctxtMenu.addAction(&action5);
+   action5.setEnabled(lineStartPointIdx_ == -1);
 
    ctxtMenu.exec(mapToGlobal(startPos_));
 }

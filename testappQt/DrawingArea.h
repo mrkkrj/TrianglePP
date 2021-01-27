@@ -39,8 +39,10 @@ public:
     void drawPoint(const QPoint& pos);
     void clearPoint(const QPoint& pos);
     void drawLine(const QPoint& from, const QPoint& to);
+    void drawText(const QPoint& pos, const QString& txt, const QFont* font = nullptr);
 
     QVector<QPoint> getPointCoordinates() const;
+    QVector<QPoint> getHoleMarkerCoordinates() const;
 
     bool openImage(const QString& fileName);
     bool saveImage(const QString& fileName, const char* fileFormat);
@@ -53,6 +55,7 @@ signals:
    void lineAdded(const QPoint& start, const QPoint& end);
    void lineDeleted(const QPoint& start, const QPoint& end);
    void linePointsSelected(int startIdx, int endIdx);
+   void pointChangedToHoleMarker(int pointIdx, const QPoint& pos);
 
 protected:
    void paintEvent(QPaintEvent* ev) override;
@@ -67,6 +70,7 @@ private slots:
    void startMovingPoint();
    void selectLineStartPoint();
    void selectLineEndPoint();
+   void changePointToHoleMarker();
 
 private:
    void drawLineTo(const QPoint& endPos);
@@ -83,6 +87,7 @@ private:
    bool lineStarted_;
    QPoint startPos_;
    QVector<QPoint> points_;
+   QVector<QPoint> holeMarkerPoints_;
 
    int lineStartPointIdx_;
 

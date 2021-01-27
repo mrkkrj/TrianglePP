@@ -35,9 +35,13 @@ constrained triangulations:
 
 ![triangle-PP's GUI test program 1](tri-w-segment-constarints.gif)
 
-and also with tesselations:
+(also with holes!):
 
-![triangle-PP's GUI screenshot 1](triangle-pp-testApp-Voronoi.jpg)
+![triangle-PP's GUI Screenshot 1](triangle-pp-testApp-with-hole.jpg)
+
+and with tesselations:
+
+![triangle-PP's GUI screenshot 2](triangle-pp-testApp-Voronoi.jpg)
 
 
 ## Theory:

@@ -80,6 +80,7 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
    connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPTest::onSegmentEndpointsSelected);
+   connect(ui.drawAreaWidget, &DrawingArea::pointChangedToHoleMarker, this, &TrianglePPTest::onPointChangedToHoleMarker);
 }
 
 
@@ -142,19 +143,28 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    std::vector<Delaunay::Point> delaunayInput;
    for (auto& point : drawnPoints)
    {
+      if (isHoleMarker(point))
+         continue;
+
       delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
    }
 
    Delaunay trGenerator(delaunayInput);
    configDelaunay(trGenerator);
+   
+#if 0
+   auto trace = tpp::Debug; // TEST:::
+#else
+   auto trace = tpp::None;
+#endif
 
    if (useConformingDelaunay_)
    {
-      trGenerator.TriangulateConf();
+      trGenerator.TriangulateConf(trace);
    }
    else
    {
-      trGenerator.Triangulate(useConstraints_);
+      trGenerator.Triangulate(useConstraints_, trace);
    }
 
    triangulated_ = true;
@@ -191,6 +201,12 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
       auto end = segmentEndpointIndexes_[i];
 
       ui.drawAreaWidget->drawLine(drawnPoints[start], drawnPoints[end]);
+   }
+
+   // and hole markers
+   for (auto& point : holePoints_)
+   {
+      drawHoleMarker(point);
    }
 
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
@@ -275,6 +291,11 @@ void TrianglePPTest::on_optionsToolButton_clicked()
 
 void TrianglePPTest::onTriangulationPointDeleted(const QPoint& pos)
 {
+   if (holePoints_.contains(pos))
+   {
+      holePoints_.removeOne(pos);
+   }
+
    if (!triangulated_)
    {
       return;
@@ -294,9 +315,22 @@ void TrianglePPTest::onSegmentEndpointsSelected(int startPointIdx, int endPointI
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
    ui.drawAreaWidget->drawLine(drawnPoints[startPointIdx], drawnPoints[endPointIdx]);
 
+   Q_ASSERT(startPointIdx >= 0 && endPointIdx >= 0);
+   Q_ASSERT(startPointIdx < drawnPoints.size()&& endPointIdx < drawnPoints.size());
+
    segmentEndpointIndexes_ << startPointIdx << endPointIdx;
 
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+}
+
+
+void TrianglePPTest::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
+{
+   drawHoleMarker(pos);
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+
+   holePointIndexes_ << pointIdx;
+   holePoints_ << pos;
 }
 
 
@@ -398,9 +432,11 @@ void TrianglePPTest::clearDisplay()
    ui.drawAreaWidget->clearImage();
    statusBar()->showMessage("");
    
-   triangulated_ = false;
    segmentEndpointIndexes_.clear(); // forget them, bound to old points!
+   holePointIndexes_.clear();
+   holePoints_.clear();
 
+   triangulated_ = false;
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 }
 
@@ -505,5 +541,30 @@ void TrianglePPTest::configDelaunay(tpp::Delaunay& trGenerator)
    {
       QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
    }
+
+   std::vector<Delaunay::Point> constrDelaunayHoles;
+   for (auto& point : holePoints_)
+   {
+      constrDelaunayHoles.push_back(Delaunay::Point(point.x(), point.y()));
+   }
+
+   trGenerator.setHolesConstraint(constrDelaunayHoles);
+}
+
+
+bool TrianglePPTest::isHoleMarker(const QPoint& point) const
+{
+   return holePoints_.contains(point);
+}
+
+
+void TrianglePPTest::drawHoleMarker(const QPoint& pos)
+{
+   ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+   QFont f;
+   f.setPixelSize(22);
+
+   ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
+   ui.drawAreaWidget->drawPoint(pos);
 }
 
