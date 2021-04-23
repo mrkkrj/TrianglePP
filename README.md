@@ -21,7 +21,34 @@ The code is now preliminary ported to x64 Windows. The project file was updated 
 
 For usage patterns see the examples in the *trpp_example.cpp* source file. The interface of the *trpp*-wrapper is defined in the *tpp_inteface.hpp* header file. 
 
+    // prepare input
+    std::vector<Delaunay::Point> delaunayInput;
+    
+    delaunayInput.push_back(Delaunay::Point(0,0));
+    delaunayInput.push_back(Delaunay::Point(1,1));
+    delaunayInput.push_back(Delaunay::Point(0,2));
+    delaunayInput.push_back(Delaunay::Point(3,3));
+
+    // use standard triangulation
+    Delaunay trGenerator(delaunayInput);
+    trGenerator.Triangulate();
+
+    // iterate over triangles
+    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    {
+        int keypointIdx1 = trGenerator.Org(fit); 
+        int keypointIdx2 = trGenerator.Dest(fit);
+        int keypointIdx3 = trGenerator.Apex(fit);
+
+        // access data
+        double x1 = delaunayInput[keypointIdx1][0];
+        double y1 = delaunayInput[keypointIdx1][1];
+    }
+
+
 If compiled with *TRIANGLE_DBG_TO_FILE* define, debug traces will be written to the *./triangle.out.txt* file.
+
+## Demo App:
 
 Additionally, under *testappQt* you'll find a GUI programm to play with the triangulations:
 
