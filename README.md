@@ -76,7 +76,7 @@ For backgroud info on the original implementation see "*Triangle: Engineering a 
 
 The original *Triangle* library documentation can be found at: http://www.cs.cmu.edu/~quake/triangle.html. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
 
-Algorithm used for DCT construction: *Fast segment insertion and incremental construction of constrained Delaunay triangulations*, Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
+Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 ## TODOs:
  - Add support for all options in contrained triangulations
