@@ -154,7 +154,7 @@ namespace tpp {
         This function calls Triangle.h to Delaunay-triangulate points given as input to the
         constructor of this class. Here a Conforming triangualtion will be created.
       */
-      void TriangulateConf(DebugOutputLevel = None);
+      void TriangulateConf(bool quality = false, DebugOutputLevel = None);
 
       //! Voronoi-tesselate the input points (added  mrkkrj)
       /*!
@@ -668,6 +668,8 @@ namespace tpp {
 
    private:
       void Triangulate(std::string& triswitches);
+
+      void TriangulateConf(std::string& triswitches);
 
       // added mrkkrj - helper functions for face iterator access methods 
       //    HACK:: double* as not to export internal impl.
