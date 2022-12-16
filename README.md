@@ -12,7 +12,7 @@ This code is released under LPGL licence.
 
 The code is now preliminary ported to x64 Windows. The project file was updated to Visual Studio 2015/2019, the x64 target was added, and the asserts & crashes when running the example program were fixed. It **wasn't thorougly tested though**.
 
-*CMake* support for both the example program and the GUI demonstrator were added too recently.
+*CMake* support for both the example program and the GUI demonstrator were added too recently. They are running both on Linux and Windows.
 
 ## Usage:
 
@@ -63,6 +63,10 @@ constrained triangulations:
 
 ![triangle-PP's GUI Screenshot 1](triangle-pp-testApp-with-hole.jpg)
 
+(also without enclosing convex hull):
+
+![triangle-PP's GUI Screenshot Linux 1](triangle-pp-Linux-constrained-with-hole.jpg)
+
 and with tesselations:
 
 ![triangle-PP's GUI screenshot 2](triangle-pp-testApp-Voronoi.jpg)
@@ -79,8 +83,7 @@ The original *Triangle* library documentation can be found at: http://www.cs.cmu
 Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 ## TODOs:
- - Add support for all options in contrained triangulations
- - Test it on 64-bit Linux
+ - Add support for all options in constrained triangulations
  - Port the Qt demo app to Emscripten
  - Move tests to Catch
  - add file export/import to the Qt demo app

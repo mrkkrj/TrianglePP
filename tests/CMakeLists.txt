@@ -7,7 +7,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(TianglePPTest VERSION 0.1.0 LANGUAGES CXX)
+project(TrianglePPTests VERSION 0.1.0 LANGUAGES CXX)
 
 ################################################################################
 # Use solution folders feature
@@ -15,76 +15,40 @@ project(TianglePPTest VERSION 0.1.0 LANGUAGES CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################################################################
-# Use Qt
-################################################################################
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-#set(CMAKE_AUTOUIC_SEARCH_PATHS "src/ui")
-
-find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-
-################################################################################
 # Source groups
 ################################################################################
-
-set(Form_Files
-    "./TrianglePPTest.ui"
-    "./TrianglePpOptions.ui"
-)
-source_group("Form Files" FILES ${Form_Files})
-
-set(Resource_Files
-    "./TrianglePPTest.qrc"
-)
-source_group("Resource Files" FILES ${Resource_Files})
-
-
-################################################################################
-# Source groups
-################################################################################
-set(Header_Files__tpp
-)
-source_group("Header Files\\tpp" FILES ${Header_Files__tpp})
 
 set(Header_Files
-    "DrawingArea.h"
-    "TrianglePpOptions.h"
-    "TrianglePPTest.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
-set(Source_Files__tpp
+set(Source_Files__trpp
+    "../source/dpoint.hpp"
     "../source/tpp_assert.cpp"
+    "../source/tpp_assert.hpp"
     "../source/tpp_impl.cpp"
+    "../source/tpp_interface.hpp"
+    "../source/triangle_impl.hpp"
 )
-source_group("Source Files\\tpp" FILES ${Source_Files__tpp})
+source_group("Source Files\\trpp" FILES ${Source_Files__trpp})
 
 set(Source_Files
-    "DrawingArea.cpp"
-    "TrianglePpOptions.cpp"
-    "TrianglePPTest.cpp"
-    "main.cpp"
+    "trpp_tests.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES
-    ${Form_Files}
-    ${Resource_Files} 
     ${Header_Files}
-    ${Header_Files__tpp}
+    ${Source_Files__trpp}
     ${Source_Files}
-    ${Source_Files__tpp}
 )
 
 ################################################################################
 # Target
 ################################################################################
 if(MSVC)
-	# set /SUBSYSTEM:WINDOWS
-	add_executable(${PROJECT_NAME} WIN32 ${ALL_FILES})
+	# set /SUBSYSTEM:CONSOLE
+	add_executable(${PROJECT_NAME} ${ALL_FILES})
 else()
 	add_executable(${PROJECT_NAME} ${ALL_FILES})
 endif()
@@ -93,26 +57,21 @@ endif()
 # Include directories
 ################################################################################
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../source"
-)
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../testappQt"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../source;"
 )
 
 ################################################################################
 # Compiler flags
 ################################################################################
 if(MSVC)
-   # quiet warnings related to fopen, sscanf, etc.
-   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+   # 1. quiet warnings related to fopen, sscanf, etc. 
+   # 2. enable debug trace file
+   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS TRIANGLE_DBG_TO_FILE)
 endif()
 
 ################################################################################
 # Dependencies
 ################################################################################
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
-    "Qt5::Core;"
-    "Qt5::Gui;"
-    "Qt5::Widgets"
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")

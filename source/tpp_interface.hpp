@@ -9,8 +9,8 @@
     to be used *as it is* in your program!
  */
 
-
  /*! \mainpage Triangle++
+ 
  \section intro Introduction
  <table border="0">
  <tr><td>
@@ -19,7 +19,7 @@
  <a href="http://en.wikipedia.org/wiki/Delaunay_triangulation">here</a>.
  This C++ library module is just a wrapper class on the
  <a href="http://www.cs.berkeley.edu/~jrs/">Triangle</a>
- package of <a href="http://www.cs.berkeley.edu/~jrs/">Jonathan</a>.
+ package of <a href="http://www.cs.berkeley.edu/~jrs/">Jonathan Shewchuk</a>.
 
  Many times I have had to use triangle in C++ code bases of mine and have been forced to use C.
  At last I thought I would put a wrapper on his cool C code and it seems that this is what I got.
@@ -30,23 +30,10 @@
 
  Look at the tpp_interface.hpp file for getting started on what this wrapper can do for you. Also
  have a look at main.cpp which shows an example of using this class. The class is thread-safe.
- <p>
- <b>Requirements</b> : Python, make and C++ compilers.
- Supported C/C++ Compilers: g++ / icpc (Intel C++).
- Also needed is doxygen for generating documentation.
- </p>
- <p>
- <b>Compilation</b> : Just type 'make'</p>
- <p>
- <b>Testing</b> : Goto the bin directory, and type './test ../data/input.dat' (after compilation of course).
- </p>
- </td>
+  </td>
  <td><img src="http://upload.wikimedia.org/wikipedia/en/9/92/Delaunay_triangulation.png" alt="Delaunay Triangulation Example"></td>
  </tr>
  </table>
-
- \section Downloads
- You can download the latest version of the source code from <a href="triangle++.tar.gz">here</a>.
 
  \section authors Authors
      <ul>
@@ -56,26 +43,22 @@
      </ul>
 
  \section changelog Change Log
-
- 17/04/20: mrkkrj – added support Voronoi tesselation <br>
- 22/01/20: mrkkrj – added support for custom constraints (angle and area) <br>
- 17/09/18: mrkkrj – ported to 64-bit (preliminary, not thorougly tested!) <br>
- 11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney() <br>
- 10/15/11: mrkkrj - added support for the "quality triangulation" option, added some debug support<br>
- 08/24/11: mrkkrj - Ported to VisualStudio, added comp. operators, reformatted and added some comments<br>
- 10/21/06: Replaced vertexsort with C++ sort.<br>
+ 11/03/06: Fixed the compilation system. <br>
  10/25/06: Wrapped in tpp namespace for usage with other libraries with similar names.
            Added some more documentation/small changes. Used doxygen 1.5.0 and dot. Tested compilation with
            icc 9.0/9.1, gcc-4.1/3.4.6. <br>
- 11/03/06: Fixed the compilation system. <br>
+ 10/21/06: Replaced vertexsort with C++ sort.<br>
+ 08/24/11: mrkkrj - Ported to VisualStudio, added comp. operators, reformatted and added some comments<br>
+ 10/15/11: mrkkrj - added support for the "quality triangulation" option, added some debug support<br>
+ 11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney() <br>
+ 17/09/18: mrkkrj – ported to 64-bit (preliminary, not thorougly tested!) <br>
+ 22/01/20: mrkkrj – added support for custom constraints (angle and area) <br>
+ 17/04/20: mrkkrj – added support Voronoi tesselation <br>
+ 05/08/22: mrkkrj – added more tests for constrained PSLG triangulations, 
+                    included (reworked) Yejneshwar's fix for removal of concavities <br>
 
  \todo
  <ol>
-     <li> Intel Compiler Warnings with -Wall </li>
-     <ul>
-          <li> remove the compiler warnings for icpc 9.0/9.1</li>
-     </ul>
-
      <li> Implement vertexmedian() in C++. </li>
      <li> Implement the flip operator as a member function of Delaunay. </li>
  </ol>
@@ -86,14 +69,12 @@
 #ifndef TRPP_INTERFACE
 #define TRPP_INTERFACE
 
-// changed mrkkrj --
-//#include <dpoint.hpp>
 #include "dpoint.hpp"
-// END changed --
+
 #include <vector>
 #include <string>
 
-//! The main namespace in which the Triangle++ project lives
+
 namespace tpp {
 
    // (mrkkrj)
@@ -106,16 +87,14 @@ namespace tpp {
 
    //!  The main Delaunay Class that wraps around Triangle.
    /*!
-     This is a C++ wrapper of the Triangle package by JRS.
+     This is a C++ wrapper of the Triangle package by JP Shewchuk.
 
      This class currently uses the dpoint class written by me (the point class is a d-dimensional point
      class reviver::dpoint (but for this application it only uses the d=2 case).
      Additionally, the inner helper C++ class Triwrap groups the original Triangle's C functions.
 
-     \author Piyush Kumar, mrkkrj
-
      \note   (mrkkrj) For for backgroud info on the Triangle's implementation see "Triangle:
-             Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk:
+             Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JR Shewchuk:
              www.cs.cmu.edu/~quake-papers/triangle.ps
    */
    class Delaunay {
@@ -140,21 +119,42 @@ namespace tpp {
       */
       ~Delaunay();
 
-      //! Delaunay Triangulate the input points (Quality)
+      //! Delaunay triangulate the input points
       /*!
         This function calls Triangle.h to Delaunay-triangulate points given as input to the 
-        constructor of this class. Here a Quality triangualtion will be created.
+        constructor of this class. A quality triangualtion can be also created here.
 
-        \param quality enforce minimal angle (default: 20°) and, minimal area (only if explicitely set)
+        If segment constraints were set, this method creates a constrained Delaunay triangulation where 
+        each PSLG segment is present as a single edge in the triangulation. Note that some of the resulting 
+        triangles might not be Delaunay!
+
+        \param quality  enforce minimal angle (default: 20°) and minimal area (only if explicitely set)
       */
-      void Triangulate(bool quality = false, DebugOutputLevel = None);
+      void Triangulate(bool quality = false, DebugOutputLevel traceLvl = None);
 
-      //! Delaunay Triangulate the input points (Conforming)
+      void Triangulate(DebugOutputLevel traceLvl) {
+          Triangulate(false, traceLvl);
+      }
+
+      //! Conforming Delaunay triangulate the input points 
       /*!
         This function calls Triangle.h to Delaunay-triangulate points given as input to the
-        constructor of this class. Here a Conforming triangualtion will be created.
+        constructor of this class and the constraining segments set with setSegmentConstraint(). 
+        Here a conforming triangualtion will be created.
+
+        A conforming Delaunay triangulation (CDT) is a true Delaunay triangulation in which each 
+        constraining segment may have been subdivided into several edges by the insertion of additional 
+        vertices, called Steiner points.
+
+        \param quality  enforce minimal angle (default: 20°) and minimal area (only if explicitely set)
       */
-      void TriangulateConf(bool quality = false, DebugOutputLevel = None);
+      void TriangulateConf(bool quality = false, bool includeCovexHull = false, DebugOutputLevel traceLvl = None);
+
+      void TriangulateConf(bool quality, DebugOutputLevel traceLvl = None); // for backward compatibility! 
+
+      void TriangulateConf(DebugOutputLevel traceLvl) {
+          TriangulateConf(false, false, traceLvl);
+      }
 
       //! Voronoi-tesselate the input points (added  mrkkrj)
       /*!
@@ -164,13 +164,13 @@ namespace tpp {
         Note that a Voronoi diagram can be only created if the underlying triangulation is convex 
         and doesn't have holes!
 
-        \param useConformingDelaunay use conforming Delaunay triangulation as base for the Voronoi diagram
+        \param useConformingDelaunay  use conforming Delaunay triangulation as base for the Voronoi diagram
       */
       void Tesselate(bool useConformingDelaunay = false, DebugOutputLevel traceLvl = None);
 
       //! Set a quality constraint for the triangulation
       /*!
-        \param angle min. resulting angle, if angle <= 0, the constraint will be removed.
+        \param angle  min. resulting angle, if angle <= 0, the constraint will be removed.
       */
       void setMinAngle(float angle) {
          m_minAngle = angle;
@@ -178,7 +178,7 @@ namespace tpp {
 
       //! Set a quality constraint for the triangulation
       /*!
-        \param area max. triangle area, if area <= 0, the constraint will be removed.
+        \param area  max. triangle area, if area <= 0, the constraint will be removed.
       */
       void setMaxArea(float area) {
          m_maxArea = area;
@@ -187,47 +187,54 @@ namespace tpp {
       //! Set the segments to constrain the triangulation
       /*!
         Takes a vector of 2 dimensional points where each consecutive pair of points describes a single segment.
-      Both endpoints of every segment are vertices of the input vector, and a segment may intersect other segments 
-      and vertices only at its endpoints.
+        Both endpoints of every segment are vertices of the input vector, and a segment may intersect other segments 
+        and vertices only at its endpoints.
 
-      \return true if the input is valid, false otherwise 
+        \return true if the input is valid, false otherwise 
       */
       bool setSegmentConstraint(const std::vector<Point>& segments);
 
      //! Set the segments to constrain the triangulation
      /*!
-       Same as above, but usign indexes of the input points!
+       Same as above, but usign indexes of the input points
 
-     \return true if the input is valid, false otherwise
+       \return true if the input is valid, false otherwise
      */
      bool setSegmentConstraint(const std::vector<int>& segmentPointIndexes);
+
+     //! Use convex hull when segments are set to constrain the triangulation
+     /*!
+       Option to generate convex hull using all specified points, the constraining segments are guaranteed 
+       to be included in the triangulation
+     */
+     void useConvexHullWithSegments(bool useConvexHull);
 
      //! Set the holes to constrain the triangulation
      /*!
        Takes a vector of 2 dimensional points where each consecutive pair of points describes a single edge of a hole.
 
-     \return true if the input is valid, false otherwise
+       \return true if the input is valid, false otherwise
      */
      bool setHolesConstraint(const std::vector<Point>& holes);
 
       //! Are the quality constrainst sane?
       /*!
-        \possible true if is highly probable for triangualtion to succeed
-        \return true if triangualtion is guaranteed to succeed
+        \possible  true if is highly probable for triangualtion to succeed
+        \return  true if triangualtion is guaranteed to succeed
       */
       bool checkConstraints(bool& possible) const;
 
       //! Are the quality constrainst sane, take two
       /*!
-        \relaxed report highly probable as correct too, as error otherwise
-        \return true if triangualtion is guaranteed to succeed, or at least higly probable to
+        \relaxed  report highly probable as correct too, as error otherwise
+        \return  true if triangualtion is guaranteed to succeed, or at least higly probable to
       */
       bool checkConstraintsOpt(bool relaxed) const;
 
       //! Get minAngle intervals
       /*!
-        \guaranteed up to this value triangualtion is guaranteed to succeed
-        \possible up to this value it is highly probable for triangualtion to succeed
+        \guaranteed  up to this value triangualtion is guaranteed to succeed
+        \possible  up to this value it is highly probable for triangualtion to succeed
       */
       static void getMinAngleBoundaries(float& guaranteed, float& possible);
 
@@ -235,11 +242,11 @@ namespace tpp {
       /*!
         OPEN TODO::: (use the -u switch!!!!)
       */
-      void setUserConstraint(bool (*f)()) {};
+      void setUserConstraint(bool (*f)()) { /* NYI !!!!! */ };
 
       //! Output a geomview .off file containing the delaunay triangulation
       /*!
-        \param fname output file name.
+        \param fname  output file name.
       */
       void writeoff(std::string& fname);
 
@@ -285,6 +292,21 @@ namespace tpp {
       */
       int nvedges() const;
 
+      //! Number of holes in the triangulation
+      /*!
+        \return Number of Holes
+        Remember to call Triangulate before using this function.
+      */
+      int nholes() const;
+
+      //! Triangulation completed?
+      /*!
+        \return Status of the triangulation
+      */
+      bool hasTriangulation() const
+      {
+          return m_triangulated;
+      }
 
       ///////////////////////////////
       //
@@ -311,19 +333,19 @@ namespace tpp {
          friend bool operator!=(vIterator const&, vIterator const&);
       };
 
-      //! Vertex iterator begin function
       vIterator vbegin() { return vIterator(this); };
-      //! Vertex iterator end function
       vIterator vend();
 
       //! Given an iterator, find its index in the input vector of points.
       int vertexId(vIterator const& vit) const;
 
       //! Given an index, return the actual double Point
-      const Point& point_at_vertex_id(int i) { return m_PList[i]; };
+      const Point& point_at_vertex_id(int i) { return m_pointList[i]; };
 
+#if 0 // NYI!
       //! Return the Point additionally created in quality mesh generation ("q" option)
       Point added_point_at_vertex_id(int i);
+#endif
 
       friend class vIterator;
 
@@ -362,61 +384,58 @@ namespace tpp {
          friend bool operator<(fIterator const&, fIterator const&); // added mrkkrj
       };
 
-      //! Face iterator begin function
       fIterator fbegin() { return fIterator(this); };
-      //! Face iterator end function
       fIterator fend();
+
+#if 0 // NYI!
       int faceId(fIterator const&);
+#endif
 
 
       //! Access the origin (Org) vertex of a face.
       /*!
+        A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
+        c.  These vertices occur in counterclockwise order about the triangle.
+        Remember to call Triangulate before using this function. Do not use it on a null iterator.
+
         \param fit  Face interator.
         \param point  if specified: the cordinates of the vertex
         \return Index of the vertex in m_pList,
                 or -1 if quality option was used and a new vertex was created!
-
-        A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
-        c.  These vertices occur in counterclockwise order about the triangle.
-        Remember to call Triangulate before using this function. Do not use it on a null iterator.
       */
       int Org(fIterator const& fit, Point* point = 0);
 
 
       //! Access the destination (Dest) vertex of a face.
       /*!
+        A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
+        c.  These vertices occur in counterclockwise order about the triangle.
+        Remember to call Triangulate before using this function. Do not use it on a null iterator.
+
         \param fit  Face interator.
         \param point  if specified: the cordinates of the vertex
         \return Index of the vertex in m_pList,
                 or -1 if quality option was used and a new vertex was created!
-
-        A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
-        c.  These vertices occur in counterclockwise order about the triangle.
-        Remember to call Triangulate before using this function. Do not use it on a null iterator.
       */
       int Dest(fIterator const& fit, Point* point = 0);
 
 
       //! Access the apex (Apex) vertex of a face.
       /*!
+        A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
+        c.  These vertices occur in counterclockwise order about the triangle.
+        Remember to call Triangulate before using this function. Do not use it on a null iterator.
+
         \param fit  Face interator.
         \param point  if specified: the cordinates of the vertex
         \return Index of the vertex in m_pList,
                 or -1 if quality option was used and a new vertex was created!
-
-        A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
-        c.  These vertices occur in counterclockwise order about the triangle.
-        Remember to call Triangulate before using this function. Do not use it on a null iterator.
       */
       int Apex(fIterator const& fit, Point* point = 0);
 
 
       //! Access the triangle adjoining edge i
       /*!
-        \param fit  Face Iterator
-        \param i  edge number
-        \return The vertex on the opposite face, or -1 (see Org() above)
-
         A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
             c.  These vertices occur in counterclockwise order about the triangle.
         <ul>
@@ -428,15 +447,16 @@ namespace tpp {
         is returned. A -1 is returned if the edge is part of the convex hull.
         Remember to call Triangulate before using this function.
         Do not use it on a null iterator.
+
+        \param fit  Face Iterator
+        \param i  edge number
+        \return The vertex on the opposite face, or -1 (see Org() above)
       */
       int Sym(fIterator const& fit, char i);
 
 
       //! Access the triangle opposite to current edge of the face
       /*!
-        \param fit  Face iterator
-        \return The iterator of the opposite face
-
         A triangle abc has origin (org) a,destination (dest) b, and apex (apex)
             c.  These vertices occur in counterclockwise order about the triangle.
         The iterator
@@ -444,6 +464,9 @@ namespace tpp {
         is on the convex hull.
             Remember to call Triangulate before using this function.
         Do not use it on a null iterator.
+
+        \param fit  Face iterator
+        \return The iterator of the opposite face
       */
       fIterator Sym(fIterator const& fit);
 
@@ -469,48 +492,48 @@ namespace tpp {
 
       //! Find the next edge (counterclockwise) of a triangle.   
       /*!
-        \param fit  face iterator
-        \return The face iterator corresponding to the next counterclockwise edge of a triangle
-
         Lnext(abc) -> bca.
         Remember to call Triangulate before using this function.
         Do not use it on a null iterator.
+
+        \param fit  face iterator
+        \return The face iterator corresponding to the next counterclockwise edge of a triangle
       */
       fIterator Lnext(fIterator const& fit);
 
 
       //! Find the previous edge (clockwise) of a triangle.   
       /*!
-        \param fit  face iterator
-        \return The face iterator corresponding to the previous clockwise edge of a triangle
-
         Lprev(abc) -> cab.
         Remember to call Triangulate before using this function.
         Do not use it on a null iterator.
+
+        \param fit  face iterator
+        \return The face iterator corresponding to the previous clockwise edge of a triangle
       */
       fIterator Lprev(fIterator const& fit);
 
 
       //! Find the next edge (counterclockwise) of a triangle with the same origin
       /*!
-        \param fit  face iterator
-        \return The face iterator corresponding to the next edge counterclockwise with the same origin.
-
         Onext(abc) -> ac*.
         Remember to call Triangulate before using this function.
         Do not use it on a null iterator.
+
+        \param fit  face iterator
+        \return The face iterator corresponding to the next edge counterclockwise with the same origin.
       */
       fIterator Onext(fIterator const& fit);
 
 
       //! Find the next edge clockwise with the same origin.
       /*!
-        \param fit  face iterator
-        \return The face iterator corresponding to the next edge clockwise with the same origin.
-
         Onext(abc) -> a*b.
         Remember to call Triangulate before using this function.
         Do not use it on a null iterator.
+
+        \param fit  face iterator
+        \return The face iterator corresponding to the next edge clockwise with the same origin.
       */
       fIterator Oprev(fIterator const& fit);
 
@@ -531,13 +554,13 @@ namespace tpp {
 
       //! Calculate incident triangles around a vertex.
       /*!
-      \param vertexid The vertex for which you want incident triangles.
-            \param ivv Returns triangles around a vertex in counterclockwise order.
+        Note that behaviour is undefined if vertexid is greater than
+        number of vertices - 1. Remember to call Triangulate before using this function.
+        All triangles returned have Org(triangle) = vertexid.
+        All triangles returned are in counterclockwise order.
 
-      Note that behaviour is undefined if vertexid is greater than
-      number of vertices - 1. Remember to call Triangulate before using this function.
-      All triangles returned have Org(triangle) = vertexid.
-      All triangles returned are in counterclockwise order.
+        \param vertexid The vertex for which you want incident triangles.
+        \param ivv Returns triangles around a vertex in counterclockwise order.
       */
       void trianglesAroundVertex(int vertexid, std::vector<int>& ivv);
 
@@ -546,7 +569,6 @@ namespace tpp {
       /*!
         \param fit  Face interator.
         \return area of the face associated with the iterator.
-
       */
       double area(fIterator const& fit);
 
@@ -587,9 +609,7 @@ namespace tpp {
          friend bool operator!=(vvIterator const&, vvIterator const&);
       };
 
-      //! Voronoi Points iterator begin function
       vvIterator vvbegin() { return vvIterator(this); };
-      //! Voronoi Points iterator end function
       vvIterator vvend();
 
 
@@ -621,9 +641,7 @@ namespace tpp {
          friend bool operator!=(veIterator const&, veIterator const&);
       };
 
-      //! Voronoi Points iterator begin function
       veIterator vebegin() { return veIterator(this); };
-      //! Voronoi Points iterator end function
       veIterator veend();
 
 
@@ -669,8 +687,6 @@ namespace tpp {
    private:
       void Triangulate(std::string& triswitches);
 
-      void TriangulateConf(std::string& triswitches);
-
       // added mrkkrj - helper functions for face iterator access methods 
       //    HACK:: double* as not to export internal impl.
       void SetPoint(Point& point, double* vertexptr);
@@ -685,12 +701,12 @@ namespace tpp {
       friend class fIterator;
 
    private:
-      std::vector<Point> m_PList;   /*! Stores the input point list. */
+      std::vector<Point> m_pointList;   /*! Stores the input point list. */
       void* m_in;             /*! Used for intput to triangle  */
       void* m_triangleWrap;   /*! Triangle impl. is wrapped in this pointer. */
       void* m_pmesh;          /*! pointer to triangle mesh */
       void* m_pbehavior;
-      bool m_Triangulated;
+      bool m_triangulated;
 
       // added mrkkrj:
       void* m_vorout;          /*! pointer to Voronoi output */
@@ -700,9 +716,11 @@ namespace tpp {
       float m_maxArea;
 
      // added mrkkrj: segment constraints
-     std::vector<int> m_SList;
+     std::vector<int> m_segmentList;
+     bool m_convexHullWithSegments;
+
      // added mrkkrj: holes 
-     std::vector<Point> m_HList;
+     std::vector<Point> m_holesList;
 
    }; // Class Delaunay
 
@@ -710,5 +728,3 @@ namespace tpp {
 
 
 #endif
-
-

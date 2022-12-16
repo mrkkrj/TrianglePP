@@ -9,6 +9,7 @@
 #include <tpp_interface.hpp>
 
 #include <QMessageBox>
+#include <QPixmap>
 
 #include <vector>
 #include <random>
@@ -26,7 +27,7 @@ namespace {
 
    const QColor c_TriangleColor = Qt::blue;
    const QColor c_VoronoiColor = Qt::red;
-   const QColor c_SegmentColor = Qt::green;
+   const QColor c_SegmentColor = "limegreen";
 
 
    // impl. helpers
@@ -68,7 +69,8 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
       maxArea_(-1),
       minPoints_(-1),
       maxPoints_(-1),
-      useConformingDelaunay_(false)
+      useConformingDelaunay_(false),
+      includeConvexHull_(false)
 {
    ui.setupUi(this);
    
@@ -160,7 +162,7 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
 
    if (useConformingDelaunay_)
    {
-      trGenerator.TriangulateConf(trace);
+      trGenerator.TriangulateConf(false, includeConvexHull_, trace);
    }
    else
    {
@@ -393,7 +395,8 @@ void TrianglePPTest::showTrianguationOptions()
          maxArea_ > 0 ? maxArea_ : -1,
          minPoints_ > 0 ? minPoints_ : c_defaultMinPoints,
          maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints,
-         useConformingDelaunay_);
+         useConformingDelaunay_,
+         includeConvexHull_);
 
    float guaranteed = 0, possible = 0;
    Delaunay::getMinAngleBoundaries(guaranteed, possible);
@@ -417,13 +420,28 @@ void TrianglePPTest::showTrianguationOptions()
       }
 
       segmentEndpointIndexes_ = dlg.getSegmentPointIndexes();
+      includeConvexHull_ = dlg.includeConvexHull();
    }
 }
 
 
 void TrianglePPTest::showInfo()
 {
-   QMessageBox::information(this, tr("INFO"), "A Qt-based demo for the TrianglePP library!");
+
+   QMessageBox about;
+
+   about.setText("TrianglePPTest - a Qt-based demo for the TrianglePP library by @mrkkrj");
+   about.setInformativeText("It can create Delaunay triangulations, constrained Delaunay triangulations and Voronoi diagrams.\n\nWARNING: not yet completely correct, more work will be done...");
+   about.setDetailedText("The Triangle++ library (aka TrianglePP) is an updated version of Piyush Kumar's C++/OO wrapper for the original 2005 J.P. Shevchuk's Triangle package that was written in plain old C.\n\n"
+    "For backgroud info on the original implementation see:\n    \"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator\" by J.P. Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps.\n\nThe original Triangle library documentation can be found at: http://www.cs.cmu.edu/~quake/triangle.html."
+    " The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).\n\nAlgorithm used for DCT construction:\n    Shewchuk, J.R., Brown, B.C, \"Fast segment insertion and incremental construction of constrained Delaunay triangulations\", Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006");
+
+   about.setIconPixmap(QPixmap(":/TrianglePPTest/triangle-PP-sm.jpg"));
+
+   about.setStandardButtons(QMessageBox::Ok);
+   about.setDefaultButton(QMessageBox::Ok);   
+   about.show();
+   about.exec();
 }
 
 

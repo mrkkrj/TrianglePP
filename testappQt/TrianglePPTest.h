@@ -62,6 +62,7 @@ private:
     int minPoints_;
     int maxPoints_;
     bool useConformingDelaunay_;
+    bool includeConvexHull_;
 
     QVector<QPoint> voronoiPoints_;
     QVector<int> segmentEndpointIndexes_;

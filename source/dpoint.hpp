@@ -527,7 +527,11 @@ operator>>(std::istream& is,dpoint<NumType,D> &p)
          if(!(is >> p[i])){
              if(!is.eof()){
                 std::cerr << "Error Reading Point:" 
+#ifndef _WIN32
+                      /*<< is*/ << std::endl;   // ---> OPEN TODO::: not compiling with gcc!
+#else
                       << is << std::endl;
+#endif
                 exit(1);
              }
          }

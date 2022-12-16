@@ -35,6 +35,8 @@ int main()
         double x1 = delaunayInput[keypointIdx1][0];
         double y1 = delaunayInput[keypointIdx1][1];
     }
+    
+    std::cout << " Example: 1";
 
     // 2. triangulation with quality constraints
     bool enforceQuality = true;
@@ -76,6 +78,8 @@ int main()
        }
     }
 
+    std::cout << ", 2";
+
     // 3. creation of a Voronoi diagram
     trGenerator.Tesselate();
 
@@ -90,6 +94,8 @@ int main()
        double x1 = point[0];
        double y1 = point[1];
     }
+
+    std::cout << ", 3a";
 
     // ... and Voronoi edges
     for (Delaunay::veIterator fit = trGenerator.vebegin(); fit != trGenerator.veend(); ++fit)
@@ -115,6 +121,8 @@ int main()
           double yend = p2[1];
        }
     }
+
+    std::cout << ", 3b";
 
     // 4. constrained Delaunay
     std::vector<Delaunay::Point> segments;
@@ -143,6 +151,10 @@ int main()
        double x1 = delaunayInput[keypointIdx1][0];
        double y1 = delaunayInput[keypointIdx1][1];
     }
+
+    std::cout << ", 4\n";
+
+    std::cout << " ### all TrianglePP examples finished\n";
 }
 
 // --- eof ---

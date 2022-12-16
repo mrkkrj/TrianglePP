@@ -6767,6 +6767,7 @@ struct behavior *b;
 #endif /* not ANSI_DECLARATORS */
 
 {
+  TRACE(" -> checkmesh");
   struct otri triangleloop;
   struct otri oppotri, oppooppotri;
   vertex triorg, tridest, triapex;
@@ -6866,6 +6867,7 @@ struct behavior *b;
 #endif /* not ANSI_DECLARATORS */
 
 {
+  TRACE(" -> checkdelaunay");
   struct otri triangleloop;
   struct otri oppotri;
   struct osub opposubseg;
@@ -12718,6 +12720,7 @@ struct behavior *b;
 #endif /* not ANSI_DECLARATORS */
 
 {
+  TRACE(" -> infecthull");
   struct otri hulltri;
   struct otri nexttri;
   struct otri starttri;
@@ -12800,6 +12803,7 @@ struct behavior *b;
 #endif /* not ANSI_DECLARATORS */
 
 {
+  TRACE(" -> plague");
   struct otri testtri;
   struct otri neighbor;
   triangle **virusloop;
@@ -13013,6 +13017,7 @@ REAL area;
 #endif /* not ANSI_DECLARATORS */
 
 {
+  TRACE(" -> regionplague");
   struct otri testtri;
   struct otri neighbor;
   triangle **virusloop;
