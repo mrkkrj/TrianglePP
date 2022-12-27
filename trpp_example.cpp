@@ -152,9 +152,7 @@ int main()
        double y1 = delaunayInput[keypointIdx1][1];
     }
 
-    std::cout << ", 4\n";
-
-    std::cout << " ### all TrianglePP examples finished\n";
+    std::cout << ", 4 --> OK! \n";
 }
 
 // --- eof ---
