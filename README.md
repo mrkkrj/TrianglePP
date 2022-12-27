@@ -85,6 +85,5 @@ Algorithm used for DCT construction: "*Fast segment insertion and incremental co
 ## TODOs:
  - Add support for all options in constrained triangulations
  - Port the Qt demo app to Emscripten
- - Move tests to Catch
  - add file export/import to the Qt demo app
 

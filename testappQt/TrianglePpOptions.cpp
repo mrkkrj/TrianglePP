@@ -65,7 +65,7 @@ bool TrianglePpOptions::useConformingDelaunay() const
 
 bool TrianglePpOptions::includeConvexHull() const 
 {
-  return ui.includeConvexHullCheckBox->isChecked();
+  return !ui.removeConcavitiesCheckBox->isChecked();
 }
 
 
@@ -88,7 +88,8 @@ QVector<int> TrianglePpOptions::getSegmentPointIndexes() const
 }
 
 
-void TrianglePpOptions::fillContents(int minAngle, int maxArea, int minPoints, int maxPoints, bool confDelaunay, bool convexHull)
+void TrianglePpOptions::fillContents(
+    int minAngle, int maxArea, int minPoints, int maxPoints, bool confDelaunay, bool convexHull)
 {
    ui.minAngleLineEdit->setText(minAngle >= 0 ? QString::number(minAngle) : "");
    ui.maxAreaLineEdit->setText(maxArea >= 0 ? QString::number(maxArea) : "");
@@ -99,7 +100,7 @@ void TrianglePpOptions::fillContents(int minAngle, int maxArea, int minPoints, i
    ui.constrainedDelaunayCheckBox->setChecked(!confDelaunay);
    enableMinMaxAngle(!confDelaunay);
 
-   ui.includeConvexHullCheckBox->setChecked(convexHull);
+   ui.removeConcavitiesCheckBox->setChecked(!convexHull);
 }
 
 
@@ -206,9 +207,9 @@ void TrianglePpOptions::on_segmentPointsLineEdit_editingFinished()
 }
 
 
-void TrianglePpOptions::on_includeConvexHullCheckBox_clicked(bool checked) 
+void TrianglePpOptions::on_removeConcavitiesCheckBox_clicked(bool checked) 
 {
-   ui.includeConvexHullCheckBox->setChecked(checked);
+   ui.removeConcavitiesCheckBox->setChecked(checked);
 }
 
 
@@ -217,3 +218,4 @@ void TrianglePpOptions::enableMinMaxAngle(bool enable)
    ui.minAngleLineEdit->setEnabled(enable);
    ui.maxAreaLineEdit->setEnabled(enable);
 }
+

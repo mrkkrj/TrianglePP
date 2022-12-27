@@ -14,6 +14,7 @@
 #define DREDUCED
 #define ANSI_DECLARATORS
 #define TRILIBRARY
+#define INCLUDE_FILE_OUTPUT
 //#define CDT_ONLY // no, we want all algorithms!
 
 #ifndef _WIN64
@@ -26,17 +27,16 @@
 #undef CPU86
 #endif
 
-// mrkkrj::: DEBUG trace 
-//    - needed when debugging a GUI app. on Windows without console
-
 //#define TRIANGLE_DBG_TO_FILE 1
 
+// mrkkrj::: DEBUG trace 
+//    - needed when debugging a GUI app. on Windows without console
 #ifdef TRIANGLE_DBG_TO_FILE
 #   include <cstdio>
 
-    FILE* g_debugFile = nullptr;
+FILE* g_debugFile = nullptr;
 
-    // TR string
+// TR string
 #   define TRACE(a) { if(g_debugFile) { fprintf(g_debugFile, "%s\n", a); fflush(g_debugFile); } }
    // TR string + integer 
 #   define TRACE2i(a,b) { if(g_debugFile) { fprintf(g_debugFile, "%s%d\n", a, b); fflush(g_debugFile); } }
@@ -58,9 +58,7 @@
 #endif
 
 #define TRIANGLE_DETAIL_DEBUG 0
-
 // end DEBUG trace (mrkkrj)
-
 
 #include "triangle_impl.hpp"
 #include "tpp_interface.hpp"
@@ -68,6 +66,7 @@
 #include <cassert>
 #include <algorithm>
 // END changed --
+
 
 #include <new>
 
@@ -105,35 +104,9 @@ Delaunay::~Delaunay() {
 */
 void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
 
-    // OPEN TODO::: change!!!!
-
-    // --------------------------->
-
-
-   if (!m_segmentList.empty() && !m_convexHullWithSegments)
-   {
-      // conforming Delaunay (without convex hull)
-      return TriangulateConf(quality, traceLvl);
-   }
-
    std::string options = "nz";  // n: need neighbors, z: index from 0
 
-   if (quality) {
-      options.append("q");
-      if (m_minAngle > 0) {
-         options.append(formatFloatConstraint(m_minAngle));
-      }
-      if (m_maxArea > 0) {
-         options.append("a" + formatFloatConstraint(m_maxArea));
-      }
-   }
-   
-   if (!m_segmentList.empty() && m_convexHullWithSegments)
-   {
-      // conforming Delaunay (with convex hull)
-      options.append("D"); 
-   }
-
+   setQualityOptions(options, quality);
    setDebugLevelOption(options, traceLvl);
 
    Triangulate(options);
@@ -141,51 +114,17 @@ void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
 
 /*!
 */
-void Delaunay::TriangulateConf(bool quality, bool includeCovexHull, DebugOutputLevel traceLvl) {
+void Delaunay::TriangulateConf(bool quality, DebugOutputLevel traceLvl) {
+
    std::string options = "nz";  // n: need neighbors, z: index from 0
 
-   if (quality) {
-       options.append("q");
-       if (m_minAngle > 0) {
-           options.append(formatFloatConstraint(m_minAngle));
-       }
-       if (m_maxArea > 0) {
-           options.append("a" + formatFloatConstraint(m_maxArea));
-       }
-   }
-
+   setQualityOptions(options, quality);
    options.append("D"); // conforming Delaunay!
    setDebugLevelOption(options, traceLvl);
 
-   m_convexHullWithSegments = includeCovexHull; // with/without convex hull? (credits Yejneshwar!)
    Triangulate(options);
 }
 
-
-void Delaunay::TriangulateConf(bool quality, DebugOutputLevel traceLvl) {
-#if 0
-   // --> Yejneshwar commented on 26 Feb
-   //Hi,
-   //    Thank you for this implementation.
-   // 
-   //    could you please add support for the D tag ?
-   // 
-   //    i.e.remove concavities
-   //
-   //    EDIT :
-   //    I have fixed the issue, will be submitting a pull request soon.
-   //
-   //    Support for it existed but internally the "c" tag would still be added which caused the concavities to not be removed.
-   //
-
-   TriangulateConf(options); //created a new function just for the -D tag, because the -c tag doesn't remove concavities with a boundary defined through the segment list.
-#else
-
-    bool includeCovexHull = false; // without convex hull (credits Yejneshwar!)
-
-    TriangulateConf(quality, includeCovexHull, traceLvl);
-#endif
-}
 
 /*!
   Triangulate the points stored in m_pointList.
@@ -232,7 +171,9 @@ void Delaunay::Triangulate(std::string& triswitches) {
        if (m_convexHullWithSegments)
        {
           triswitches.append("c"); // -c Encloses the convex hull with segments - (preserve boudnaries in carveholes())  
-                                       // If you are refining a mesh, this switch works differently; it generates the set of boundary edges of the mesh, including boundaries of holes.(https://www.cs.cmu.edu/~quake/triangle.c.html ) could use only during refine instead?
+                                   // If you are refining a mesh, this switch works differently; it generates the set of
+                                   // boundary edges of the mesh, including boundaries of holes.
+                                   // (https://www.cs.cmu.edu/~quake/triangle.c.html ) could use only during refine instead?
        }
     }
 
@@ -241,7 +182,6 @@ void Delaunay::Triangulate(std::string& triswitches) {
        pin->numberofholes = (int)m_holesList.size();
        pin->holelist = static_cast<double*>((void*)(&m_holesList[0]));
 
-       //triswitches.append("???"); 
        if (m_segmentList.empty())
        {
           triswitches.append("p"); // constrained Delaunay (Planar Straight Line Graph)
@@ -506,7 +446,25 @@ bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes)
 */
 void Delaunay::useConvexHullWithSegments(bool useConvexHull)
 {
-    m_convexHullWithSegments = useConvexHull; 
+#if 0
+    // --> Yejneshwar commented on 26 Feb
+    //Hi,
+    //    Thank you for this implementation.
+    // 
+    //    could you please add support for the D tag ?
+    // 
+    //    i.e.remove concavities
+    //
+    //    EDIT :
+    //    I have fixed the issue, will be submitting a pull request soon.
+    //
+    //    Support for it existed but internally the "c" tag would still be added which caused the concavities to not be removed.
+    //
+
+    TriangulateConf(options); //created a new function just for the -D tag, because the -c tag doesn't remove concavities with a boundary defined through the segment list.
+#endif
+
+    m_convexHullWithSegments = useConvexHull; // with/without convex hull (credits Yejneshwar!)
 }
 
 
@@ -519,17 +477,181 @@ bool Delaunay::setHolesConstraint(const std::vector<Point>& holes)
 
    // OPEN TODO::: check the intersection constraints ...
 
-   // TEST::: make them also points!!
+   // TEST::: make them also points???
    //m_pointList.insert(m_pointList.end(), holes.begin(), holes.end());
 
-   // ??? 
-
    return true;
-
 }
 
 
 /*!
+  added mrkkrj:
+*/
+bool Delaunay::savePoints(const char* filePath)
+{
+
+   // OPEN TODO::: experimental only!!!!!
+
+   if (!m_triangulated) 
+   {
+    struct triangulateio input;
+    triangulateio* pin = (struct triangulateio *)&input;
+    
+    pin->numberofpoints = (int)m_pointList.size();
+    pin->numberofpointattributes = (int)0;
+    pin->pointlist = static_cast<double *>((void *)(&m_pointList[0]));
+    pin->pointattributelist = nullptr;
+    pin->pointmarkerlist = nullptr;
+    pin->numberofsegments = 0;
+    pin->numberofholes = 0;
+    pin->numberofregions = 0;
+    pin->regionlist = nullptr;
+
+
+   if (!m_triangleWrap) 
+   {
+      m_triangleWrap = new Triwrap;
+   }
+
+    m_pmesh = new Triwrap::__pmesh;
+    //*m_pmesh = {};
+    m_pbehavior = new Triwrap::__pbehavior;
+
+    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+
+   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
+   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;  
+
+    // initialize data structs
+
+    pTriangleWrap->triangleinit(tpmesh);
+    tpmesh->steinerleft = tpbehavior->steiner; // added mrkkrj
+
+    pTriangleWrap->transfernodes(
+                tpmesh, tpbehavior, pin->pointlist, 
+                pin->pointattributelist,
+                pin->pointmarkerlist, pin->numberofpoints,
+                pin->numberofpointattributes);
+
+    pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
+   }
+
+
+
+   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+
+   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
+   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;    
+
+
+    
+    pTriangleWrap->writenodes2file(tpmesh, tpbehavior, const_cast<char*>(filePath), 
+                                   0, nullptr); // argc & argv
+
+   // OPEN TODO:::
+   return true;
+}
+
+
+/*!
+  added mrkkrj:
+*/
+bool Delaunay::saveSegments(const char* filePath)
+{
+   // OPEN TODO::: experimental only!!!!!
+
+   if (!m_triangulated) 
+   {
+    struct triangulateio input;
+    triangulateio* pin = (struct triangulateio *)&input;
+    
+    pin->numberofpoints = (int)m_pointList.size();
+    pin->numberofpointattributes = (int)0;
+    pin->pointlist = static_cast<double *>((void *)(&m_pointList[0]));
+    pin->pointattributelist = nullptr;
+    pin->pointmarkerlist = nullptr;
+    pin->numberofsegments = 0;
+    pin->numberofholes = 0;
+    pin->numberofregions = 0;
+    pin->regionlist = nullptr;
+
+
+    if (!m_segmentList.empty()) 
+    {
+       pin->numberofsegments = (int)m_segmentList.size() / 2;
+       pin->segmentlist = m_segmentList.data(); 
+       pin->segmentmarkerlist = nullptr; 
+    }
+
+   if (!m_triangleWrap) 
+   {
+      m_triangleWrap = new Triwrap;
+   }
+
+    m_pmesh = new Triwrap::__pmesh;
+    //*m_pmesh = {};
+    m_pbehavior = new Triwrap::__pbehavior;
+
+    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+
+   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
+   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;  
+
+    // initialize data structs
+
+    pTriangleWrap->triangleinit(tpmesh);
+    tpmesh->steinerleft = tpbehavior->steiner; // added mrkkrj
+
+    pTriangleWrap->transfernodes(
+                tpmesh, tpbehavior, pin->pointlist, 
+                pin->pointattributelist,
+                pin->pointmarkerlist, pin->numberofpoints,
+                pin->numberofpointattributes);
+
+    if (!m_segmentList.empty())
+    {
+        // npt working!
+        tpbehavior->usesegments = 1;
+
+        pTriangleWrap->formskeleton(tpmesh, tpbehavior, pin->segmentlist,
+                                      pin->segmentmarkerlist, pin->numberofsegments);
+    }
+
+    pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
+   }
+   // OPEN TODO::: end...
+
+
+    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+
+    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
+    Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;
+
+    int numberofholes = 0;
+    double* holelist = nullptr;
+
+    if (!m_holesList.empty()) 
+    {
+        numberofholes = (int)m_holesList.size();
+        holelist = static_cast<double*>((void*)(&m_holesList[0]));
+    }
+
+    // OPEN TODO:::: regions support???
+    int numberofregions = 0;
+    double* regionlist = nullptr;
+
+    pTriangleWrap->writepoly2file(tpmesh, tpbehavior, const_cast<char*>(filePath),
+                                  holelist, numberofholes, regionlist, numberofregions,
+                                  0, nullptr); // argc & argv
+
+   // OPEN TODO:::
+   return true;
+}
+
+
+/*!
+    Write the triangulation to an .off file
+     - OFF stands for the Object File Format, a format used by Geometry Center's "Geomview" package. 
 */
 void Delaunay::writeoff(std::string& fname){
     if(!m_triangulated) {
@@ -662,8 +784,31 @@ void Delaunay::setDebugLevelOption(std::string& options, DebugOutputLevel traceL
 /*!
   added mrkkrj:
 */
+void Delaunay::setQualityOptions(std::string& options, bool quality)
+{
+    if (quality) {
+        options.append("q");
+        if (m_minAngle > 0) {
+            options.append(formatFloatConstraint(m_minAngle));
+        }
+        if (m_maxArea > 0) {
+            options.append("a" + formatFloatConstraint(m_maxArea));
+        }
+    }
+}
+
+/*!
+  added mrkkrj:
+*/
 void Delaunay::freeTriangleDataStructs()
 {
+   if (m_in == nullptr && m_vorout == nullptr && 
+       m_triangleWrap == nullptr && m_pmesh == nullptr &&
+       m_pbehavior == nullptr)
+   {
+      return; // already freed!
+   }
+
    struct triangulateio* pin = (struct triangulateio*) m_in;
    struct triangulateio* pvorout = (struct triangulateio*) m_vorout;
 

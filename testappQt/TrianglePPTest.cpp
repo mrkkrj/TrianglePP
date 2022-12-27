@@ -9,6 +9,7 @@
 #include <tpp_interface.hpp>
 
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QPixmap>
 
 #include <vector>
@@ -70,7 +71,7 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
       minPoints_(-1),
       maxPoints_(-1),
       useConformingDelaunay_(false),
-      includeConvexHull_(false)
+      includeConvexHull_(true)
 {
    ui.setupUi(this);
    
@@ -103,14 +104,130 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
    case FromImageMode:
       clearDisplay();
 
+#if 1
+
+#else
       // find characteristic points in the image
 
       // OPEN TODO::: --> image processing, characteristic points
       //Q_ASSERT(false && "FromImageMode ---> NYI!!!");
       QMessageBox::critical(this/*qApp->activeModalWidget()*/, "ERROR", "FromImage mode ---> NYI, sorry !!!");
       // OPEN TODO::: end ---
+#endif
 
       break;
+
+   case Example1Mode:
+       clearDisplay();
+       {
+           // "CDT triangulation" data from trpp_tests.cpp
+
+           struct Point { float x; float y; };
+           std::vector<Point> constrDelaunayInput;
+
+           constrDelaunayInput.push_back(Point{ 0, 0 });
+           constrDelaunayInput.push_back(Point{ 0, 1 });
+           constrDelaunayInput.push_back(Point{ 0, 3 });
+           constrDelaunayInput.push_back(Point{ 2, 0 });
+           constrDelaunayInput.push_back(Point{ 4, 1.25 });
+           constrDelaunayInput.push_back(Point{ 4, 3 });
+           constrDelaunayInput.push_back(Point{ 6, 0 });
+           constrDelaunayInput.push_back(Point{ 8, 1.25 });
+           constrDelaunayInput.push_back(Point{ 9, 0 });
+           constrDelaunayInput.push_back(Point{ 9, 0.75 });
+           constrDelaunayInput.push_back(Point{ 9, 3 });
+
+           for (size_t i = 0; i < constrDelaunayInput.size(); ++i)
+           {
+               auto& pt = constrDelaunayInput[i];
+
+               float offsetX = 20;
+               float offsetY = 20;
+               float scaleFactor = 80;
+
+               ui.drawAreaWidget->drawPoint(
+                   { (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
+           }
+
+           statusBar()->showMessage(QString("Created %1 Example-1 points").arg(constrDelaunayInput.size()));
+       }
+       break;
+
+   case Example2Mode:
+       clearDisplay();
+       {
+           // "Planar Straight Line Graph (PSLG) triangulation" data from trpp_tests.cpp
+
+           struct Point { 
+               float x; float y;  
+               Point(float x_, float y_) : x(x_), y(y_) {}
+           };
+
+           // prepare points: 
+           //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
+           std::vector<Point> pslgDelaunayInput;
+
+           pslgDelaunayInput.push_back(Point(0, 0));
+           pslgDelaunayInput.push_back(Point(1, 0));
+           pslgDelaunayInput.push_back(Point(3, 0));
+           pslgDelaunayInput.push_back(Point(4, 0));
+           pslgDelaunayInput.push_back(Point(1.5, 1));
+           pslgDelaunayInput.push_back(Point(2.5, 1));
+           pslgDelaunayInput.push_back(Point(1.6, 1.5));
+           pslgDelaunayInput.push_back(Point(2.4, 1.5));
+
+           //pslgDelaunayInput.push_back(Point(2, 2));
+           //pslgDelaunayInput.push_back(Point(3, 3));
+           pslgDelaunayInput.push_back(Point(2, 2));
+           pslgDelaunayInput.push_back(Point(1.25, 3));
+           pslgDelaunayInput.push_back(Point(2.75, 3));
+
+
+           // prepare segments 
+           //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
+           std::vector<Point> pslgDelaunaySegments;
+
+           // outer outline
+           pslgDelaunaySegments.push_back(Point(1, 0));
+           pslgDelaunaySegments.push_back(Point(0, 0));
+           pslgDelaunaySegments.push_back(Point(0, 0));
+           pslgDelaunaySegments.push_back(Point(3, 3));
+           pslgDelaunaySegments.push_back(Point(3, 3));
+           pslgDelaunaySegments.push_back(Point(4, 0));
+           pslgDelaunaySegments.push_back(Point(4, 0));
+           pslgDelaunaySegments.push_back(Point(3, 0));
+           pslgDelaunaySegments.push_back(Point(3, 0));
+           pslgDelaunaySegments.push_back(Point(2.5, 1));
+           pslgDelaunaySegments.push_back(Point(2.5, 1));
+           pslgDelaunaySegments.push_back(Point(1.5, 1));
+           pslgDelaunaySegments.push_back(Point(1.5, 1));
+           pslgDelaunaySegments.push_back(Point(1, 0));
+
+           // inner outline
+           pslgDelaunaySegments.push_back(Point(1.6, 1.5));
+           pslgDelaunaySegments.push_back(Point(2, 2));
+           pslgDelaunaySegments.push_back(Point(2, 2));
+           pslgDelaunaySegments.push_back(Point(2.4, 1.5));
+           pslgDelaunaySegments.push_back(Point(2.4, 1.5));
+           pslgDelaunaySegments.push_back(Point(1.6, 1.5));
+
+           for (size_t i = 0; i < pslgDelaunayInput.size(); ++i)
+           {
+               auto& pt = pslgDelaunayInput[i];
+
+               float offsetX = 20;
+               float offsetY = 20;
+               float scaleFactor = 80;
+
+               ui.drawAreaWidget->drawPoint(
+                   { (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
+           }
+
+           statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
+
+           // OPEN TODO::: add segments!!!!!
+       }
+       break;
 
    default:
       Q_ASSERT(false);
@@ -160,9 +277,12 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    auto trace = tpp::None;
 #endif
 
+
+   trGenerator.useConvexHullWithSegments(includeConvexHull_);
+
    if (useConformingDelaunay_)
    {
-      trGenerator.TriangulateConf(false, includeConvexHull_, trace);
+      trGenerator.TriangulateConf(useConstraints_, trace);
    }
    else
    {
@@ -212,6 +332,9 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
    }
 
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+
+   // finished
+   statusBar()->showMessage(QString("Created %1 triangles").arg(trGenerator.ntriangles()));
 }
 
 
@@ -272,6 +395,14 @@ void TrianglePPTest::on_useConstraintsCheckBox_toggled(bool checked)
 void TrianglePPTest::on_optionsToolButton_clicked()
 {
    QMenu ctxtMenu(tr(""), this);
+   
+   QAction action01("Save to File", this);
+   connect(&action01, &QAction::triggered, this, &TrianglePPTest::writeToFile);
+   ctxtMenu.addAction(&action01);
+
+   QAction action02("Read from File", this);
+   connect(&action02, &QAction::triggered, this, &TrianglePPTest::readFromFile);
+   ctxtMenu.addAction(&action02);
 
    QAction action1("Options", this);
    connect(&action1, &QAction::triggered, this, &TrianglePPTest::showTrianguationOptions);
@@ -349,6 +480,12 @@ void TrianglePPTest::setGenerateButtonText()
    case FromImageMode:
       ui.generatePointsPushButton->setText(tr("Find Points"));
       break;
+   case Example1Mode:
+       ui.generatePointsPushButton->setText(tr("Read Points"));
+       break;
+   case Example2Mode:
+       ui.generatePointsPushButton->setText(tr("Read Points"));
+       break;
    default:
       ui.generatePointsPushButton->setText("???");
       Q_ASSERT(false && "unknown draw mode");
@@ -379,7 +516,7 @@ void TrianglePPTest::generateRandomPoints()
    for (int i = 0; i < count; ++i)
    {
       // OPEN TODO:: 
-      //  -- check minimum distance to other points!!!
+      //  -- check minimum distance to other points ????
 
       ui.drawAreaWidget->drawPoint({ udistrWidth(reng), udistrHeight(reng) });
    }     
@@ -584,5 +721,69 @@ void TrianglePPTest::drawHoleMarker(const QPoint& pos)
 
    ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
    ui.drawAreaWidget->drawPoint(pos);
+}
+
+
+void TrianglePPTest::writeToFile()
+{
+    // fill the points
+    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
+    std::vector<Delaunay::Point> delaunayInput;
+
+    for (auto& point : drawnPoints)
+    {
+        if (isHoleMarker(point))
+            continue;
+
+        delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
+
+    }
+
+    Delaunay trGenerator(delaunayInput);
+
+    // write out
+    bool ok = false;
+
+    if (!segmentEndpointIndexes_.empty())
+    {
+#if 1
+       QMessageBox::warning(this, tr("WARNING"), tr("Exporting of segments not yet working!!!"));
+       return;
+#else
+       // TEST::: 
+
+       if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
+       {
+          QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
+          return;
+       }
+
+       QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                       "./Trpp_Segments.poly", tr("Segment File (*.poly)"));
+
+       ok = trGenerator.saveSegments(fileName.toStdString().c_str());
+#endif
+    }
+    else
+    {
+       QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                       "./Trpp_Points.nodes", tr("Vertex File (*.nodes)"));
+
+       ok = trGenerator.savePoints(fileName.toStdString().c_str());
+    }
+
+    if (!ok)
+    {
+       QMessageBox::critical(this, tr("ERROR"), tr("File couldn't be written!"));
+    }   
+}
+
+
+void TrianglePPTest::readFromFile() 
+{
+  QMessageBox::critical(this, "ERROR", "Not yet implemented");
+
+  // OPEN TODO::::
+
 }
 

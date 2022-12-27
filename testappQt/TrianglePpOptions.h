@@ -36,7 +36,7 @@ private slots:
    void on_minAngleLineEdit_textChanged();
    void on_minAngleLineEdit_editingFinished();
    void on_segmentPointsLineEdit_editingFinished();
-   void on_includeConvexHullCheckBox_clicked(bool checked);
+   void on_removeConcavitiesCheckBox_clicked(bool checked);
 
 
 private:

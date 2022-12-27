@@ -14605,6 +14605,155 @@ char **argv;
 
 /*****************************************************************************/
 /*                                                                           */
+/*  writenodes2file()   Number the vertices and write them to a .node file.  */
+/*                                                                           */
+/*   - copy of writenodes(), only name changed, added mrkkrj!!!              */
+/*                                                                           */
+/*****************************************************************************/
+
+#if defined(TRILIBRARY) && defined(INCLUDE_FILE_OUTPUT) 
+#undef TRILIBRARY
+
+#ifdef TRILIBRARY
+
+#ifdef ANSI_DECLARATORS
+void writenodes(struct mesh* m, struct behavior* b, REAL** pointlist,
+    REAL** pointattriblist, int** pointmarkerlist)
+#else /* not ANSI_DECLARATORS */
+void writenodes(m, b, pointlist, pointattriblist, pointmarkerlist)
+struct mesh* m;
+struct behavior* b;
+REAL** pointlist;
+REAL** pointattriblist;
+int** pointmarkerlist;
+#endif /* not ANSI_DECLARATORS */
+
+#else /* not TRILIBRARY */
+
+#ifdef ANSI_DECLARATORS
+void writenodes2file(struct mesh* m, struct behavior* b, char* nodefilename,
+    int argc, char** argv)
+#else /* not ANSI_DECLARATORS */
+void writenodes2file(m, b, nodefilename, argc, argv)
+struct mesh* m;
+struct behavior* b;
+char* nodefilename;
+int argc;
+char** argv;
+#endif /* not ANSI_DECLARATORS */
+
+#endif /* not TRILIBRARY */
+
+{
+#ifdef TRILIBRARY
+    REAL* plist;
+    REAL* palist;
+    int* pmlist;
+    int coordindex;
+    int attribindex;
+#else /* not TRILIBRARY */
+    FILE* outfile;
+#endif /* not TRILIBRARY */
+    vertex vertexloop;
+    long outvertices;
+    int vertexnumber;
+    int i;
+
+    if (b->jettison) {
+        outvertices = m->vertices.items - m->undeads;
+    }
+    else {
+        outvertices = m->vertices.items;
+    }
+
+#ifdef TRILIBRARY
+    if (!b->quiet) {
+        printf("Writing vertices.\n");
+    }
+    /* Allocate memory for output vertices if necessary. */
+    if (*pointlist == (REAL*)NULL) {
+        *pointlist = (REAL*)trimalloc((int)(outvertices * 2 * sizeof(REAL)));
+    }
+    /* Allocate memory for output vertex attributes if necessary. */
+    if ((m->nextras > 0) && (*pointattriblist == (REAL*)NULL)) {
+        *pointattriblist = (REAL*)trimalloc((int)(outvertices * m->nextras *
+            sizeof(REAL)));
+    }
+    /* Allocate memory for output vertex markers if necessary. */
+    if (!b->nobound && (*pointmarkerlist == (int*)NULL)) {
+        *pointmarkerlist = (int*)trimalloc((int)(outvertices * sizeof(int)));
+    }
+    plist = *pointlist;
+    palist = *pointattriblist;
+    pmlist = *pointmarkerlist;
+    coordindex = 0;
+    attribindex = 0;
+#else /* not TRILIBRARY */
+    if (!b->quiet) {
+        printf("Writing %s.\n", nodefilename);
+    }
+    outfile = fopen(nodefilename, "w");
+    if (outfile == (FILE*)NULL) {
+        printf("  Error:  Cannot create file %s.\n", nodefilename);
+        triexit(1);
+    }
+    /* Number of vertices, number of dimensions, number of vertex attributes, */
+    /*   and number of boundary markers (zero or one).                        */
+    fprintf(outfile, "%ld  %d  %d  %d\n", outvertices, m->mesh_dim,
+        m->nextras, 1 - b->nobound);
+#endif /* not TRILIBRARY */
+
+    traversalinit(&m->vertices);
+    vertexnumber = b->firstnumber;
+    vertexloop = vertextraverse(m);
+    while (vertexloop != (vertex)NULL) {
+        if (!b->jettison || (vertextype(vertexloop) != UNDEADVERTEX)) {
+#ifdef TRILIBRARY
+            /* X and y coordinates. */
+            plist[coordindex++] = vertexloop[0];
+            plist[coordindex++] = vertexloop[1];
+            /* Vertex attributes. */
+            for (i = 0; i < m->nextras; i++) {
+                palist[attribindex++] = vertexloop[2 + i];
+            }
+            if (!b->nobound) {
+                /* Copy the boundary marker. */
+                pmlist[vertexnumber - b->firstnumber] = vertexmark(vertexloop);
+            }
+#else /* not TRILIBRARY */
+            /* Vertex number, x and y coordinates. */
+            fprintf(outfile, "%4d    %.17g  %.17g", vertexnumber, vertexloop[0],
+                vertexloop[1]);
+            for (i = 0; i < m->nextras; i++) {
+                /* Write an attribute. */
+                fprintf(outfile, "  %.17g", vertexloop[i + 2]);
+            }
+            if (b->nobound) {
+                fprintf(outfile, "\n");
+            }
+            else {
+                /* Write the boundary marker. */
+                fprintf(outfile, "    %d\n", vertexmark(vertexloop));
+            }
+#endif /* not TRILIBRARY */
+
+            setvertexmark(vertexloop, vertexnumber);
+            vertexnumber++;
+        }
+        vertexloop = vertextraverse(m);
+    }
+
+#ifndef TRILIBRARY
+    finishfile(outfile, argc, argv);
+#endif /* not TRILIBRARY */
+}
+
+#define TRILIBRARY
+#endif /* INCLUDE_FILE_OUTPUT */
+
+
+/*****************************************************************************/
+/*                                                                           */
 /*  numbernodes()   Number the vertices.                                     */
 /*                                                                           */
 /*  Each vertex is assigned a marker equal to its number.                    */
@@ -14923,6 +15072,163 @@ char **argv;
   finishfile(outfile, argc, argv);
 #endif /* not TRILIBRARY */
 }
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*  writepoly2file()   Write the segments and holes to a .poly file.         */
+/*                                                                           */
+/*   - copy of writepoly(), only name changed, added mrkkrj!!!               */
+/*                                                                           */
+/*****************************************************************************/
+
+#if defined(TRILIBRARY) && defined(INCLUDE_FILE_OUTPUT) 
+#undef TRILIBRARY
+
+#ifdef TRILIBRARY
+
+#ifdef ANSI_DECLARATORS
+void writepoly(struct mesh* m, struct behavior* b,
+    int** segmentlist, int** segmentmarkerlist)
+#else /* not ANSI_DECLARATORS */
+void writepoly(m, b, segmentlist, segmentmarkerlist)
+struct mesh* m;
+struct behavior* b;
+int** segmentlist;
+int** segmentmarkerlist;
+#endif /* not ANSI_DECLARATORS */
+
+#else /* not TRILIBRARY */
+
+#ifdef ANSI_DECLARATORS
+void writepoly2file(struct mesh* m, struct behavior* b, char* polyfilename,
+    REAL* holelist, int holes, REAL* regionlist, int regions,
+    int argc, char** argv)
+#else /* not ANSI_DECLARATORS */
+void writepoly2file(m, b, polyfilename, holelist, holes, regionlist, regions,
+    argc, argv)
+    struct mesh* m;
+struct behavior* b;
+char* polyfilename;
+REAL* holelist;
+int holes;
+REAL* regionlist;
+int regions;
+int argc;
+char** argv;
+#endif /* not ANSI_DECLARATORS */
+
+#endif /* not TRILIBRARY */
+
+{
+#ifdef TRILIBRARY
+    int* slist;
+    int* smlist;
+    int index;
+#else /* not TRILIBRARY */
+    FILE* outfile;
+    long holenumber, regionnumber;
+#endif /* not TRILIBRARY */
+    struct osub subsegloop;
+    vertex endpoint1, endpoint2;
+    long subsegnumber;
+
+#ifdef TRILIBRARY
+    if (!b->quiet) {
+        printf("Writing segments.\n");
+    }
+    /* Allocate memory for output segments if necessary. */
+    if (*segmentlist == (int*)NULL) {
+        *segmentlist = (int*)trimalloc((int)(m->subsegs.items * 2 *
+            sizeof(int)));
+    }
+    /* Allocate memory for output segment markers if necessary. */
+    if (!b->nobound && (*segmentmarkerlist == (int*)NULL)) {
+        *segmentmarkerlist = (int*)trimalloc((int)(m->subsegs.items *
+            sizeof(int)));
+    }
+    slist = *segmentlist;
+    smlist = *segmentmarkerlist;
+    index = 0;
+#else /* not TRILIBRARY */
+    if (!b->quiet) {
+        printf("Writing %s.\n", polyfilename);
+    }
+    outfile = fopen(polyfilename, "w");
+    if (outfile == (FILE*)NULL) {
+        printf("  Error:  Cannot create file %s.\n", polyfilename);
+        triexit(1);
+    }
+    /* The zero indicates that the vertices are in a separate .node file. */
+    /*   Followed by number of dimensions, number of vertex attributes,   */
+    /*   and number of boundary markers (zero or one).                    */
+    fprintf(outfile, "%d  %d  %d  %d\n", 0, m->mesh_dim, m->nextras,
+        1 - b->nobound);
+    /* Number of segments, number of boundary markers (zero or one). */
+    fprintf(outfile, "%ld  %d\n", m->subsegs.items, 1 - b->nobound);
+#endif /* not TRILIBRARY */
+
+    traversalinit(&m->subsegs);
+    subsegloop.ss = subsegtraverse(m);
+    subsegloop.ssorient = 0;
+    subsegnumber = b->firstnumber;
+    while (subsegloop.ss != (subseg*)NULL) {
+        sorg(subsegloop, endpoint1);
+        sdest(subsegloop, endpoint2);
+#ifdef TRILIBRARY
+        /* Copy indices of the segment's two endpoints. */
+        slist[index++] = vertexmark(endpoint1);
+        slist[index++] = vertexmark(endpoint2);
+        if (!b->nobound) {
+            /* Copy the boundary marker. */
+            smlist[subsegnumber - b->firstnumber] = mark(subsegloop);
+        }
+#else /* not TRILIBRARY */
+        /* Segment number, indices of its two endpoints, and possibly a marker. */
+        if (b->nobound) {
+            fprintf(outfile, "%4ld    %4d  %4d\n", subsegnumber,
+                vertexmark(endpoint1), vertexmark(endpoint2));
+        }
+        else {
+            fprintf(outfile, "%4ld    %4d  %4d    %4d\n", subsegnumber,
+                vertexmark(endpoint1), vertexmark(endpoint2), mark(subsegloop));
+        }
+#endif /* not TRILIBRARY */
+
+        subsegloop.ss = subsegtraverse(m);
+        subsegnumber++;
+    }
+
+#ifndef TRILIBRARY
+#ifndef CDT_ONLY
+    fprintf(outfile, "%d\n", holes);
+    if (holes > 0) {
+        for (holenumber = 0; holenumber < holes; holenumber++) {
+            /* Hole number, x and y coordinates. */
+            fprintf(outfile, "%4ld   %.17g  %.17g\n", b->firstnumber + holenumber,
+                holelist[2 * holenumber], holelist[2 * holenumber + 1]);
+        }
+    }
+    if (regions > 0) {
+        fprintf(outfile, "%d\n", regions);
+        for (regionnumber = 0; regionnumber < regions; regionnumber++) {
+            /* Region number, x and y coordinates, attribute, maximum area. */
+            fprintf(outfile, "%4ld   %.17g  %.17g  %.17g  %.17g\n",
+                b->firstnumber + regionnumber,
+                regionlist[4 * regionnumber], regionlist[4 * regionnumber + 1],
+                regionlist[4 * regionnumber + 2],
+                regionlist[4 * regionnumber + 3]);
+        }
+    }
+#endif /* not CDT_ONLY */
+
+    finishfile(outfile, argc, argv);
+#endif /* not TRILIBRARY */
+}
+
+#define TRILIBRARY
+#endif /* INCLUDE_FILE_OUTPUT */
+
 
 /*****************************************************************************/
 /*                                                                           */

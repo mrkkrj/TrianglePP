@@ -43,6 +43,8 @@ set(ALL_FILES
     ${Source_Files}
 )
 
+add_subdirectory(Catch2)
+
 ################################################################################
 # Target
 ################################################################################
@@ -73,5 +75,7 @@ endif()
 # Dependencies
 ################################################################################
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
+    Catch2 Catch2WithMain
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
+

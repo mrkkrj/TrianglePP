@@ -46,12 +46,14 @@ private:
    void configDelaunay(tpp::Delaunay& trGenerator);
    bool isHoleMarker(const QPoint& point) const;
    void drawHoleMarker(const QPoint& pos);
+   void writeToFile();
+   void readFromFile();
 
 private:
     Ui::TrianglePPTestClass ui;
 
     enum PointGenerationMode { 
-       ManualMode = 0, AutomaticMode, FromImageMode 
+       ManualMode = 0, AutomaticMode, FromImageMode, Example1Mode, Example2Mode 
     } mode_;
 
     bool useConstraints_;

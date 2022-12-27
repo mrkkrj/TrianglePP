@@ -56,6 +56,7 @@
  17/04/20: mrkkrj – added support Voronoi tesselation <br>
  05/08/22: mrkkrj – added more tests for constrained PSLG triangulations, 
                     included (reworked) Yejneshwar's fix for removal of concavities <br>
+ 17/12/22: mrkkrj – ported to Linux, reworked Yejneshwar's fix again<br>
 
  \todo
  <ol>
@@ -126,7 +127,7 @@ namespace tpp {
 
         If segment constraints were set, this method creates a constrained Delaunay triangulation where 
         each PSLG segment is present as a single edge in the triangulation. Note that some of the resulting 
-        triangles might not be Delaunay!
+        triangles might *not be Delaunay*!
 
         \param quality  enforce minimal angle (default: 20°) and minimal area (only if explicitely set)
       */
@@ -142,18 +143,16 @@ namespace tpp {
         constructor of this class and the constraining segments set with setSegmentConstraint(). 
         Here a conforming triangualtion will be created.
 
-        A conforming Delaunay triangulation (CDT) is a true Delaunay triangulation in which each 
+        A conforming Delaunay triangulation is a *true Delaunay* triangulation in which each 
         constraining segment may have been subdivided into several edges by the insertion of additional 
         vertices, called Steiner points.
 
         \param quality  enforce minimal angle (default: 20°) and minimal area (only if explicitely set)
       */
-      void TriangulateConf(bool quality = false, bool includeCovexHull = false, DebugOutputLevel traceLvl = None);
-
-      void TriangulateConf(bool quality, DebugOutputLevel traceLvl = None); // for backward compatibility! 
+      void TriangulateConf(bool quality = false, DebugOutputLevel traceLvl = None);
 
       void TriangulateConf(DebugOutputLevel traceLvl) {
-          TriangulateConf(false, false, traceLvl);
+          TriangulateConf(false, traceLvl);
       }
 
       //! Voronoi-tesselate the input points (added  mrkkrj)
@@ -684,6 +683,19 @@ namespace tpp {
          }
       };
 
+      ///////////////////////////////
+      //
+      // Write file output 
+      //  (added mrkkrj)
+      //
+      ///////////////////////////////
+      
+      //! Save the vertices to a file. (added mrkkrj)
+      bool savePoints(const char* filePath);
+
+      //! Save the PSLG graph to a file. (added mrkkrj)
+      bool saveSegments(const char* filePath);
+
    private:
       void Triangulate(std::string& triswitches);
 
@@ -695,6 +707,7 @@ namespace tpp {
 
       // added mrkkrj 
       std::string formatFloatConstraint(float f) const;
+      void setQualityOptions(std::string& options, bool quality);
       void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
       void freeTriangleDataStructs();
 
