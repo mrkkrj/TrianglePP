@@ -11,7 +11,15 @@ These are the preliminary test cases for the Triangle++ package.
 ![example-constr-segments.jpg](example_constr_segments.jpg)
 
 
+ - and for constrained Delaunay with holes we add these:
+
+<kbd><img src="./example_constr_segments-wth-holes-input.jpg" alt="example_constr_segments-wth-holes-input" width="520"></kbd>
+
+
+ - ...which then results in following (quality) triangulation:
+
+<kbd><img src="./example_constr_segments-wth-holes-result.jpg" alt="example_constr_segments-wth-holes-result" width="520"></kbd>
+
 ## TODOs:
- - port to Google Tests/Catch & CMake
  - add a more complete test suite
 
