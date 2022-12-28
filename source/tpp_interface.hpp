@@ -79,7 +79,8 @@
 namespace tpp {
 
    // (mrkkrj)
-   enum DebugOutputLevel {
+   enum DebugOutputLevel 
+   {
       None, 
       Info,    // most useful; it gives information on algorithmic progress and much more detailed statistics
       Vertex,  // gives vertex-by-vertex details, and prints so much that Triangle runs much more slowly
@@ -98,12 +99,13 @@ namespace tpp {
              Engineering a 2D Quality Mesh Generator and Delaunay Triangulator" by JR Shewchuk:
              www.cs.cmu.edu/~quake-papers/triangle.ps
    */
-   class Delaunay {
+   class Delaunay 
+   {
    public:
       //! Point Typedef
-      /*! Warning: If you want to use your own point class, you might have to
-          work hard...
-           - mrkkrj: true!!! - spare your time, use an adapter class.
+      /*! Warning: If you want to use your own point class, you might have to work hard...
+      
+           - mrkkrj: true!!! -> spare your time, use an adapter class!
       */
       typedef reviver::dpoint <double, 2> Point;
 

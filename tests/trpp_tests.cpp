@@ -12,13 +12,15 @@
 
 // debug support
 #define DEBUG_OUTPUT_STDOUT false 
+//#define DEBUG_OUTPUT_STDOUT true 
 
 using namespace tpp;
 
 namespace {
 
 #if DEBUG_OUTPUT_STDOUT
-    tpp::DebugOutputLevel dbgOutput = tpp::Debug; // OR - tpp::Info
+    //tpp::DebugOutputLevel dbgOutput = tpp::Debug; // OR - tpp::Info
+    tpp::DebugOutputLevel dbgOutput = tpp::Info; 
 #else
     tpp::DebugOutputLevel dbgOutput = tpp::None;
 #endif
@@ -112,7 +114,7 @@ namespace {
        int triangleCt = trGenerator.ntriangles();
 
        if (dbgOutput != tpp::None)
-          std::cout << " -- " << (descr ? descr : "") << " triangle count: " << triangleCt << "\n";
+          std::cout << " - " << (descr ? descr : "") << " triangle count: " << triangleCt << "\n\n";
 
        REQUIRE(triangleCt == expected);
     }
@@ -258,16 +260,12 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
         REQUIRE(referenceCt == expected);
     }
 
-    //trConstrGenerator.setMinAngle(30.5f);
-    //trConstrGenerator.setMaxArea(5.5f);
-    //REQUIRE(checkConstraints(trConstrGenerator) == true);
-
     SECTION("TEST 4.0: reference triangulation with quality constr.")
     {
         trConstrGenerator.Triangulate(withQuality, dbgOutput);
         referenceQualityCt = trConstrGenerator.ntriangles();
 
-        expected = 11; // checked with GUI!
+        expected = 11; // checked with GUI
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Unconstrained (quality=true)");
     }
 
@@ -299,7 +297,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
     {
         trConstrGenerator.Triangulate(withQuality, dbgOutput);
 
-        expected = 29; // checked with GUI!
+        expected = 29; // checked with GUI
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (quality=true)");
     }
 
@@ -317,12 +315,12 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
        trConstrGenerator.setHolesConstraint(constrDelaunayHoles);
        trConstrGenerator.Triangulate(withQuality, dbgOutput);
        
-       expected = 11; // checked with GUI!
+       expected = 11; // checked with GUI
        checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + holes (quality=true)");
 
        trConstrGenerator.Triangulate(!withQuality, dbgOutput);
 
-       expected = 4; // checked with GUI!
+       expected = 4; // checked with GUI
        checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + holes (quality=true)");
     }
 
@@ -359,16 +357,8 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
     pslgDelaunayInput.push_back(Delaunay::Point(1.6, 1.5));
     pslgDelaunayInput.push_back(Delaunay::Point(2.4, 1.5));
 
-    // TEST:::
-#if 1 // OLD::
     pslgDelaunayInput.push_back(Delaunay::Point(2, 2));    
-    pslgDelaunayInput.push_back(Delaunay::Point(3, 3));
-#else
-    // OPEN TODO::: test with GUI!!!!
-    pslgDelaunayInput.push_back(Delaunay::Point(2, 2));
-    pslgDelaunayInput.push_back(Delaunay::Point(1.25, 3));
-    pslgDelaunayInput.push_back(Delaunay::Point(2.75, 3)); // ??? (3, 3)?
-#endif
+    pslgDelaunayInput.push_back(Delaunay::Point(2, 3));
 
     // prepare segments 
     //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
@@ -378,8 +368,8 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
     pslgDelaunaySegments.push_back(Delaunay::Point(1, 0));
     pslgDelaunaySegments.push_back(Delaunay::Point(0, 0));           
     pslgDelaunaySegments.push_back(Delaunay::Point(0, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(3, 3));
-    pslgDelaunaySegments.push_back(Delaunay::Point(3, 3));
+    pslgDelaunaySegments.push_back(Delaunay::Point(2, 3));
+    pslgDelaunaySegments.push_back(Delaunay::Point(2, 3));
     pslgDelaunaySegments.push_back(Delaunay::Point(4, 0));
     pslgDelaunaySegments.push_back(Delaunay::Point(4, 0));
     pslgDelaunaySegments.push_back(Delaunay::Point(3, 0));
@@ -407,10 +397,15 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
 
     SECTION("TEST 6.1: Planar Straight Line Graph (PSLG) points-only triangluation") 
     {
-       trPlsgGenerator.Triangulate(/*withQuality = false*/ dbgOutput); // ???? OPEN::: can be done?
+       trPlsgGenerator.Triangulate(!withQuality, dbgOutput);
 
-       expected = 12;
-       checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Unconstrained");
+       expected = 13;
+       checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Unconstrained (quality=false)");
+
+       trPlsgGenerator.Triangulate(withQuality, dbgOutput);
+
+       expected = 15;
+       checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Unconstrained (quality=true)");
     }
 
     SECTION("TEST 6.2: PSLG triangluation (quality=true)") 
@@ -419,24 +414,34 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
        REQUIRE(segmentsOK);
        trPlsgGenerator.Triangulate(withQuality, dbgOutput);
 
-       // OPEN TODO:::
-       //expected = 50;
-       expected = 34; // ???????
-
+       expected = 13; // checked with GUI
        checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Constrained (quality=true)");
 
-       // OPEN TODO:: check --> concavities removed?
+       // concavities removed?
+       trPlsgGenerator.useConvexHullWithSegments(true);
+       trPlsgGenerator.Triangulate(withQuality, dbgOutput);
+
+       expected = 15; // checked with GUI
+       checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Constrained + convex hull (quality=true)");
     }
 
     SECTION("TEST 6.3: PSLG triangluation (quality=false)") 
     {
-       trPlsgGenerator.Triangulate(dbgOutput);
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgDelaunaySegments);
+       REQUIRE(segmentsOK);
+       trPlsgGenerator.useConvexHullWithSegments(false);
 
-       // OPEN TODO:::
-       //expected = 35;
-       expected = 12; // ???????
+       trPlsgGenerator.Triangulate(!withQuality, dbgOutput);
 
+       expected = 11; // checked with GUI
        checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Constrained (quality=false)");
+
+       // concavities removed?
+       trPlsgGenerator.useConvexHullWithSegments(true);
+       trPlsgGenerator.Triangulate(!withQuality, dbgOutput);
+
+       expected = 13; // checked with GUI
+       checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Constrained + convex hull (quality=false)");
     }
 }
 

@@ -104,16 +104,12 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
    case FromImageMode:
       clearDisplay();
 
-#if 1
-
-#else
       // find characteristic points in the image
 
       // OPEN TODO::: --> image processing, characteristic points
       //Q_ASSERT(false && "FromImageMode ---> NYI!!!");
       QMessageBox::critical(this/*qApp->activeModalWidget()*/, "ERROR", "FromImage mode ---> NYI, sorry !!!");
       // OPEN TODO::: end ---
-#endif
 
       break;
 
@@ -161,6 +157,7 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
            struct Point { 
                float x; float y;  
                Point(float x_, float y_) : x(x_), y(y_) {}
+               bool operator==(const Point &other) { return x == other.x && y == other.y; }
            };
 
            // prepare points: 
@@ -176,12 +173,22 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
            pslgDelaunayInput.push_back(Point(1.6, 1.5));
            pslgDelaunayInput.push_back(Point(2.4, 1.5));
 
-           //pslgDelaunayInput.push_back(Point(2, 2));
-           //pslgDelaunayInput.push_back(Point(3, 3));
            pslgDelaunayInput.push_back(Point(2, 2));
-           pslgDelaunayInput.push_back(Point(1.25, 3));
-           pslgDelaunayInput.push_back(Point(2.75, 3));
+           pslgDelaunayInput.push_back(Point(2, 3));
 
+           for (size_t i = 0; i < pslgDelaunayInput.size(); ++i)
+           {
+               auto& pt = pslgDelaunayInput[i];
+
+               float offsetX = 20;
+               float offsetY = 20;
+               float scaleFactor = 80;
+
+               ui.drawAreaWidget->drawPoint(
+                   { (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
+           }
+
+           statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
 
            // prepare segments 
            //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
@@ -191,8 +198,8 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
            pslgDelaunaySegments.push_back(Point(1, 0));
            pslgDelaunaySegments.push_back(Point(0, 0));
            pslgDelaunaySegments.push_back(Point(0, 0));
-           pslgDelaunaySegments.push_back(Point(3, 3));
-           pslgDelaunaySegments.push_back(Point(3, 3));
+           pslgDelaunaySegments.push_back(Point(2, 3));
+           pslgDelaunaySegments.push_back(Point(2, 3));
            pslgDelaunaySegments.push_back(Point(4, 0));
            pslgDelaunaySegments.push_back(Point(4, 0));
            pslgDelaunaySegments.push_back(Point(3, 0));
@@ -211,21 +218,16 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
            pslgDelaunaySegments.push_back(Point(2.4, 1.5));
            pslgDelaunaySegments.push_back(Point(1.6, 1.5));
 
-           for (size_t i = 0; i < pslgDelaunayInput.size(); ++i)
+           for (size_t i = 0; i < pslgDelaunaySegments.size(); i += 2) 
            {
-               auto& pt = pslgDelaunayInput[i];
+              auto &pt1 = pslgDelaunaySegments[i];
+              auto &pt2 = pslgDelaunaySegments[i + 1];        
 
-               float offsetX = 20;
-               float offsetY = 20;
-               float scaleFactor = 80;
-
-               ui.drawAreaWidget->drawPoint(
-                   { (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
+              auto idx1 = std::distance(pslgDelaunayInput.begin(), std::find(pslgDelaunayInput.begin(), pslgDelaunayInput.end(), pt1)); 
+              auto idx2 = std::distance(pslgDelaunayInput.begin(), std::find(pslgDelaunayInput.begin(), pslgDelaunayInput.end(), pt2)); 
+                
+              onSegmentEndpointsSelected(idx1, idx2);
            }
-
-           statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
-
-           // OPEN TODO::: add segments!!!!!
        }
        break;
 
