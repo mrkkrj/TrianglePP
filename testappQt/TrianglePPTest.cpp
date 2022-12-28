@@ -56,6 +56,14 @@ namespace {
       return QPoint(x, y);
    }
 
+   struct Point 
+   {
+       float x; float y;
+
+       Point(float x_, float y_) : x(x_), y(y_) {}
+       bool operator==(const Point& other) { return x == other.x && y == other.y; }
+   };
+
 }
 
 
@@ -118,7 +126,8 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
        {
            // "CDT triangulation" data from trpp_tests.cpp
 
-           struct Point { float x; float y; };
+           // prepare points: 
+           //  - see "example constr segments.jpg" for visualisation!
            std::vector<Point> constrDelaunayInput;
 
            constrDelaunayInput.push_back(Point{ 0, 0 });
@@ -146,6 +155,16 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
            }
 
            statusBar()->showMessage(QString("Created %1 Example-1 points").arg(constrDelaunayInput.size()));
+
+           // prepare constrainig segment 
+           //  - see "example constr segments.jpg" for visualisation!
+           Point pt1(0, 1);
+           Point pt2(9, 0.75);
+
+           auto idx1 = std::distance(constrDelaunayInput.begin(), std::find(constrDelaunayInput.begin(), constrDelaunayInput.end(), pt1));
+           auto idx2 = std::distance(constrDelaunayInput.begin(), std::find(constrDelaunayInput.begin(), constrDelaunayInput.end(), pt2));
+
+           onSegmentEndpointsSelected(idx1, idx2);
        }
        break;
 
@@ -153,12 +172,6 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
        clearDisplay();
        {
            // "Planar Straight Line Graph (PSLG) triangulation" data from trpp_tests.cpp
-
-           struct Point { 
-               float x; float y;  
-               Point(float x_, float y_) : x(x_), y(y_) {}
-               bool operator==(const Point &other) { return x == other.x && y == other.y; }
-           };
 
            // prepare points: 
            //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)

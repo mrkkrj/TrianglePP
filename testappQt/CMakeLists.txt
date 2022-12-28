@@ -105,6 +105,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 if(MSVC)
    # quiet warnings related to fopen, sscanf, etc.
    target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+   # add file output as there's no console!
+   target_compile_definitions(${PROJECT_NAME} PRIVATE TRIANGLE_DBG_TO_FILE)
 endif()
 
 ################################################################################
