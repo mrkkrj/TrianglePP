@@ -38,6 +38,8 @@ private slots:
 private:
    void setGenerateButtonText();
    void generateRandomPoints();
+   void showExample1();
+   void showExample2();
    void showTrianguationOptions();
    void showInfo();
    void clearDisplay();
@@ -46,8 +48,18 @@ private:
    void configDelaunay(tpp::Delaunay& trGenerator);
    bool isHoleMarker(const QPoint& point) const;
    void drawHoleMarker(const QPoint& pos);
+
    void writeToFile();
    void readFromFile();
+
+   struct Point   {
+       float x; float y;
+       Point(float x_, float y_) : x(x_), y(y_) {}
+       bool operator==(const Point& other) const { return x == other.x && y == other.y; }
+   };
+
+   void drawPoints(const std::vector<Point>& points, float offsetX = 0, float offsetY = 0, float scaleFactor = 1);
+   void drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points);
 
 private:
     Ui::TrianglePPTestClass ui;

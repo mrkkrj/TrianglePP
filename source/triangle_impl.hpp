@@ -388,14 +388,18 @@ int minus1mod3[3] = {2, 0, 1};
 /*!
   This is a minimal C++ wrapper grouping the Triangle's C functions in a C++ class.
   \author Piyush Kumar
+  \author Marek Krajewski (extensions)
 */
 class Triwrap {
  public:
 
-#ifndef TRILIBRARY
-char *readline();
-char *findfield();
-#endif /* not TRILIBRARY */
+
+// mrkkrj - not needed, code wrapped in a class!
+//#ifndef TRILIBRARY
+//char *readline();
+//char *findfield();
+//#endif /* not TRILIBRARY */
+
 
 /* Labels that signify the result of point location.  The result of a        */
 /*   search indicates that the point falls in the interior of a triangle, on */
@@ -13951,7 +13955,7 @@ struct behavior *b;
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef TRILIBRARY
+#if !defined(TRILIBRARY) || defined(TRIFILES_READ_SUPPORT)
 
 #ifdef ANSI_DECLARATORS
 char *readline(char *string, FILE *infile, char *infilename)
@@ -13995,7 +13999,7 @@ char *infilename;
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef TRILIBRARY
+#if !defined(TRILIBRARY) || defined(TRIFILES_READ_SUPPORT)
 
 #ifdef ANSI_DECLARATORS
 char *findfield(char *string)
@@ -14036,7 +14040,7 @@ char *string;
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef TRILIBRARY
+#if !defined(TRILIBRARY) || defined(TRIFILES_READ_SUPPORT)
 
 #ifdef ANSI_DECLARATORS
 void readnodes(struct mesh *m, struct behavior *b, char *nodefilename,
@@ -14049,7 +14053,6 @@ char *nodefilename;
 char *polyfilename;
 FILE **polyfile;
 #endif /* not ANSI_DECLARATORS */
-
 {
   FILE *infile;
   vertex vertexloop;
@@ -14611,7 +14614,7 @@ char **argv;
 /*                                                                           */
 /*****************************************************************************/
 
-#if defined(TRILIBRARY) && defined(INCLUDE_FILE_OUTPUT) 
+#if defined(TRILIBRARY) && defined(TRIFILES_OUTPUT_SUPPORT) 
 #undef TRILIBRARY
 
 #ifdef TRILIBRARY
@@ -14749,7 +14752,7 @@ char** argv;
 }
 
 #define TRILIBRARY
-#endif /* INCLUDE_FILE_OUTPUT */
+#endif /* TRIFILES_OUTPUT_SUPPORT */
 
 
 /*****************************************************************************/
@@ -15082,7 +15085,7 @@ char **argv;
 /*                                                                           */
 /*****************************************************************************/
 
-#if defined(TRILIBRARY) && defined(INCLUDE_FILE_OUTPUT) 
+#if defined(TRILIBRARY) && defined(TRIFILES_OUTPUT_SUPPORT) 
 #undef TRILIBRARY
 
 #ifdef TRILIBRARY
@@ -15227,7 +15230,7 @@ char** argv;
 }
 
 #define TRILIBRARY
-#endif /* INCLUDE_FILE_OUTPUT */
+#endif /* TRIFILES_OUTPUT_SUPPORT */
 
 
 /*****************************************************************************/

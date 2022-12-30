@@ -56,14 +56,6 @@ namespace {
       return QPoint(x, y);
    }
 
-   struct Point 
-   {
-       float x; float y;
-
-       Point(float x_, float y_) : x(x_), y(y_) {}
-       bool operator==(const Point& other) { return x == other.x && y == other.y; }
-   };
-
 }
 
 
@@ -123,125 +115,12 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
 
    case Example1Mode:
        clearDisplay();
-       {
-           // "CDT triangulation" data from trpp_tests.cpp
-
-           // prepare points: 
-           //  - see "example constr segments.jpg" for visualisation!
-           std::vector<Point> constrDelaunayInput;
-
-           constrDelaunayInput.push_back(Point{ 0, 0 });
-           constrDelaunayInput.push_back(Point{ 0, 1 });
-           constrDelaunayInput.push_back(Point{ 0, 3 });
-           constrDelaunayInput.push_back(Point{ 2, 0 });
-           constrDelaunayInput.push_back(Point{ 4, 1.25 });
-           constrDelaunayInput.push_back(Point{ 4, 3 });
-           constrDelaunayInput.push_back(Point{ 6, 0 });
-           constrDelaunayInput.push_back(Point{ 8, 1.25 });
-           constrDelaunayInput.push_back(Point{ 9, 0 });
-           constrDelaunayInput.push_back(Point{ 9, 0.75 });
-           constrDelaunayInput.push_back(Point{ 9, 3 });
-
-           for (size_t i = 0; i < constrDelaunayInput.size(); ++i)
-           {
-               auto& pt = constrDelaunayInput[i];
-
-               float offsetX = 20;
-               float offsetY = 20;
-               float scaleFactor = 80;
-
-               ui.drawAreaWidget->drawPoint(
-                   { (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
-           }
-
-           statusBar()->showMessage(QString("Created %1 Example-1 points").arg(constrDelaunayInput.size()));
-
-           // prepare constrainig segment 
-           //  - see "example constr segments.jpg" for visualisation!
-           Point pt1(0, 1);
-           Point pt2(9, 0.75);
-
-           auto idx1 = std::distance(constrDelaunayInput.begin(), std::find(constrDelaunayInput.begin(), constrDelaunayInput.end(), pt1));
-           auto idx2 = std::distance(constrDelaunayInput.begin(), std::find(constrDelaunayInput.begin(), constrDelaunayInput.end(), pt2));
-
-           onSegmentEndpointsSelected(idx1, idx2);
-       }
+       showExample1();
        break;
 
    case Example2Mode:
        clearDisplay();
-       {
-           // "Planar Straight Line Graph (PSLG) triangulation" data from trpp_tests.cpp
-
-           // prepare points: 
-           //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
-           std::vector<Point> pslgDelaunayInput;
-
-           pslgDelaunayInput.push_back(Point(0, 0));
-           pslgDelaunayInput.push_back(Point(1, 0));
-           pslgDelaunayInput.push_back(Point(3, 0));
-           pslgDelaunayInput.push_back(Point(4, 0));
-           pslgDelaunayInput.push_back(Point(1.5, 1));
-           pslgDelaunayInput.push_back(Point(2.5, 1));
-           pslgDelaunayInput.push_back(Point(1.6, 1.5));
-           pslgDelaunayInput.push_back(Point(2.4, 1.5));
-
-           pslgDelaunayInput.push_back(Point(2, 2));
-           pslgDelaunayInput.push_back(Point(2, 3));
-
-           for (size_t i = 0; i < pslgDelaunayInput.size(); ++i)
-           {
-               auto& pt = pslgDelaunayInput[i];
-
-               float offsetX = 20;
-               float offsetY = 20;
-               float scaleFactor = 80;
-
-               ui.drawAreaWidget->drawPoint(
-                   { (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
-           }
-
-           statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
-
-           // prepare segments 
-           //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
-           std::vector<Point> pslgDelaunaySegments;
-
-           // outer outline
-           pslgDelaunaySegments.push_back(Point(1, 0));
-           pslgDelaunaySegments.push_back(Point(0, 0));
-           pslgDelaunaySegments.push_back(Point(0, 0));
-           pslgDelaunaySegments.push_back(Point(2, 3));
-           pslgDelaunaySegments.push_back(Point(2, 3));
-           pslgDelaunaySegments.push_back(Point(4, 0));
-           pslgDelaunaySegments.push_back(Point(4, 0));
-           pslgDelaunaySegments.push_back(Point(3, 0));
-           pslgDelaunaySegments.push_back(Point(3, 0));
-           pslgDelaunaySegments.push_back(Point(2.5, 1));
-           pslgDelaunaySegments.push_back(Point(2.5, 1));
-           pslgDelaunaySegments.push_back(Point(1.5, 1));
-           pslgDelaunaySegments.push_back(Point(1.5, 1));
-           pslgDelaunaySegments.push_back(Point(1, 0));
-
-           // inner outline
-           pslgDelaunaySegments.push_back(Point(1.6, 1.5));
-           pslgDelaunaySegments.push_back(Point(2, 2));
-           pslgDelaunaySegments.push_back(Point(2, 2));
-           pslgDelaunaySegments.push_back(Point(2.4, 1.5));
-           pslgDelaunaySegments.push_back(Point(2.4, 1.5));
-           pslgDelaunaySegments.push_back(Point(1.6, 1.5));
-
-           for (size_t i = 0; i < pslgDelaunaySegments.size(); i += 2) 
-           {
-              auto &pt1 = pslgDelaunaySegments[i];
-              auto &pt2 = pslgDelaunaySegments[i + 1];        
-
-              auto idx1 = std::distance(pslgDelaunayInput.begin(), std::find(pslgDelaunayInput.begin(), pslgDelaunayInput.end(), pt1)); 
-              auto idx2 = std::distance(pslgDelaunayInput.begin(), std::find(pslgDelaunayInput.begin(), pslgDelaunayInput.end(), pt2)); 
-                
-              onSegmentEndpointsSelected(idx1, idx2);
-           }
-       }
+       showExample2();
        break;
 
    default:
@@ -496,10 +375,10 @@ void TrianglePPTest::setGenerateButtonText()
       ui.generatePointsPushButton->setText(tr("Find Points"));
       break;
    case Example1Mode:
-       ui.generatePointsPushButton->setText(tr("Read Points"));
+       ui.generatePointsPushButton->setText(tr("Read Example"));
        break;
    case Example2Mode:
-       ui.generatePointsPushButton->setText(tr("Read Points"));
+       ui.generatePointsPushButton->setText(tr("Read Example"));
        break;
    default:
       ui.generatePointsPushButton->setText("???");
@@ -535,6 +414,100 @@ void TrianglePPTest::generateRandomPoints()
 
       ui.drawAreaWidget->drawPoint({ udistrWidth(reng), udistrHeight(reng) });
    }     
+}
+
+
+void TrianglePPTest::showExample1()
+{
+   // "CDT triangulation" data from trpp_tests.cpp
+   //  - see "example constr segments.jpg" for visualisation!
+
+   // draw points: 
+   std::vector<Point> constrDelaunayInput;
+
+   constrDelaunayInput.push_back(Point{ 0, 0 });
+   constrDelaunayInput.push_back(Point{ 0, 1 });
+   constrDelaunayInput.push_back(Point{ 0, 3 });
+   constrDelaunayInput.push_back(Point{ 2, 0 });
+   constrDelaunayInput.push_back(Point{ 4, 1.25 });
+   constrDelaunayInput.push_back(Point{ 4, 3 });
+   constrDelaunayInput.push_back(Point{ 6, 0 });
+   constrDelaunayInput.push_back(Point{ 8, 1.25 });
+   constrDelaunayInput.push_back(Point{ 9, 0 });
+   constrDelaunayInput.push_back(Point{ 9, 0.75 });
+   constrDelaunayInput.push_back(Point{ 9, 3 });
+
+   float offsetX = 20;
+   float offsetY = 20;
+   float scaleFactor = 80;
+
+   drawPoints(constrDelaunayInput, offsetX, offsetY, scaleFactor);
+   statusBar()->showMessage(QString("Created %1 Example-1 points").arg(constrDelaunayInput.size()));
+
+   // draw constrainig segment 
+   std::vector<Point> constrDelaunaySegment;
+
+   constrDelaunaySegment.push_back(Point(0, 1));
+   constrDelaunaySegment.push_back(Point(9, 0.75));
+
+   drawSegments(constrDelaunaySegment, constrDelaunayInput);
+}
+
+
+void TrianglePPTest::showExample2()
+{
+    // "Planar Straight Line Graph (PSLG) triangulation" data from trpp_tests.cpp
+    //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
+
+    // draw points
+    std::vector<Point> pslgDelaunayInput;
+
+    pslgDelaunayInput.push_back(Point(0, 0));
+    pslgDelaunayInput.push_back(Point(1, 0));
+    pslgDelaunayInput.push_back(Point(3, 0));
+    pslgDelaunayInput.push_back(Point(4, 0));
+    pslgDelaunayInput.push_back(Point(1.5, 1));
+    pslgDelaunayInput.push_back(Point(2.5, 1));
+    pslgDelaunayInput.push_back(Point(1.6, 1.5));
+    pslgDelaunayInput.push_back(Point(2.4, 1.5));
+    pslgDelaunayInput.push_back(Point(2, 2));
+    pslgDelaunayInput.push_back(Point(2, 3));
+
+    float offsetX = 20;
+    float offsetY = 20;
+    float scaleFactor = 80;
+
+    drawPoints(pslgDelaunayInput, offsetX, offsetY, scaleFactor);
+    statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
+
+    // draw segments 
+    std::vector<Point> pslgDelaunaySegments;
+
+    // outer outline
+    pslgDelaunaySegments.push_back(Point(1, 0));
+    pslgDelaunaySegments.push_back(Point(0, 0));
+    pslgDelaunaySegments.push_back(Point(0, 0));
+    pslgDelaunaySegments.push_back(Point(2, 3));
+    pslgDelaunaySegments.push_back(Point(2, 3));
+    pslgDelaunaySegments.push_back(Point(4, 0));
+    pslgDelaunaySegments.push_back(Point(4, 0));
+    pslgDelaunaySegments.push_back(Point(3, 0));
+    pslgDelaunaySegments.push_back(Point(3, 0));
+    pslgDelaunaySegments.push_back(Point(2.5, 1));
+    pslgDelaunaySegments.push_back(Point(2.5, 1));
+    pslgDelaunaySegments.push_back(Point(1.5, 1));
+    pslgDelaunaySegments.push_back(Point(1.5, 1));
+    pslgDelaunaySegments.push_back(Point(1, 0));
+
+    // inner outline
+    pslgDelaunaySegments.push_back(Point(1.6, 1.5));
+    pslgDelaunaySegments.push_back(Point(2, 2));
+    pslgDelaunaySegments.push_back(Point(2, 2));
+    pslgDelaunaySegments.push_back(Point(2.4, 1.5));
+    pslgDelaunaySegments.push_back(Point(2.4, 1.5));
+    pslgDelaunaySegments.push_back(Point(1.6, 1.5));
+
+    drawSegments(pslgDelaunaySegments, pslgDelaunayInput);
 }
 
 
@@ -784,7 +757,7 @@ void TrianglePPTest::writeToFile()
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                        "./Trpp_Points.nodes", tr("Vertex File (*.nodes)"));
 
-       ok = trGenerator.savePoints(fileName.toStdString().c_str());
+       ok = trGenerator.savePoints(fileName.toStdString().c_str()); // OPEN TODO::: replace writenodes2file with writenodes!!
     }
 
     if (!ok)
@@ -796,9 +769,63 @@ void TrianglePPTest::writeToFile()
 
 void TrianglePPTest::readFromFile() 
 {
-  QMessageBox::critical(this, "ERROR", "Not yet implemented");
+   //QMessageBox::critical(this, "ERROR", "Not yet implemented");
 
-  // OPEN TODO::::
+   // OPEN TODO::::
 
+   QString fileName = QFileDialog::getOpenFileName(this, tr("Read File"),
+                                                   "./", tr("Vertex File (*.node)")); // OPEN TODO::: .nodes?
+
+    std::vector<Delaunay::Point> points;
+    Delaunay trGenerator(points);
+    
+    bool ok = trGenerator.readPoints(fileName.toStdString().c_str(), points); // OPEN TODO::: change param to std::string   
+    
+    
+    if (!ok)
+    {
+       QMessageBox::critical(this, tr("ERROR"), tr("File couldn't be opened!"));
+    } 
+
+    // TEST:: scalings work for spiral.nodes & box.nodes
+
+    float offsetX = 200; // OPEN TODO::: adapt automatically??!!
+    float offsetY = 200;
+    float scaleFactor = 50;
+
+    for (size_t i = 0; i < points.size(); ++i)
+    {       
+       float x = points[i][0];
+       float y = points[i][1];
+
+       ui.drawAreaWidget->drawPoint({ int(x * scaleFactor + offsetX), int(y * scaleFactor + offsetY) });
+    }
+
+    statusBar()->showMessage(QString("Read %1 points from %2").arg(points.size()).arg(fileName));
+}
+
+
+void TrianglePPTest::drawPoints(const std::vector<Point>& points, float offsetX, float offsetY, float scaleFactor)
+{
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        auto& pt = points[i];
+        ui.drawAreaWidget->drawPoint({ (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
+    }
+}
+
+
+void TrianglePPTest::drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points)
+{
+    for (size_t i = 0; i < segmentEndpoints.size(); i += 2)
+    {
+        auto& pt1 = segmentEndpoints[i];
+        auto& pt2 = segmentEndpoints[i + 1];
+
+        auto idx1 = std::distance(points.begin(), std::find(points.begin(), points.end(), pt1));
+        auto idx2 = std::distance(points.begin(), std::find(points.begin(), points.end(), pt2));
+
+        onSegmentEndpointsSelected(idx1, idx2);
+    }
 }
 

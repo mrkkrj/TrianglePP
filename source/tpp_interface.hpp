@@ -57,6 +57,7 @@
  05/08/22: mrkkrj – added more tests for constrained PSLG triangulations, 
                     included (reworked) Yejneshwar's fix for removal of concavities <br>
  17/12/22: mrkkrj – ported to Linux, reworked Yejneshwar's fix again<br>
+ 30/12/22: mrkkrj – added first file read-write support<br>
 
  \todo
  <ol>
@@ -212,6 +213,7 @@ namespace tpp {
 
      //! Set the holes to constrain the triangulation
      /*!
+        OPEN TODO::: comment not correct????
        Takes a vector of 2 dimensional points where each consecutive pair of points describes a single edge of a hole.
 
        \return true if the input is valid, false otherwise
@@ -687,7 +689,7 @@ namespace tpp {
 
       ///////////////////////////////
       //
-      // Write file output 
+      // Read/Write file output 
       //  (added mrkkrj)
       //
       ///////////////////////////////
@@ -697,6 +699,9 @@ namespace tpp {
 
       //! Save the PSLG graph to a file. (added mrkkrj)
       bool saveSegments(const char* filePath);
+
+      //! Read the vertices from a file. (added mrkkrj)
+      bool readPoints(const char* filePath, std::vector<Delaunay::Point>& points);
 
    private:
       void Triangulate(std::string& triswitches);
