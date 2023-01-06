@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/TrianglePPTest">
+    <qresource prefix="/TrianglePPDemo">
         <file>triangle-PP-ico.png</file>
         <file>triangle-PP-sm.jpg</file>
     </qresource>

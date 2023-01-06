@@ -3,7 +3,7 @@
 // OPEN TODO:: file header
 
 
-#include "TrianglePPTest.h"
+#include "TrianglePPDemoApp.h"
 #include "TrianglePpOptions.h"
 
 #include <tpp_interface.hpp>
@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <random>
+#include <cassert>
 
 
 using namespace tpp;
@@ -61,7 +62,7 @@ namespace {
 
 // public methods
 
-TrianglePPTest::TrianglePPTest(QWidget *parent)
+TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
     : QMainWindow(parent),
       mode_(ManualMode),
       useConstraints_(false),
@@ -81,13 +82,13 @@ TrianglePPTest::TrianglePPTest(QWidget *parent)
    setGenerateButtonText();
 
    // drawing area changes:
-   connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPTest::onTriangulationPointDeleted);
-   connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPTest::onSegmentEndpointsSelected);
-   connect(ui.drawAreaWidget, &DrawingArea::pointChangedToHoleMarker, this, &TrianglePPTest::onPointChangedToHoleMarker);
+   connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
+   connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPDemoApp::onSegmentEndpointsSelected);
+   connect(ui.drawAreaWidget, &DrawingArea::pointChangedToHoleMarker, this, &TrianglePPDemoApp::onPointChangedToHoleMarker);
 }
 
 
-void TrianglePPTest::on_generatePointsPushButton_clicked()
+void TrianglePPDemoApp::on_generatePointsPushButton_clicked()
 {
    switch (mode_)
    {
@@ -113,6 +114,11 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
 
       break;
 
+   case FromFileMode:
+      clearDisplay();
+      readFromFile();
+      break;
+
    case Example1Mode:
        clearDisplay();
        showExample1();
@@ -129,7 +135,7 @@ void TrianglePPTest::on_generatePointsPushButton_clicked()
 }
 
 
-void TrianglePPTest::on_triangualtePointsPushButton_clicked()
+void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
 {
    // remove Voronoi points
    clearVoronoiPoints();
@@ -170,7 +176,6 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
 #else
    auto trace = tpp::None;
 #endif
-
 
    trGenerator.useConvexHullWithSegments(includeConvexHull_);
 
@@ -232,7 +237,7 @@ void TrianglePPTest::on_triangualtePointsPushButton_clicked()
 }
 
 
-void TrianglePPTest::on_tesselatePointsPushButton_clicked()
+void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
 {
    //QMessageBox::critical(this, tr("TODO"), tr("Not yet implemented!"));
 
@@ -265,7 +270,7 @@ void TrianglePPTest::on_tesselatePointsPushButton_clicked()
 }
 
 
-void TrianglePPTest::on_pointModeComboBox_currentIndexChanged(int index)
+void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
 {
    Q_ASSERT(ManualMode == PointGenerationMode(0));
 
@@ -274,7 +279,7 @@ void TrianglePPTest::on_pointModeComboBox_currentIndexChanged(int index)
 }
 
 
-void TrianglePPTest::on_useConstraintsCheckBox_toggled(bool checked)
+void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 {
    useConstraints_ = checked;
 
@@ -286,28 +291,28 @@ void TrianglePPTest::on_useConstraintsCheckBox_toggled(bool checked)
 }
 
 
-void TrianglePPTest::on_optionsToolButton_clicked()
+void TrianglePPDemoApp::on_optionsToolButton_clicked()
 {
    QMenu ctxtMenu(tr(""), this);
    
    QAction action01("Save to File", this);
-   connect(&action01, &QAction::triggered, this, &TrianglePPTest::writeToFile);
+   connect(&action01, &QAction::triggered, this, &TrianglePPDemoApp::writeToFile);
    ctxtMenu.addAction(&action01);
 
    QAction action02("Read from File", this);
-   connect(&action02, &QAction::triggered, this, &TrianglePPTest::readFromFile);
+   connect(&action02, &QAction::triggered, this, &TrianglePPDemoApp::readFromFile);
    ctxtMenu.addAction(&action02);
 
    QAction action1("Options", this);
-   connect(&action1, &QAction::triggered, this, &TrianglePPTest::showTrianguationOptions);
+   connect(&action1, &QAction::triggered, this, &TrianglePPDemoApp::showTrianguationOptions);
    ctxtMenu.addAction(&action1);
 
    QAction action2("Info", this);
-   connect(&action2, &QAction::triggered, this, &TrianglePPTest::showInfo);
+   connect(&action2, &QAction::triggered, this, &TrianglePPDemoApp::showInfo);
    ctxtMenu.addAction(&action2);
    
    QAction action3("Close", this);
-   connect(&action3, &QAction::triggered, this, &TrianglePPTest::close);
+   connect(&action3, &QAction::triggered, this, &TrianglePPDemoApp::close);
    ctxtMenu.addAction(&action3);
 
    ctxtMenu.exec(mapToGlobal(ui.optionsToolButton->geometry().bottomLeft()));
@@ -316,7 +321,7 @@ void TrianglePPTest::on_optionsToolButton_clicked()
 
 // private methods
 
-void TrianglePPTest::onTriangulationPointDeleted(const QPoint& pos)
+void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
 {
    if (holePoints_.contains(pos))
    {
@@ -335,7 +340,7 @@ void TrianglePPTest::onTriangulationPointDeleted(const QPoint& pos)
 }
 
 
-void TrianglePPTest::onSegmentEndpointsSelected(int startPointIdx, int endPointIdx)
+void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPointIdx)
 {
    ui.drawAreaWidget->setDrawColor(c_SegmentColor);
 
@@ -351,7 +356,7 @@ void TrianglePPTest::onSegmentEndpointsSelected(int startPointIdx, int endPointI
 }
 
 
-void TrianglePPTest::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
+void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 {
    drawHoleMarker(pos);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
@@ -361,7 +366,7 @@ void TrianglePPTest::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 }
 
 
-void TrianglePPTest::setGenerateButtonText()
+void TrianglePPDemoApp::setGenerateButtonText()
 {
    switch (mode_)
    {
@@ -373,6 +378,9 @@ void TrianglePPTest::setGenerateButtonText()
       break;      
    case FromImageMode:
       ui.generatePointsPushButton->setText(tr("Find Points"));
+      break;      
+   case FromFileMode:
+      ui.generatePointsPushButton->setText(tr("Open File"));
       break;
    case Example1Mode:
        ui.generatePointsPushButton->setText(tr("Read Example"));
@@ -387,7 +395,7 @@ void TrianglePPTest::setGenerateButtonText()
 }
 
 
-void TrianglePPTest::generateRandomPoints()
+void TrianglePPDemoApp::generateRandomPoints()
 {
    std::random_device r;
    std::default_random_engine reng(r());
@@ -417,7 +425,7 @@ void TrianglePPTest::generateRandomPoints()
 }
 
 
-void TrianglePPTest::showExample1()
+void TrianglePPDemoApp::showExample1()
 {
    // "CDT triangulation" data from trpp_tests.cpp
    //  - see "example constr segments.jpg" for visualisation!
@@ -454,7 +462,7 @@ void TrianglePPTest::showExample1()
 }
 
 
-void TrianglePPTest::showExample2()
+void TrianglePPDemoApp::showExample2()
 {
     // "Planar Straight Line Graph (PSLG) triangulation" data from trpp_tests.cpp
     //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
@@ -511,7 +519,7 @@ void TrianglePPTest::showExample2()
 }
 
 
-void TrianglePPTest::showTrianguationOptions()
+void TrianglePPDemoApp::showTrianguationOptions()
 {
    TrianglePpOptions dlg(this);
 
@@ -550,18 +558,34 @@ void TrianglePPTest::showTrianguationOptions()
 }
 
 
-void TrianglePPTest::showInfo()
+void TrianglePPDemoApp::showInfo()
 {
-
    QMessageBox about;
 
-   about.setText("TrianglePPTest - a Qt-based demo for the TrianglePP library by @mrkkrj");
-   about.setInformativeText("It can create Delaunay triangulations, constrained Delaunay triangulations and Voronoi diagrams.\n\nWARNING: not yet completely correct, more work will be done...");
-   about.setDetailedText("The Triangle++ library (aka TrianglePP) is an updated version of Piyush Kumar's C++/OO wrapper for the original 2005 J.P. Shevchuk's Triangle package that was written in plain old C.\n\n"
-    "For backgroud info on the original implementation see:\n    \"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator\" by J.P. Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps.\n\nThe original Triangle library documentation can be found at: http://www.cs.cmu.edu/~quake/triangle.html."
-    " The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).\n\nAlgorithm used for DCT construction:\n    Shewchuk, J.R., Brown, B.C, \"Fast segment insertion and incremental construction of constrained Delaunay triangulations\", Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006");
+   about.setText("TrianglePPDemoApp is a Qt-based demo for the TrianglePP library by @mrkkrj.");
+   about.setInformativeText(
+               "It can create:\n"
+               " - Delaunay triangulations\n"
+               " - quality Delaunay triangulations\n"
+               " - constrained Delaunay triangulations\n"
+               " - Voronoi tesselations"
+               "\n\nWARNING: not yet completely correct, more work will be done...");
 
-   about.setIconPixmap(QPixmap(":/TrianglePPTest/triangle-PP-sm.jpg"));
+   about.setDetailedText(
+               "The Triangle++ library (aka TrianglePP) is an updated version of Piyush Kumar's C++/OO wrapper "
+               "for the original 2005 J.P. Shevchuk's Triangle package, which was a **winner**"
+               " of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).\n\n"
+               " - The wrapped Triangle library was written in plain old C, its documentation can be found at:\n"
+               "    http://www.cs.cmu.edu/~quake/triangle.html.\n\n"
+               " - For backgroud info on the original implementation see:\n"
+               "    \"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator\" by J.P. Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps.\n\n"
+               " - Algorithm used for DCT construction:\n"
+               "    Shewchuk, J.R., Brown, B.C, \"Fast segment insertion and incremental construction of constrained Delaunay triangulations\", Computational Geometry,"
+               " Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006");
+
+   about.setIconPixmap(QPixmap(":/TrianglePPDemo/triangle-PP-sm.jpg"));
+   about.setWindowIcon(QIcon(":/TrianglePPDemo/triangle-PP-ico.jpg"));
+   about.setWindowTitle("About Triangle++ Demo");
 
    about.setStandardButtons(QMessageBox::Ok);
    about.setDefaultButton(QMessageBox::Ok);   
@@ -570,7 +594,7 @@ void TrianglePPTest::showInfo()
 }
 
 
-void TrianglePPTest::clearDisplay()
+void TrianglePPDemoApp::clearDisplay()
 {
    ui.drawAreaWidget->clearImage();
    statusBar()->showMessage("");
@@ -584,7 +608,7 @@ void TrianglePPTest::clearDisplay()
 }
 
 
-void TrianglePPTest::clearVoronoiPoints()
+void TrianglePPDemoApp::clearVoronoiPoints()
 {
    // do not need to re-triangulate here!
    const QSignalBlocker blocker(ui.drawAreaWidget);
@@ -598,7 +622,7 @@ void TrianglePPTest::clearVoronoiPoints()
 }
 
 
-void TrianglePPTest::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
+void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
 {
    // draw Voronoi points
    ui.drawAreaWidget->setDrawColor(c_VoronoiColor);
@@ -661,7 +685,7 @@ void TrianglePPTest::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
 }
 
 
-void TrianglePPTest::configDelaunay(tpp::Delaunay& trGenerator)
+void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
 {
    if (useConstraints_)
    {
@@ -695,13 +719,13 @@ void TrianglePPTest::configDelaunay(tpp::Delaunay& trGenerator)
 }
 
 
-bool TrianglePPTest::isHoleMarker(const QPoint& point) const
+bool TrianglePPDemoApp::isHoleMarker(const QPoint& point) const
 {
    return holePoints_.contains(point);
 }
 
 
-void TrianglePPTest::drawHoleMarker(const QPoint& pos)
+void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos)
 {
    ui.drawAreaWidget->setDrawColor(c_SegmentColor);
    QFont f;
@@ -712,7 +736,7 @@ void TrianglePPTest::drawHoleMarker(const QPoint& pos)
 }
 
 
-void TrianglePPTest::writeToFile()
+void TrianglePPDemoApp::writeToFile()
 {
     // fill the points
     auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
@@ -749,7 +773,7 @@ void TrianglePPTest::writeToFile()
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                        "./Trpp_Segments.poly", tr("Segment File (*.poly)"));
 
-       ok = trGenerator.saveSegments(fileName.toStdString().c_str());
+       ok = trGenerator.saveSegments(fileName.toStdString());
 #endif
     }
     else
@@ -757,7 +781,7 @@ void TrianglePPTest::writeToFile()
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                        "./Trpp_Points.nodes", tr("Vertex File (*.nodes)"));
 
-       ok = trGenerator.savePoints(fileName.toStdString().c_str()); // OPEN TODO::: replace writenodes2file with writenodes!!
+       ok = trGenerator.savePoints(fileName.toStdString());
     }
 
     if (!ok)
@@ -767,36 +791,33 @@ void TrianglePPTest::writeToFile()
 }
 
 
-void TrianglePPTest::readFromFile() 
+void TrianglePPDemoApp::readFromFile()
 {
-   //QMessageBox::critical(this, "ERROR", "Not yet implemented");
-
-   // OPEN TODO::::
-
    QString fileName = QFileDialog::getOpenFileName(this, tr("Read File"),
                                                    "./", tr("Vertex File (*.node)")); // OPEN TODO::: .nodes?
 
     std::vector<Delaunay::Point> points;
     Delaunay trGenerator(points);
     
-    bool ok = trGenerator.readPoints(fileName.toStdString().c_str(), points); // OPEN TODO::: change param to std::string   
-    
+    bool ok = trGenerator.readPoints(fileName.toStdString(), points);
     
     if (!ok)
     {
        QMessageBox::critical(this, tr("ERROR"), tr("File couldn't be opened!"));
     } 
 
-    // TEST:: scalings work for spiral.nodes & box.nodes
+    // TEST:: scalings work for spiral.nodes & box.nodes!!!!
 
-    float offsetX = 200; // OPEN TODO::: adapt automatically??!!
-    float offsetY = 200;
-    float scaleFactor = 50;
+    // OPEN TODO::: add automatic scaling ???
+
+    double offsetX = 200;
+    double offsetY = 200;
+    double scaleFactor = 50;
 
     for (size_t i = 0; i < points.size(); ++i)
     {       
-       float x = points[i][0];
-       float y = points[i][1];
+       double x = points[i][0];
+       double y = points[i][1];
 
        ui.drawAreaWidget->drawPoint({ int(x * scaleFactor + offsetX), int(y * scaleFactor + offsetY) });
     }
@@ -805,7 +826,7 @@ void TrianglePPTest::readFromFile()
 }
 
 
-void TrianglePPTest::drawPoints(const std::vector<Point>& points, float offsetX, float offsetY, float scaleFactor)
+void TrianglePPDemoApp::drawPoints(const std::vector<Point>& points, float offsetX, float offsetY, float scaleFactor)
 {
     for (size_t i = 0; i < points.size(); ++i)
     {
@@ -815,7 +836,7 @@ void TrianglePPTest::drawPoints(const std::vector<Point>& points, float offsetX,
 }
 
 
-void TrianglePPTest::drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points)
+void TrianglePPDemoApp::drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points)
 {
     for (size_t i = 0; i < segmentEndpoints.size(); i += 2)
     {

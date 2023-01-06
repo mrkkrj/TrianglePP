@@ -41,8 +41,10 @@ namespace {
         else
         {
             // point from original data
-            x = triPoints[keypointIdx][0];
-            y = triPoints[keypointIdx][1];
+            assert(keypointIdx >= 0);
+
+            x = triPoints[static_cast<unsigned>(keypointIdx)][0];
+            y = triPoints[static_cast<unsigned>(keypointIdx)][1];
         }
     }
         
@@ -134,10 +136,54 @@ namespace {
         return true;
     };
 
+
+    // test data:
+    //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
+
+    void preparePLSGTestData(std::vector<Delaunay::Point>& pslgPoints, std::vector<Delaunay::Point>& pslgSegments)
+    {
+        // prepare points
+        pslgPoints.push_back(Delaunay::Point(0, 0));
+        pslgPoints.push_back(Delaunay::Point(1, 0));
+        pslgPoints.push_back(Delaunay::Point(3, 0));
+        pslgPoints.push_back(Delaunay::Point(4, 0));
+        pslgPoints.push_back(Delaunay::Point(1.5, 1));
+        pslgPoints.push_back(Delaunay::Point(2.5, 1));
+        pslgPoints.push_back(Delaunay::Point(1.6, 1.5));
+        pslgPoints.push_back(Delaunay::Point(2.4, 1.5));
+
+        pslgPoints.push_back(Delaunay::Point(2, 2));
+        pslgPoints.push_back(Delaunay::Point(2, 3));
+
+        // prepare segments
+        //  - outer outline
+        pslgSegments.push_back(Delaunay::Point(1, 0));
+        pslgSegments.push_back(Delaunay::Point(0, 0));
+        pslgSegments.push_back(Delaunay::Point(0, 0));
+        pslgSegments.push_back(Delaunay::Point(2, 3));
+        pslgSegments.push_back(Delaunay::Point(2, 3));
+        pslgSegments.push_back(Delaunay::Point(4, 0));
+        pslgSegments.push_back(Delaunay::Point(4, 0));
+        pslgSegments.push_back(Delaunay::Point(3, 0));
+        pslgSegments.push_back(Delaunay::Point(3, 0));
+        pslgSegments.push_back(Delaunay::Point(2.5, 1));
+        pslgSegments.push_back(Delaunay::Point(2.5, 1));
+        pslgSegments.push_back(Delaunay::Point(1.5, 1));
+        pslgSegments.push_back(Delaunay::Point(1.5, 1));
+        pslgSegments.push_back(Delaunay::Point(1, 0));
+
+        // - inner outline
+        pslgSegments.push_back(Delaunay::Point(1.6, 1.5));
+        pslgSegments.push_back(Delaunay::Point(2, 2));
+        pslgSegments.push_back(Delaunay::Point(2, 2));
+        pslgSegments.push_back(Delaunay::Point(2.4, 1.5));
+        pslgSegments.push_back(Delaunay::Point(2.4, 1.5));
+        pslgSegments.push_back(Delaunay::Point(1.6, 1.5));
+    }
 }
 
 
-// tests
+// test cases
 
 TEST_CASE("unconstrained triangulation", "[trpp]")
 {
@@ -344,49 +390,11 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
 
 TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
 {
-    // prepare points: 
-    //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
+    // prepare points & segments of a PSLG (simplified letter "A")
     std::vector<Delaunay::Point> pslgDelaunayInput;
-
-    pslgDelaunayInput.push_back(Delaunay::Point(0, 0));
-    pslgDelaunayInput.push_back(Delaunay::Point(1, 0));
-    pslgDelaunayInput.push_back(Delaunay::Point(3, 0));
-    pslgDelaunayInput.push_back(Delaunay::Point(4, 0));
-    pslgDelaunayInput.push_back(Delaunay::Point(1.5, 1));
-    pslgDelaunayInput.push_back(Delaunay::Point(2.5, 1));
-    pslgDelaunayInput.push_back(Delaunay::Point(1.6, 1.5));
-    pslgDelaunayInput.push_back(Delaunay::Point(2.4, 1.5));
-
-    pslgDelaunayInput.push_back(Delaunay::Point(2, 2));    
-    pslgDelaunayInput.push_back(Delaunay::Point(2, 3));
-
-    // prepare segments 
-    //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
     std::vector<Delaunay::Point> pslgDelaunaySegments;
 
-    // outer outline
-    pslgDelaunaySegments.push_back(Delaunay::Point(1, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(0, 0));           
-    pslgDelaunaySegments.push_back(Delaunay::Point(0, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2, 3));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2, 3));
-    pslgDelaunaySegments.push_back(Delaunay::Point(4, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(4, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(3, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(3, 0));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2.5, 1));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2.5, 1));
-    pslgDelaunaySegments.push_back(Delaunay::Point(1.5, 1));
-    pslgDelaunaySegments.push_back(Delaunay::Point(1.5, 1));
-    pslgDelaunaySegments.push_back(Delaunay::Point(1, 0));
-
-    // inner outline
-    pslgDelaunaySegments.push_back(Delaunay::Point(1.6, 1.5));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2, 2));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2, 2));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2.4, 1.5));
-    pslgDelaunaySegments.push_back(Delaunay::Point(2.4, 1.5));
-    pslgDelaunaySegments.push_back(Delaunay::Point(1.6, 1.5));
+    preparePLSGTestData(pslgDelaunayInput, pslgDelaunaySegments);
 
     // 6. Planar Straight Line Graph (PSLG) triangulations
 
@@ -444,5 +452,73 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
        checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Constrained + convex hull (quality=false)");
     }
 }
+
+
+TEST_CASE("Reading and writing files", "[trpp]")
+{
+    Delaunay trReader;
+    bool ioResult;
+
+    // 7. reading files
+
+    SECTION("TEST 7.1: reading a .node file")
+    {
+        std::vector<Delaunay::Point> points;
+
+        ioResult = trReader.readPoints("../exampleFiles/spiral.node", points);
+
+        REQUIRE(ioResult == true);
+        REQUIRE(points.size() == 15); // look inside the file
+    }
+
+    SECTION("TEST 7.2: reading a .poly file")
+    {
+        std::vector<Delaunay::Point> segments;
+
+        ioResult = trReader.readSegments("../exampleFiles/spiral.node", segments);
+
+        REQUIRE(ioResult == true);
+        REQUIRE(segments.size() == 22); // look inside the file
+    }
+
+    // 8. writing files
+
+    std::vector<Delaunay::Point> pslgDelaunayInput;
+    std::vector<Delaunay::Point> pslgDelaunaySegments;
+
+    preparePLSGTestData(pslgDelaunayInput, pslgDelaunaySegments);
+
+    Delaunay trWriter(pslgDelaunayInput);
+
+    SECTION("TEST 8.1: writing a .node file")
+    {
+        ioResult = trWriter.savePoints("./test.node");
+        REQUIRE(ioResult == true);
+
+        // read it back
+        std::vector<Delaunay::Point> points;
+        ioResult = trReader.readPoints("./test.node", points);
+
+        REQUIRE(ioResult == true);
+        REQUIRE(points.size() == pslgDelaunayInput.size());
+    }
+
+    SECTION("TEST 8.2: writing a .poly file")
+    {
+        bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
+        REQUIRE(segmentsOK);
+
+        ioResult = trWriter.saveSegments("./test.poly");
+        REQUIRE(ioResult == true);
+
+        // read it back
+        std::vector<Delaunay::Point> segments;
+        ioResult = trReader.readSegments("./test.poly", segments);
+
+        REQUIRE(ioResult == true);
+        REQUIRE(segments.size() == pslgDelaunaySegments.size());
+    }
+}
+
 
 // --- eof ---

@@ -530,7 +530,11 @@ operator>>(std::istream& is,dpoint<NumType,D> &p)
 #ifndef _WIN32
                       /*<< is*/ << std::endl;   // ---> OPEN TODO::: not compiling with gcc!
 #else
-                      << is << std::endl;
+
+                    // OPEN TODO::::
+                      // << is << std::endl; <-- Microsoft OK!
+
+                      << static_cast<bool>(is) << std::endl; // <-- MinGW!
 #endif
                 exit(1);
              }

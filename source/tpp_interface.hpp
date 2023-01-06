@@ -5,13 +5,11 @@
     Use this class to produce Delaunay triangulations.
 
     The following description pertains to the original version, the current version
-    was ported to VisualStudio. Thus it doesn't need Python scripts, and is supposed
-    to be used *as it is* in your program!
+    was ported to VisualStudio and CMake by mrkkrj.
  */
 
  /*! \mainpage Triangle++
- 
- \section intro Introduction
+  \section intro Introduction
  <table border="0">
  <tr><td>
  If you do not know, what a Delaunay triangulation is, you can read more about it
@@ -43,11 +41,13 @@
      </ul>
 
  \section changelog Change Log
+
  11/03/06: Fixed the compilation system. <br>
  10/25/06: Wrapped in tpp namespace for usage with other libraries with similar names.
            Added some more documentation/small changes. Used doxygen 1.5.0 and dot. Tested compilation with
            icc 9.0/9.1, gcc-4.1/3.4.6. <br>
  10/21/06: Replaced vertexsort with C++ sort.<br>
+
  08/24/11: mrkkrj - Ported to VisualStudio, added comp. operators, reformatted and added some comments<br>
  10/15/11: mrkkrj - added support for the "quality triangulation" option, added some debug support<br>
  11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney() <br>
@@ -66,7 +66,7 @@
  </ol>
  */
 
- //-----------------------------------------------------------
+//-----------------------------------------------------------
 
 #ifndef TRPP_INTERFACE
 #define TRPP_INTERFACE
@@ -115,7 +115,7 @@ namespace tpp {
         Takes a vector of 2 dimensional points where each of the coordinates is
         expressed as double.
       */
-      Delaunay(const std::vector<Point>& points);
+      Delaunay(const std::vector<Point>& points = std::vector<Point>());
 
       //! The main destructor.
       /*!
@@ -188,9 +188,11 @@ namespace tpp {
 
       //! Set the segments to constrain the triangulation
       /*!
-        Takes a vector of 2 dimensional points where each consecutive pair of points describes a single segment.
-        Both endpoints of every segment are vertices of the input vector, and a segment may intersect other segments 
-        and vertices only at its endpoints.
+        Takes a vector of 2 dimensional points where each consecutive pair of points describes
+        a single segment.
+
+        Both endpoints of every segment are vertices of the input vector, and a segment may
+        intersect other segments and vertices only at its endpoints.
 
         \return true if the input is valid, false otherwise 
       */
@@ -245,7 +247,7 @@ namespace tpp {
       /*!
         OPEN TODO::: (use the -u switch!!!!)
       */
-      void setUserConstraint(bool (*f)()) { /* NYI !!!!! */ };
+      void setUserConstraint(bool (*f)()) { /* NYI !!!!! */ }
 
       //! Output a geomview .off file containing the delaunay triangulation
       /*!
@@ -612,7 +614,7 @@ namespace tpp {
          friend bool operator!=(vvIterator const&, vvIterator const&);
       };
 
-      vvIterator vvbegin() { return vvIterator(this); };
+      vvIterator vvbegin() { return vvIterator(this); }
       vvIterator vvend();
 
 
@@ -644,7 +646,7 @@ namespace tpp {
          friend bool operator!=(veIterator const&, veIterator const&);
       };
 
-      veIterator vebegin() { return veIterator(this); };
+      veIterator vebegin() { return veIterator(this); }
       veIterator veend();
 
 
@@ -695,13 +697,16 @@ namespace tpp {
       ///////////////////////////////
       
       //! Save the vertices to a file. (added mrkkrj)
-      bool savePoints(const char* filePath);
+      bool savePoints(const std::string& filePath);
 
       //! Save the PSLG graph to a file. (added mrkkrj)
-      bool saveSegments(const char* filePath);
+      bool saveSegments(const std::string& filePath);
 
       //! Read the vertices from a file. (added mrkkrj)
-      bool readPoints(const char* filePath, std::vector<Delaunay::Point>& points);
+      bool readPoints(const std::string& filePath, std::vector<Delaunay::Point>& points);
+
+      //! Read PSLG's segments from a file. (added mrkkrj)
+      bool readSegments(const std::string& filePath, std::vector<Delaunay::Point>& segments);
 
    private:
       void Triangulate(std::string& triswitches);

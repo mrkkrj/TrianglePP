@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TrianglePPTestClass</class>
- <widget class="QMainWindow" name="TrianglePPTestClass">
+ <class>TrianglePPDemoAppClass</class>
+ <widget class="QMainWindow" name="TrianglePPDemoAppClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>716</width>
-    <height>423</height>
+    <width>857</width>
+    <height>576</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>TrianglePPTest</string>
+   <string>Triangle++ Demo</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="TrianglePPTest.qrc">
+   <iconset resource="TrianglePPDemoApp.qrc">
     <normaloff>:/TrianglePPTest/triangle-PP-ico.png</normaloff>:/TrianglePPTest/triangle-PP-ico.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -46,6 +46,11 @@
         <item>
          <property name="text">
           <string>From Image</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>From File</string>
          </property>
         </item>
         <item>
@@ -168,8 +173,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>716</width>
-     <height>20</height>
+     <width>857</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -193,7 +198,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="TrianglePPTest.qrc"/>
+  <include location="TrianglePPDemoApp.qrc"/>
  </resources>
  <connections/>
 </ui>

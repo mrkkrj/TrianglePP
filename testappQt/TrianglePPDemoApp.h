@@ -5,7 +5,7 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_TrianglePPTest.h"
+#include "ui_TrianglePPDemoApp.h"
 
 
 namespace tpp {
@@ -15,12 +15,12 @@ namespace tpp {
 
 // OPEN TODO::: class header ...
 
-class TrianglePPTest : public QMainWindow
+class TrianglePPDemoApp : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    TrianglePPTest(QWidget *parent = nullptr);
+    TrianglePPDemoApp(QWidget *parent = nullptr);
 
 public slots:
    void on_generatePointsPushButton_clicked();
@@ -62,10 +62,10 @@ private:
    void drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points);
 
 private:
-    Ui::TrianglePPTestClass ui;
+    Ui::TrianglePPDemoAppClass ui;
 
     enum PointGenerationMode { 
-       ManualMode = 0, AutomaticMode, FromImageMode, Example1Mode, Example2Mode 
+       ManualMode = 0, AutomaticMode, FromImageMode, FromFileMode, Example1Mode, Example2Mode
     } mode_;
 
     bool useConstraints_;

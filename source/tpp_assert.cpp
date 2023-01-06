@@ -16,7 +16,8 @@ namespace tpp {
    
     Details.
 */
-bool MyAssertFunction( bool b, const char* desc, int line, const char* file){
+bool MyAssertFunction( bool b, const char* desc, int line, const char* file)
+{
     // changed mrkkrj --
 #if _WINDOWS
     (void)desc;

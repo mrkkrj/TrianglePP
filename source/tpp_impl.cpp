@@ -488,7 +488,7 @@ bool Delaunay::setHolesConstraint(const std::vector<Point>& holes)
 /*!
   added mrkkrj:
 */
-bool Delaunay::savePoints(const char* filePath)
+bool Delaunay::savePoints(const std::string& filePath)
 {
    if (!m_triangulated) 
    {
@@ -538,7 +538,7 @@ bool Delaunay::savePoints(const char* filePath)
    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
    Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;    
        
-   pTriangleWrap->writenodes2file(tpmesh, tpbehavior, const_cast<char*>(filePath), 
+   pTriangleWrap->writenodes2file(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()),
                                    0, nullptr); // argc & argv
 
    return true;
@@ -548,7 +548,7 @@ bool Delaunay::savePoints(const char* filePath)
 /*!
   added mrkkrj:
 */
-bool Delaunay::saveSegments(const char* filePath)
+bool Delaunay::saveSegments(const std::string& filePath)
 {
    // OPEN TODO::: experimental only!!!!!
 
@@ -630,7 +630,7 @@ bool Delaunay::saveSegments(const char* filePath)
     int numberofregions = 0;
     double* regionlist = nullptr;
 
-    pTriangleWrap->writepoly2file(tpmesh, tpbehavior, const_cast<char*>(filePath),
+    pTriangleWrap->writepoly2file(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()),
                                   holelist, numberofholes, regionlist, numberofregions,
                                   0, nullptr); // argc & argv
 
@@ -641,7 +641,7 @@ bool Delaunay::saveSegments(const char* filePath)
 /*!
   added mrkkrj:
 */
-bool Delaunay::readPoints(const char* filePath, std::vector<Delaunay::Point>& points)
+bool Delaunay::readPoints(const std::string& filePath, std::vector<Delaunay::Point>& points)
 {
     // OPEN TODO::: experimental only!!!!!
    
@@ -659,6 +659,9 @@ bool Delaunay::readPoints(const char* filePath, std::vector<Delaunay::Point>& po
     Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;
     Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
 
+    *tpmesh = {};
+    *tpbehavior = {};
+
     // get points
 
     pTriangleWrap->triangleinit(tpmesh); 
@@ -668,7 +671,7 @@ bool Delaunay::readPoints(const char* filePath, std::vector<Delaunay::Point>& po
     tpbehavior->usesegments = 0;
     FILE* polyfile = nullptr;
 
-    pTriangleWrap->readnodes(tpmesh, tpbehavior, const_cast<char*>(filePath), nullptr, &polyfile);
+    pTriangleWrap->readnodes(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()), nullptr, &polyfile);
 
     // read points from the mesh data
 
@@ -707,6 +710,20 @@ bool Delaunay::readPoints(const char* filePath, std::vector<Delaunay::Point>& po
    points = m_pointList; // OPEN TODO::: make optional parameter?????
 
    return true;
+}
+
+
+/*!
+  added mrkkrj:
+*/
+bool Delaunay::readSegments(const std::string& filePath, std::vector<Delaunay::Point>& segments)
+{
+
+    // OPEN TODO::: !!!!!!!!!
+
+
+    return false;
+
 }
 
 

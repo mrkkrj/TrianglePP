@@ -1,13 +1,13 @@
 if(UNIX)
 	cmake_minimum_required(VERSION 3.10)
 else()
-	cmake_minimum_required(VERSION 3.13)
+        cmake_minimum_required(VERSION 3.12)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(TianglePPTest VERSION 0.1.0 LANGUAGES CXX)
+project(TrianglePPDemo VERSION 0.1.0 LANGUAGES CXX)
 
 ################################################################################
 # Use solution folders feature
@@ -31,13 +31,13 @@ find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
 ################################################################################
 
 set(Form_Files
-    "./TrianglePPTest.ui"
+    "./TrianglePPDemoApp.ui"
     "./TrianglePpOptions.ui"
 )
 source_group("Form Files" FILES ${Form_Files})
 
 set(Resource_Files
-    "./TrianglePPTest.qrc"
+    "./TrianglePPDemoApp.qrc"
 )
 source_group("Resource Files" FILES ${Resource_Files})
 
@@ -52,7 +52,7 @@ source_group("Header Files\\tpp" FILES ${Header_Files__tpp})
 set(Header_Files
     "DrawingArea.h"
     "TrianglePpOptions.h"
-    "TrianglePPTest.h"
+    "TrianglePPDemoApp.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -65,7 +65,7 @@ source_group("Source Files\\tpp" FILES ${Source_Files__tpp})
 set(Source_Files
     "DrawingArea.cpp"
     "TrianglePpOptions.cpp"
-    "TrianglePPTest.cpp"
+    "TrianglePPDemoApp.cpp"
     "main.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
