@@ -61,6 +61,24 @@ FILE* g_debugFile = nullptr;
 #define TRIANGLE_DETAIL_DEBUG 0
 // end DEBUG trace (mrkkrj)
 
+
+// mrkkrj: helper macros
+#define TP_MESH_BEHAVIOR() \
+    Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh); \
+    Triwrap::__pbehavior* tpbehavior = static_cast<Triwrap::__pbehavior *>(m_pbehavior);
+
+#define TP_MESH() \
+    Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh);
+
+#define TP_MESH_BEHAVIOR_WRAP() \
+    Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh); \
+    Triwrap::__pbehavior* tpbehavior = static_cast<Triwrap::__pbehavior *>(m_pbehavior); \
+    Triwrap* pTriangleWrap = static_cast<Triwrap *>(m_triangleWrap);
+
+#define TP_VOROUT() \
+       triangulateio* tpvorout = static_cast<triangulateio*>(m_vorout);
+
+
 #include "triangle_impl.hpp"
 #include "tpp_interface.hpp"
 #include <sstream>
@@ -97,14 +115,15 @@ Delaunay::Delaunay(const std::vector<Point>& points)
 
 /*!
 */
-Delaunay::~Delaunay() {
+Delaunay::~Delaunay()
+{
    freeTriangleDataStructs();
 }
 
 /*!
 */
-void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
-
+void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl)
+{
    std::string options = "nz";  // n: need neighbors, z: index from 0
 
    setQualityOptions(options, quality);
@@ -115,8 +134,8 @@ void Delaunay::Triangulate(bool quality, DebugOutputLevel traceLvl) {
 
 /*!
 */
-void Delaunay::TriangulateConf(bool quality, DebugOutputLevel traceLvl) {
-
+void Delaunay::TriangulateConf(bool quality, DebugOutputLevel traceLvl)
+{
    std::string options = "nz";  // n: need neighbors, z: index from 0
 
    setQualityOptions(options, quality);
@@ -133,7 +152,8 @@ void Delaunay::TriangulateConf(bool quality, DebugOutputLevel traceLvl) {
   \author Piyush Kumar (originally), 
           mrkkrj (extracted it, debug output to file, corections, extensions)
 */
-void Delaunay::Triangulate(std::string& triswitches) {
+void Delaunay::Triangulate(std::string& triswitches)
+{
     INIT_TRACE("triangle.out.txt");
     TRACE("Triangulate ->");
 
@@ -196,18 +216,16 @@ void Delaunay::Triangulate(std::string& triswitches) {
 
     TRACE2s(" -- switches:", triswitches.c_str());
 
-    m_triangleWrap = new Triwrap;
-    Triwrap* pTriangleWrap = (Triwrap *)m_triangleWrap;
+    // parse the options:
     triswitches.push_back('\0');
     char *pTriswitches = &triswitches[0];
 
     m_pmesh = new Triwrap::__pmesh;
     m_pbehavior = new Triwrap::__pbehavior;
+    m_triangleWrap = new Triwrap;
 
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
-    Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
+    TP_MESH_BEHAVIOR_WRAP();
 
-    // parse the options:
     pTriangleWrap->parsecommandline(1, &pTriswitches, tpbehavior);
 
     // initialize data structs
@@ -297,10 +315,7 @@ void Delaunay::Tesselate(bool useConformingDelaunay, DebugOutputLevel traceLvl)
    Triangulate(options);
 
    // now use the triangulation for a Voronoi diagram
-   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)     m_pmesh;
-   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
+   TP_MESH_BEHAVIOR_WRAP();
 
    // OPEN TODO::: check these preconditions??
    if (tpmesh->holes != 0) {
@@ -308,28 +323,28 @@ void Delaunay::Tesselate(bool useConformingDelaunay, DebugOutputLevel traceLvl)
    }
 
    m_vorout = new triangulateio;
-   triangulateio* pvorout = (struct triangulateio*)m_vorout;
+   TP_VOROUT();
 
-   pvorout->numberofpoints = tpmesh->triangles.items;
-   pvorout->numberofpointattributes = tpmesh->nextras;
-   pvorout->numberofedges = tpmesh->edges;
+   tpvorout->numberofpoints = tpmesh->triangles.items;
+   tpvorout->numberofpointattributes = tpmesh->nextras;
+   tpvorout->numberofedges = tpmesh->edges;
 
-   pvorout->pointlist = nullptr;
-   pvorout->pointattributelist = nullptr;
-   pvorout->pointmarkerlist = nullptr;
-   pvorout->numberofsegments = 0;
-   pvorout->numberofholes = 0;
-   pvorout->numberofregions = 0;
-   pvorout->regionlist = nullptr;
-   pvorout->edgelist = nullptr;
-   pvorout->edgemarkerlist = nullptr;
-   pvorout->normlist = nullptr;
+   tpvorout->pointlist = nullptr;
+   tpvorout->pointattributelist = nullptr;
+   tpvorout->pointmarkerlist = nullptr;
+   tpvorout->numberofsegments = 0;
+   tpvorout->numberofholes = 0;
+   tpvorout->numberofregions = 0;
+   tpvorout->regionlist = nullptr;
+   tpvorout->edgelist = nullptr;
+   tpvorout->edgemarkerlist = nullptr;
+   tpvorout->normlist = nullptr;
 
    pTriangleWrap->writevoronoi(
          tpmesh, tpbehavior,
-         &pvorout->pointlist, &pvorout->pointattributelist,
-         &pvorout->pointmarkerlist, &pvorout->edgelist,
-         &pvorout->edgemarkerlist, &pvorout->normlist);
+         &tpvorout->pointlist, &tpvorout->pointattributelist,
+         &tpvorout->pointmarkerlist, &tpvorout->edgelist,
+         &tpvorout->edgemarkerlist, &tpvorout->normlist);
 }
 
 /*!
@@ -345,13 +360,13 @@ bool Delaunay::checkConstraints(bool& possible) const
    //"        some meshes, however, you might need to reduce the minimum angle to"
    //"        avoid problems associated with insufficient floating-point"
    //"        precision."
-   if (m_minAngle <= 28.6)
+   if (m_minAngle <= 28.6f)
    {
       return true;
    }
    else
    {
-      possible = (m_minAngle <= 34.0);
+      possible = (m_minAngle <= 34.0f);
       return false;
    }   
 }
@@ -489,7 +504,7 @@ bool Delaunay::setHolesConstraint(const std::vector<Point>& holes)
   added mrkkrj:
 */
 bool Delaunay::savePoints(const std::string& filePath)
-{
+{          
    if (!m_triangulated) 
    {
      struct triangulateio input;
@@ -505,42 +520,25 @@ bool Delaunay::savePoints(const std::string& filePath)
      pin->numberofregions = 0;
      pin->regionlist = nullptr;
 
-
-     if (!m_triangleWrap) 
+     if (!m_triangleWrap)
      {
-        m_triangleWrap = new Triwrap;
+        assert(!m_pmesh && !m_pbehavior);
+        initTriangleDataForPoints();
      }
 
-      m_pmesh = new Triwrap::__pmesh;
-      m_pbehavior = new Triwrap::__pbehavior;
+     TP_MESH_BEHAVIOR_WRAP();
 
-      Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-      Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
-      Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;
-
-      // initialize data structs
-
-      pTriangleWrap->triangleinit(tpmesh);
-      tpmesh->steinerleft = tpbehavior->steiner; // added mrkkrj
-
-      pTriangleWrap->transfernodes(
+     pTriangleWrap->transfernodes(
                 tpmesh, tpbehavior, pin->pointlist, 
                 pin->pointattributelist,
                 pin->pointmarkerlist, pin->numberofpoints,
                 pin->numberofpointattributes);
-
-      pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
    }
 
-   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
-   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;    
+   TP_MESH_BEHAVIOR_WRAP();
        
    pTriangleWrap->writenodes2file(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()),
                                    0, nullptr); // argc & argv
-
    return true;
 }
 
@@ -554,68 +552,64 @@ bool Delaunay::saveSegments(const std::string& filePath)
 
    if (!m_triangulated) 
    {
-    struct triangulateio input;
-    triangulateio* pin = (struct triangulateio *)&input;
-    
-    pin->numberofpoints = (int)m_pointList.size();
-    pin->numberofpointattributes = (int)0;
-    pin->pointlist = static_cast<double *>((void *)(&m_pointList[0]));
-    pin->pointattributelist = nullptr;
-    pin->pointmarkerlist = nullptr;
-    pin->numberofsegments = 0;
-    pin->numberofholes = 0;
-    pin->numberofregions = 0;
-    pin->regionlist = nullptr;
+        struct triangulateio input;
+        triangulateio* pin = (struct triangulateio *)&input;
 
-    if (!m_segmentList.empty()) 
-    {
-       pin->numberofsegments = (int)m_segmentList.size() / 2;
-       pin->segmentlist = m_segmentList.data(); 
-       pin->segmentmarkerlist = nullptr; 
-    }
+        pin->numberofpoints = (int)m_pointList.size();
+        pin->numberofpointattributes = (int)0;
+        pin->pointlist = static_cast<double *>((void *)(&m_pointList[0]));
+        pin->pointattributelist = nullptr;
+        pin->pointmarkerlist = nullptr;
+        pin->numberofsegments = 0;
+        pin->numberofholes = 0;
+        pin->numberofregions = 0;
+        pin->regionlist = nullptr;
 
-   if (!m_triangleWrap) 
-   {
-      m_triangleWrap = new Triwrap;
-   }
+        if (!m_segmentList.empty())
+        {
+           pin->numberofsegments = (int)m_segmentList.size() / 2;
+           pin->segmentlist = m_segmentList.data();
+           pin->segmentmarkerlist = nullptr;
+        }
 
-    m_pmesh = new Triwrap::__pmesh;
-    m_pbehavior = new Triwrap::__pbehavior;
+        if (!m_triangleWrap)
+        {
+           assert(!m_pmesh && !m_pbehavior);
 
-    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
+           m_triangleWrap = new Triwrap;
+           m_pmesh = new Triwrap::__pmesh;
+           m_pbehavior = new Triwrap::__pbehavior;
 
-    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
-    Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;  
+           TP_MESH_BEHAVIOR_WRAP();
 
-    // initialize data structs
+           // initialize data structs
+           *tpmesh = {};
+           *tpbehavior = {};
 
-    pTriangleWrap->triangleinit(tpmesh);
-    tpmesh->steinerleft = tpbehavior->steiner; // added mrkkrj
+           pTriangleWrap->triangleinit(tpmesh);
+           pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
+        }
 
-    pTriangleWrap->transfernodes(
-                tpmesh, tpbehavior, pin->pointlist, 
-                pin->pointattributelist,
-                pin->pointmarkerlist, pin->numberofpoints,
-                pin->numberofpointattributes);
+        TP_MESH_BEHAVIOR_WRAP();
 
-    if (!m_segmentList.empty())
-    {
-        // npt working!
-        tpbehavior->usesegments = 1;
+        pTriangleWrap->transfernodes(
+                    tpmesh, tpbehavior, pin->pointlist,
+                    pin->pointattributelist,
+                    pin->pointmarkerlist, pin->numberofpoints,
+                    pin->numberofpointattributes);
 
-        pTriangleWrap->formskeleton(tpmesh, tpbehavior, pin->segmentlist,
-                                      pin->segmentmarkerlist, pin->numberofsegments);
-    }
+        if (!m_segmentList.empty())
+        {
+            // npt working!
+            tpbehavior->usesegments = 1;
 
-    pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
+            pTriangleWrap->formskeleton(tpmesh, tpbehavior, pin->segmentlist,
+                                          pin->segmentmarkerlist, pin->numberofsegments);
+        }
+
+        pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
    }
    // OPEN TODO::: end...
-
-
-    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
-    Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;
 
     int numberofholes = 0;
     double* holelist = nullptr;
@@ -630,6 +624,8 @@ bool Delaunay::saveSegments(const std::string& filePath)
     int numberofregions = 0;
     double* regionlist = nullptr;
 
+    TP_MESH_BEHAVIOR_WRAP();
+
     pTriangleWrap->writepoly2file(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()),
                                   holelist, numberofholes, regionlist, numberofregions,
                                   0, nullptr); // argc & argv
@@ -642,30 +638,14 @@ bool Delaunay::saveSegments(const std::string& filePath)
   added mrkkrj:
 */
 bool Delaunay::readPoints(const std::string& filePath, std::vector<Delaunay::Point>& points)
-{
-    // OPEN TODO::: experimental only!!!!!
-   
-    typedef Triwrap::vertex vertex;
-
+{  
     if (!m_triangleWrap)
     {
-        m_triangleWrap = new Triwrap;
+       assert(!m_pmesh && !m_pbehavior);
+       initTriangleDataForPoints();
     }
 
-    m_pmesh = new Triwrap::__pmesh;
-    m_pbehavior = new Triwrap::__pbehavior;
-
-    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
-    Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)m_pbehavior;
-    Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-    *tpmesh = {};
-    *tpbehavior = {};
-
-    // get points
-
-    pTriangleWrap->triangleinit(tpmesh); 
-    pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
+    TP_MESH_BEHAVIOR_WRAP();
 
     tpbehavior->poly = 0; // poly file not provided!
     tpbehavior->usesegments = 0;
@@ -674,42 +654,44 @@ bool Delaunay::readPoints(const std::string& filePath, std::vector<Delaunay::Poi
     pTriangleWrap->readnodes(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()), nullptr, &polyfile);
 
     // read points from the mesh data
-
     m_pointList.clear();
     m_pointList.reserve(tpmesh->invertices);
 
-  int vertexnumber = tpbehavior->firstnumber;
-  Triwrap::__pmesh* m = tpmesh; // for Triwrap's macros: vertextype(), setvertexmark()
+    int vertexnumber = tpbehavior->firstnumber;
+    Triwrap::__pmesh* m = tpmesh; // for Triwrap's macros: vertextype(), setvertexmark()
 
-  pTriangleWrap->traversalinit(&tpmesh->vertices);
-  vertex vertexloop = pTriangleWrap->vertextraverse(tpmesh);  
+    pTriangleWrap->traversalinit(&tpmesh->vertices);
+    Triwrap::vertex vertexloop = pTriangleWrap->vertextraverse(tpmesh);
 
-  while (vertexloop != (vertex) NULL) {
-    if (!tpbehavior->jettison || (vertextype(vertexloop) != UNDEADVERTEX)) {
-      /* X and Y coordinates. */
-      m_pointList.push_back({vertexloop[0], vertexloop[1]});
+    while (vertexloop != nullptr)
+    {
+        if (!tpbehavior->jettison || (vertextype(vertexloop) != UNDEADVERTEX))
+        {
+          /* X and Y coordinates. */
+          m_pointList.push_back({vertexloop[0], vertexloop[1]});
 
 #if 0 // --> not yet supported!
-      /* Vertex attributes. */
-      for (i = 0; i < tpmesh->nextras; i++) {
-        palist[attribindex++] = vertexloop[2 + i];
-      }
-      if (!tpbehavior->nobound) {
-        /* Copy the boundary marker. */
-        pmlist[vertexnumber - tpbehavior->firstnumber] = vertexmark(vertexloop);
-      }
+          /* Vertex attributes. */
+          for (i = 0; i < tpmesh->nextras; i++) {
+            palist[attribindex++] = vertexloop[2 + i];
+          }
+          if (!tpbehavior->nobound) {
+            /* Copy the boundary marker. */
+            pmlist[vertexnumber - tpbehavior->firstnumber] = vertexmark(vertexloop);
+          }
 #endif
 
-      setvertexmark(vertexloop, vertexnumber);
-      vertexnumber++;
+          setvertexmark(vertexloop, vertexnumber);
+          vertexnumber++;
+        }
+
+        vertexloop = pTriangleWrap->vertextraverse(tpmesh);
     }
-    vertexloop = pTriangleWrap->vertextraverse(tpmesh);
-  }
 
-   // OPEN TODO::
-   points = m_pointList; // OPEN TODO::: make optional parameter?????
+    // OPEN TODO::
+    points = m_pointList; // OPEN TODO::: make optional parameter?????
 
-   return true;
+    return true;
 }
 
 
@@ -724,6 +706,9 @@ bool Delaunay::readSegments(const std::string& filePath, std::vector<Delaunay::P
 
     return false;
 
+
+    // OPEN TODO::: !!!!!!!!!
+
 }
 
 
@@ -731,17 +716,17 @@ bool Delaunay::readSegments(const std::string& filePath, std::vector<Delaunay::P
     Write the triangulation to an .off file
      - OFF stands for the Object File Format, a format used by Geometry Center's "Geomview" package. 
 */
-void Delaunay::writeoff(std::string& fname){
-    if(!m_triangulated) {
+void Delaunay::writeoff(std::string& fname)
+{
+    if(!m_triangulated)
+    {
         cerr << "FATAL: Write called before triangulation\n";
         //exit(1);
         throw std::runtime_error("FATAL: Write called before triangulation");
     }
 
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
-    Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
+    TP_MESH_BEHAVIOR_WRAP();
 
-    Triwrap *pTriangleWrap =  (Triwrap *)m_triangleWrap;
     char *pfname = new char[fname.size()+1];
     strcpy(pfname , fname.c_str());
 
@@ -751,23 +736,25 @@ void Delaunay::writeoff(std::string& fname){
 
 /*!
 */
-int Delaunay::nedges() const {
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
+int Delaunay::nedges() const
+{
+    TP_MESH();
     return tpmesh->edges;
 }
 
 /*!
 */
-int Delaunay::ntriangles() const {
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
+int Delaunay::ntriangles() const
+{
+    TP_MESH();
     return tpmesh->triangles.items;	
 }
 
 /*!
 */
-int Delaunay::nvertices() const {
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
-    Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) m_pbehavior;
+int Delaunay::nvertices() const
+{
+    TP_MESH_BEHAVIOR();
     int outvertices;
 
     if (tpbehavior->jettison) {
@@ -781,14 +768,16 @@ int Delaunay::nvertices() const {
 
 /*!
 */
-int Delaunay::hull_size() const {
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)     m_pmesh;
+int Delaunay::hull_size() const
+{
+    TP_MESH();
     return  tpmesh->hullsize;	
 }
 
 /*!
 */
-int Delaunay::vertexId(vIterator const &vit) const {
+int Delaunay::vertexId(vIterator const &vit) const
+{
     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) vit.MyDelaunay->m_pmesh;
     return ((int *)vit.vloop)[tpmesh->vertexmarkindex];
 }
@@ -796,13 +785,15 @@ int Delaunay::vertexId(vIterator const &vit) const {
 /*!
   added mrkkrj:
 */
-int Delaunay::nvedges() const {
-   triangulateio* pvorout = (struct triangulateio*)m_vorout;
-   if (!pvorout) {
+int Delaunay::nvedges() const
+{
+   TP_VOROUT();
+
+   if (!tpvorout) {
       return 0;
    }
    else {
-      return pvorout->numberofedges;
+      return tpvorout->numberofedges;
    }
 }
 
@@ -810,28 +801,33 @@ int Delaunay::nvedges() const {
 /*!
   added mrkkrj:
 */
-int Delaunay::nvpoints() const {
-   triangulateio* pvorout = (struct triangulateio*)m_vorout;
-   if (!pvorout) {
+int Delaunay::nvpoints() const
+{
+   TP_VOROUT();
+
+   if (!tpvorout) {
       return 0;
    }
    else {
-      return pvorout->numberofpoints;
+      return tpvorout->numberofpoints;
    }
 }
+
 
 /*!
   added mrkkrj:
 */
-int Delaunay::nholes() const {
-    Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_pmesh;
+int Delaunay::nholes() const
+{
+    TP_MESH();
     return tpmesh->holes;
 }
 
 /*!
   added mrkkrj:
 */
-std::string Delaunay::formatFloatConstraint(float f) const {
+std::string Delaunay::formatFloatConstraint(float f) const
+{
     std::ostringstream ss;
     ss << f;
     return ss.str();
@@ -840,7 +836,8 @@ std::string Delaunay::formatFloatConstraint(float f) const {
 /*!
   added mrkkrj:
 */
-void Delaunay::setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl) {
+void Delaunay::setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl)
+{
    switch (traceLvl) {
    case None:
       options.append("Q"); // Q: no trace, no debug
@@ -888,19 +885,16 @@ void Delaunay::freeTriangleDataStructs()
    }
 
    struct triangulateio* pin = (struct triangulateio*) m_in;
-   struct triangulateio* pvorout = (struct triangulateio*) m_vorout;
 
-   Triwrap* pTriangleWrap = (Triwrap*)m_triangleWrap;
-
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*) m_pmesh;
-   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*) m_pbehavior;
+   TP_MESH_BEHAVIOR_WRAP();
+   TP_VOROUT();
 
    pTriangleWrap->triangledeinit(tpmesh, tpbehavior);
 
    delete tpmesh;
    delete tpbehavior;
    delete pin;
-   delete pvorout;
+   delete tpvorout;
    delete pTriangleWrap;
 
    m_in = nullptr;
@@ -908,8 +902,26 @@ void Delaunay::freeTriangleDataStructs()
    m_triangleWrap = nullptr;
    m_pmesh = nullptr;
    m_pbehavior = nullptr;
-
 }
+
+/*!
+  added mrkkrj:
+*/
+void Delaunay::initTriangleDataForPoints()
+{
+    assert(!m_triangleWrap && !m_pmesh && !m_pbehavior);
+
+    m_triangleWrap = new Triwrap;
+    m_pmesh = new Triwrap::__pmesh;
+    m_pbehavior = new Triwrap::__pbehavior;
+
+    TP_MESH_BEHAVIOR_WRAP();
+
+    *tpmesh = {};
+    *tpbehavior = {};
+    pTriangleWrap->triangleinit(tpmesh);
+}
+
 
 ///////////////////////////////
 //

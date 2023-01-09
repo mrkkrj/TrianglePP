@@ -722,6 +722,7 @@ namespace tpp {
       void setQualityOptions(std::string& options, bool quality);
       void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
       void freeTriangleDataStructs();
+      void initTriangleDataForPoints();
 
       friend class fIterator;
 

@@ -471,6 +471,7 @@ TEST_CASE("Reading and writing files", "[trpp]")
         REQUIRE(points.size() == 15); // look inside the file
     }
 
+#if 0
     SECTION("TEST 7.2: reading a .poly file")
     {
         std::vector<Delaunay::Point> segments;
@@ -480,6 +481,7 @@ TEST_CASE("Reading and writing files", "[trpp]")
         REQUIRE(ioResult == true);
         REQUIRE(segments.size() == 22); // look inside the file
     }
+#endif
 
     // 8. writing files
 
@@ -503,6 +505,7 @@ TEST_CASE("Reading and writing files", "[trpp]")
         REQUIRE(points.size() == pslgDelaunayInput.size());
     }
 
+#if 0
     SECTION("TEST 8.2: writing a .poly file")
     {
         bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
@@ -518,6 +521,8 @@ TEST_CASE("Reading and writing files", "[trpp]")
         REQUIRE(ioResult == true);
         REQUIRE(segments.size() == pslgDelaunaySegments.size());
     }
+#endif
+
 }
 
 

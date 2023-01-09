@@ -50,8 +50,11 @@ namespace {
       }
       else
       {
-         x = delaunayInput[resultIndex][0];
-         y = delaunayInput[resultIndex][1];
+          // point from original data
+          assert(resultIndex >= 0);
+
+          x = delaunayInput[static_cast<unsigned>(resultIndex)][0];
+          y = delaunayInput[static_cast<unsigned>(resultIndex)][1];
       }
 
       return QPoint(x, y);
@@ -779,7 +782,7 @@ void TrianglePPDemoApp::writeToFile()
     else
     {
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                       "./Trpp_Points.nodes", tr("Vertex File (*.nodes)"));
+                                                       "./Trpp_Points.node", tr("Vertex File (*.node)"));
 
        ok = trGenerator.savePoints(fileName.toStdString());
     }
