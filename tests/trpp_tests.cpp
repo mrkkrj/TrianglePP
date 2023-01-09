@@ -474,11 +474,13 @@ TEST_CASE("Reading and writing files", "[trpp]")
 #if 0
     SECTION("TEST 7.2: reading a .poly file")
     {
+        std::vector<Delaunay::Point> points;
         std::vector<Delaunay::Point> segments;
 
-        ioResult = trReader.readSegments("../exampleFiles/spiral.node", segments);
+        ioResult = trReader.readSegments("../exampleFiles/face.poly", points, segments);
 
         REQUIRE(ioResult == true);
+        REQUIRE(points.size() == 26);   // look inside the file
         REQUIRE(segments.size() == 22); // look inside the file
     }
 #endif

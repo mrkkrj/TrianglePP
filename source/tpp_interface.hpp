@@ -249,11 +249,22 @@ namespace tpp {
       */
       void setUserConstraint(bool (*f)()) { /* NYI !!!!! */ }
 
+
       //! Output a geomview .off file containing the delaunay triangulation
-      /*!
-        \param fname  output file name.
-      */
       void writeoff(std::string& fname);
+
+      //! Save the vertices to a file. (added mrkkrj)
+      bool savePoints(const std::string& filePath);
+
+      //! Save the PSLG graph to a file. (added mrkkrj)
+      bool saveSegments(const std::string& filePath);
+
+      //! Read the vertices from a file. (added mrkkrj)
+      bool readPoints(const std::string& filePath, std::vector<Point>& points);
+
+      //! Read PSLG's segments from a file. (added mrkkrj)
+      bool readSegments(const std::string& filePath, std::vector<Point>& points, std::vector<Point>& segments);
+
 
       //! Number of edges in the triangulation
       /*!
@@ -688,25 +699,6 @@ namespace tpp {
             return false;
          }
       };
-
-      ///////////////////////////////
-      //
-      // Read/Write file output 
-      //  (added mrkkrj)
-      //
-      ///////////////////////////////
-      
-      //! Save the vertices to a file. (added mrkkrj)
-      bool savePoints(const std::string& filePath);
-
-      //! Save the PSLG graph to a file. (added mrkkrj)
-      bool saveSegments(const std::string& filePath);
-
-      //! Read the vertices from a file. (added mrkkrj)
-      bool readPoints(const std::string& filePath, std::vector<Delaunay::Point>& points);
-
-      //! Read PSLG's segments from a file. (added mrkkrj)
-      bool readSegments(const std::string& filePath, std::vector<Delaunay::Point>& segments);
 
    private:
       void Triangulate(std::string& triswitches);

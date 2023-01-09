@@ -4,10 +4,6 @@
     This class is a wrapper on the Triangle package.
  */
 
-#include <iostream>
-// changed mrkkrj --
-//#include <triangle_impl.hpp>
-//#include <tpp_interface.hpp>
 
 // configuaration of the Triangle.h code:
 #define NO_TIMER
@@ -29,9 +25,10 @@
 #endif
 
 //#define TRIANGLE_DBG_TO_FILE 1
+#define TRIANGLE_DETAIL_DEBUG 0
 
 // mrkkrj::: DEBUG trace 
-//    - needed when debugging a GUI app. on Windows without console
+//   - needed when debugging a GUI app. on Windows without console
 #ifdef TRIANGLE_DBG_TO_FILE
 #   include <cstdio>
 
@@ -58,8 +55,17 @@ FILE* g_debugFile = nullptr;
 #   define END_TRACE() 
 #endif
 
-#define TRIANGLE_DETAIL_DEBUG 0
-// end DEBUG trace (mrkkrj)
+
+// 1. wrapped library
+#include "triangle_impl.hpp"
+
+// 2. the wrapper
+#include "tpp_interface.hpp"
+
+#include <iostream>
+#include <sstream>
+#include <cassert>
+#include <algorithm>
 
 
 // mrkkrj: helper macros
@@ -77,19 +83,6 @@ FILE* g_debugFile = nullptr;
 
 #define TP_VOROUT() \
        triangulateio* tpvorout = static_cast<triangulateio*>(m_vorout);
-
-
-#include "triangle_impl.hpp"
-#include "tpp_interface.hpp"
-#include <sstream>
-#include <cassert>
-#include <algorithm>
-// END changed --
-
-
-#include <new>
-
-#define REAL double
 
 
 namespace tpp {
@@ -501,6 +494,28 @@ bool Delaunay::setHolesConstraint(const std::vector<Point>& holes)
 
 
 /*!
+    Write the triangulation to an .off file
+     - OFF stands for the Object File Format, a format used by Geometry Center's "Geomview" package.
+*/
+void Delaunay::writeoff(std::string& fname)
+{
+    if(!m_triangulated)
+    {
+        cerr << "FATAL: Write called before triangulation\n";
+        throw std::runtime_error("FATAL: Write called before triangulation");
+    }
+
+    TP_MESH_BEHAVIOR_WRAP();
+
+    char *pfname = new char[fname.size()+1];
+    strcpy(pfname , fname.c_str());
+
+    pTriangleWrap->writeoff(tpmesh, tpbehavior, pfname, 0, nullptr);
+    delete [] pfname;
+}
+
+
+/*!
   added mrkkrj:
 */
 bool Delaunay::savePoints(const std::string& filePath)
@@ -698,40 +713,119 @@ bool Delaunay::readPoints(const std::string& filePath, std::vector<Delaunay::Poi
 /*!
   added mrkkrj:
 */
-bool Delaunay::readSegments(const std::string& filePath, std::vector<Delaunay::Point>& segments)
+bool Delaunay::readSegments(
+        const std::string& filePath,
+        std::vector<Delaunay::Point>& points,
+        std::vector<Delaunay::Point>& segments)
 {
-
-    // OPEN TODO::: !!!!!!!!!
-
-
-    return false;
-
-
-    // OPEN TODO::: !!!!!!!!!
-
-}
-
-
-/*!
-    Write the triangulation to an .off file
-     - OFF stands for the Object File Format, a format used by Geometry Center's "Geomview" package. 
-*/
-void Delaunay::writeoff(std::string& fname)
-{
-    if(!m_triangulated)
+    if (!m_triangleWrap)
     {
-        cerr << "FATAL: Write called before triangulation\n";
-        //exit(1);
-        throw std::runtime_error("FATAL: Write called before triangulation");
+       assert(!m_pmesh && !m_pbehavior);
+       initTriangleDataForPoints();
     }
 
     TP_MESH_BEHAVIOR_WRAP();
 
-    char *pfname = new char[fname.size()+1];
-    strcpy(pfname , fname.c_str());
+    tpbehavior->poly = 1; // poly file provided!
+    tpbehavior->usesegments = 1;
+    pTriangleWrap->initializetrisubpools(tpmesh, tpbehavior);
 
-    pTriangleWrap->writeoff(tpmesh, tpbehavior, pfname, 0, nullptr);
-    delete [] pfname;
+    FILE* polyfile = nullptr;
+
+    pTriangleWrap->readnodes(tpmesh, tpbehavior, nullptr, const_cast<char*>(filePath.c_str()), &polyfile);
+
+    // TEST:::
+    tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);  /* Triangulate the vertices. */
+
+    /* Ensure that no vertex can be mistaken for a triangular bounding */
+    /*   box vertex in insertvertex().                                 */
+    tpmesh->infvertex1 = nullptr;
+    tpmesh->infvertex2 = nullptr;
+    tpmesh->infvertex3 = nullptr;
+
+    tpmesh->checksegments = 1;
+
+    // DEBUG:::
+    tpbehavior->verbose = 1;
+
+    pTriangleWrap->formskeleton4file(tpmesh, tpbehavior, polyfile, const_cast<char*>(filePath.c_str()));
+
+    fclose(polyfile);
+
+    // read points from the mesh data
+    m_pointList.clear();
+    m_pointList.reserve(tpmesh->invertices);
+
+    int vertexnumber = tpbehavior->firstnumber;
+    Triwrap::__pmesh* m = tpmesh; // for Triwrap's macros: vertextype(), setvertexmark()
+
+    pTriangleWrap->traversalinit(&tpmesh->vertices);
+    Triwrap::vertex vertexloop = pTriangleWrap->vertextraverse(tpmesh);
+
+    while (vertexloop != nullptr)
+    {
+        if (!tpbehavior->jettison || (vertextype(vertexloop) != UNDEADVERTEX))
+        {
+          /* X and Y coordinates. */
+          m_pointList.push_back({vertexloop[0], vertexloop[1]});
+
+#if 0 // --> not yet supported!
+          /* Vertex attributes. */
+          for (i = 0; i < tpmesh->nextras; i++) {
+            palist[attribindex++] = vertexloop[2 + i];
+          }
+          if (!tpbehavior->nobound) {
+            /* Copy the boundary marker. */
+            pmlist[vertexnumber - tpbehavior->firstnumber] = vertexmark(vertexloop);
+          }
+#endif
+
+          setvertexmark(vertexloop, vertexnumber);
+          vertexnumber++;
+        }
+
+        vertexloop = pTriangleWrap->vertextraverse(tpmesh);
+    }
+
+    // OPEN TODO::
+    points = m_pointList; // OPEN TODO::: make optional parameter?????
+
+    // OPEN TODO::
+    segments.clear(); // OPEN TODO::: make optional parameter?????
+
+    struct Triwrap::osub subsegloop;
+    Triwrap::vertex endpoint1, endpoint2;
+    long subsegnumber;
+
+    pTriangleWrap->traversalinit(&tpmesh->subsegs);
+    subsegloop.ss = pTriangleWrap->subsegtraverse(tpmesh);
+    subsegloop.ssorient = 0;
+    subsegnumber = tpbehavior->firstnumber;
+
+    typedef Triwrap::vertex vertex; // needed in vertexmark()!
+
+    while (subsegloop.ss != nullptr)
+    {
+      sorg(subsegloop, endpoint1);
+      sdest(subsegloop, endpoint2);
+
+      /* Copy indices of the segment's two endpoints. */
+      segments.push_back({vertexmark(endpoint1), vertexmark(endpoint2)});
+
+#if 0 // --> not yet supported!
+      if (!b->nobound) {
+        /* Copy the boundary marker. */
+        smlist[subsegnumber - b->firstnumber] = mark(subsegloop);
+      }
+  #endif
+
+      subsegloop.ss = pTriangleWrap->subsegtraverse(tpmesh);
+      subsegnumber++;
+    }
+
+    // segments = m_segmentCoordList;  // OPEN TODO::: use m_segmentCoordList & m_segmentIdxList ????
+
+    return true;
 }
 
 /*!

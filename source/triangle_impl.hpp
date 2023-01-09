@@ -850,6 +850,10 @@ struct behavior {
   char vedgefilename[FILENAMESIZE];
   char neighborfilename[FILENAMESIZE];
   char offfilename[FILENAMESIZE];
+#else
+#ifdef TRIFILES_READ_SUPPORT
+  char inpolyfilename[FILENAMESIZE];
+#endif
 #endif /* not TRILIBRARY */
 
 };                                              /* End of `struct behavior'. */
@@ -12698,6 +12702,180 @@ char *polyfilename;
     markhull(m, b);
   }
 }
+
+
+/*****************************************************************************/
+/*                                                                           */
+/*  formskeleton4file()   Create the segments of a triangulation, including  */
+/*                        PSLG segments and edges on the convex hull.        */
+/*                                                                           */
+/*  The PSLG segments are read from a .poly file.  The return value is the   */
+/*  number of segments in the file.                                          */
+/*                                                                           */
+/*   - copy of formskeleton(), only name changed, added mrkkrj!!!            */
+/*                                                                           */
+/*****************************************************************************/
+
+#if defined(TRILIBRARY) && defined(TRIFILES_READ_SUPPORT)
+#undef TRILIBRARY
+
+#ifdef TRILIBRARY
+
+#ifdef ANSI_DECLARATORS
+void formskeleton(struct mesh *m, struct behavior *b, int *segmentlist,
+                  int *segmentmarkerlist, int numberofsegments)
+#else /* not ANSI_DECLARATORS */
+void formskeleton(m, b, segmentlist, segmentmarkerlist, numberofsegments)
+struct mesh *m;
+struct behavior *b;
+int *segmentlist;
+int *segmentmarkerlist;
+int numberofsegments;
+#endif /* not ANSI_DECLARATORS */
+
+#else /* not TRILIBRARY */
+
+#ifdef ANSI_DECLARATORS
+void formskeleton4file(struct mesh *m, struct behavior *b,
+                  FILE *polyfile, char *polyfilename)
+#else /* not ANSI_DECLARATORS */
+void formskeleton4file(m, b, polyfile, polyfilename)
+struct mesh *m;
+struct behavior *b;
+FILE *polyfile;
+char *polyfilename;
+#endif /* not ANSI_DECLARATORS */
+
+#endif /* not TRILIBRARY */
+
+{
+  TRACE(" -> formskeleton4file");
+#ifdef TRILIBRARY
+  char polyfilename[6];
+  int index;
+#else /* not TRILIBRARY */
+  char inputline[INPUTLINESIZE];
+  char *stringptr;
+#endif /* not TRILIBRARY */
+  vertex endpoint1, endpoint2;
+  int segmentmarkers;
+  int end1, end2;
+  int boundmarker;
+  int i;
+
+  if (b->poly) {
+    if (!b->quiet) {
+      printf("Recovering segments in Delaunay triangulation.\n");
+    }
+#ifdef TRILIBRARY
+    strcpy(polyfilename, "input");
+    m->insegments = numberofsegments;
+    segmentmarkers = segmentmarkerlist != (int *) NULL;
+    index = 0;
+#else /* not TRILIBRARY */
+    /* Read the segments from a .poly file. */
+    /* Read number of segments and number of boundary markers. */
+    stringptr = readline(inputline, polyfile, polyfilename);
+    m->insegments = (int) strtol(stringptr, &stringptr, 0);
+    stringptr = findfield(stringptr);
+    if (*stringptr == '\0') {
+      segmentmarkers = 0;
+    } else {
+      segmentmarkers = (int) strtol(stringptr, &stringptr, 0);
+    }
+#endif /* not TRILIBRARY */
+    /* If the input vertices are collinear, there is no triangulation, */
+    /*   so don't try to insert segments.                              */
+    if (m->triangles.items == 0) {
+      return;
+    }
+
+    /* If segments are to be inserted, compute a mapping */
+    /*   from vertices to triangles.                     */
+    if (m->insegments > 0) {
+      makevertexmap(m, b);
+      if (b->verbose) {
+        printf("  Recovering PSLG segments.\n");
+      }
+    }
+
+    boundmarker = 0;
+    /* Read and insert the segments. */
+    for (i = 0; i < m->insegments; i++) {
+#ifdef TRILIBRARY
+      end1 = segmentlist[index++];
+      end2 = segmentlist[index++];
+      if (segmentmarkers) {
+        boundmarker = segmentmarkerlist[i];
+      }
+#else /* not TRILIBRARY */
+      stringptr = readline(inputline, polyfile, b->inpolyfilename);
+      stringptr = findfield(stringptr);
+      if (*stringptr == '\0') {
+        printf("Error:  Segment %d has no endpoints in %s.\n",
+               b->firstnumber + i, polyfilename);
+        triexit(1);
+      } else {
+        end1 = (int) strtol(stringptr, &stringptr, 0);
+      }
+      stringptr = findfield(stringptr);
+      if (*stringptr == '\0') {
+        printf("Error:  Segment %d is missing its second endpoint in %s.\n",
+               b->firstnumber + i, polyfilename);
+        triexit(1);
+      } else {
+        end2 = (int) strtol(stringptr, &stringptr, 0);
+      }
+      if (segmentmarkers) {
+        stringptr = findfield(stringptr);
+        if (*stringptr == '\0') {
+          boundmarker = 0;
+        } else {
+          boundmarker = (int) strtol(stringptr, &stringptr, 0);
+        }
+      }
+#endif /* not TRILIBRARY */
+      if ((end1 < b->firstnumber) ||
+          (end1 >= b->firstnumber + m->invertices)) {
+        if (!b->quiet) {
+          printf("Warning:  Invalid first endpoint of segment %d in %s.\n",
+                 b->firstnumber + i, polyfilename);
+        }
+      } else if ((end2 < b->firstnumber) ||
+                 (end2 >= b->firstnumber + m->invertices)) {
+        if (!b->quiet) {
+          printf("Warning:  Invalid second endpoint of segment %d in %s.\n",
+                 b->firstnumber + i, polyfilename);
+        }
+      } else {
+        /* Find the vertices numbered `end1' and `end2'. */
+        endpoint1 = getvertex(m, b, end1);
+        endpoint2 = getvertex(m, b, end2);
+        if ((endpoint1[0] == endpoint2[0]) && (endpoint1[1] == endpoint2[1])) {
+          if (!b->quiet) {
+            printf("Warning:  Endpoints of segment %d are coincident in %s.\n",
+                   b->firstnumber + i, polyfilename);
+          }
+        } else {
+          insertsegment(m, b, endpoint1, endpoint2, boundmarker);
+        }
+      }
+    }
+  } else {
+    m->insegments = 0;
+  }
+  if (b->convex || !b->poly) {
+    /* Enclose the convex hull with subsegments. */
+    if (b->verbose) {
+      printf("  Enclosing convex hull with segments.\n");
+    }
+    markhull(m, b);
+  }
+}
+
+#define TRILIBRARY
+
+#endif /* TRIFILES_OUTPUT_SUPPORT */
 
 /**                                                                         **/
 /**                                                                         **/
