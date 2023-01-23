@@ -29,6 +29,7 @@ set(Source_Files__trpp
     "../source/tpp_impl.cpp"
     "../source/tpp_interface.hpp"
     "../source/triangle_impl.hpp"
+    "../source/triangle.h"
 )
 source_group("Source Files\\trpp" FILES ${Source_Files__trpp})
 

@@ -93,21 +93,17 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
 
 void TrianglePPDemoApp::on_generatePointsPushButton_clicked()
 {
+   clearDisplay();
+
    switch (mode_)
    {
    case ManualMode:
-      // reset
-      clearDisplay();
+      // reset only
       break;
-
    case AutomaticMode:
-      clearDisplay();
       generateRandomPoints();
       break;
-
    case FromImageMode:
-      clearDisplay();
-
       // find characteristic points in the image
 
       // OPEN TODO::: --> image processing, characteristic points
@@ -116,22 +112,15 @@ void TrianglePPDemoApp::on_generatePointsPushButton_clicked()
       // OPEN TODO::: end ---
 
       break;
-
    case FromFileMode:
-      clearDisplay();
       readFromFile();
       break;
-
    case Example1Mode:
-       clearDisplay();
-       showExample1();
-       break;
-
+      showExample1();
+      break;
    case Example2Mode:
-       clearDisplay();
-       showExample2();
-       break;
-
+      showExample2();
+      break;
    default:
       Q_ASSERT(false);
    }
@@ -242,8 +231,6 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
 
 void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
 {
-   //QMessageBox::critical(this, tr("TODO"), tr("Not yet implemented!"));
-
    clearVoronoiPoints();
 
    // OPEN TODO::: 
@@ -279,6 +266,29 @@ void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
 
    mode_ = PointGenerationMode(index); // 0 == ManualMode!
    setGenerateButtonText();
+
+   // some immediate action needed?
+   switch (mode_)
+   {
+   case FromImageMode:
+      // OPEN TODO::: say that's not implemented!
+      on_generatePointsPushButton_clicked();
+      break;
+   case FromFileMode:
+      clearDisplay();
+      readFromFile();
+      break;
+   case Example1Mode:
+       clearDisplay();
+       showExample1();
+       break;
+   case Example2Mode:
+       clearDisplay();
+       showExample2();
+       break;
+   default:
+       break;
+   }
 }
 
 
@@ -301,10 +311,6 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
    QAction action01("Save to File", this);
    connect(&action01, &QAction::triggered, this, &TrianglePPDemoApp::writeToFile);
    ctxtMenu.addAction(&action01);
-
-   QAction action02("Read from File", this);
-   connect(&action02, &QAction::triggered, this, &TrianglePPDemoApp::readFromFile);
-   ctxtMenu.addAction(&action02);
 
    QAction action1("Options", this);
    connect(&action1, &QAction::triggered, this, &TrianglePPDemoApp::showTrianguationOptions);
@@ -571,8 +577,7 @@ void TrianglePPDemoApp::showInfo()
                " - Delaunay triangulations\n"
                " - quality Delaunay triangulations\n"
                " - constrained Delaunay triangulations\n"
-               " - Voronoi tesselations"
-               "\n\nWARNING: not yet completely correct, more work will be done...");
+               " - Voronoi tesselations");
 
    about.setDetailedText(
                "The Triangle++ library (aka TrianglePP) is an updated version of Piyush Kumar's C++/OO wrapper "
@@ -713,6 +718,7 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
    }
 
    std::vector<Delaunay::Point> constrDelaunayHoles;
+
    for (auto& point : holePoints_)
    {
       constrDelaunayHoles.push_back(Delaunay::Point(point.x(), point.y()));
@@ -736,6 +742,49 @@ void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos)
 
    ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
    ui.drawAreaWidget->drawPoint(pos);
+}
+
+
+void TrianglePPDemoApp::rescalePointsToDrawArea(
+        const tpp::Delaunay& trGenerator,
+        double& offsetX,
+        double& offsetY,
+        double& scaleFactor) const
+{
+    double minX = 0;
+    double minY = 0;
+    double maxX = 0;
+    double maxY = 0;
+
+    trGenerator.getMinMaxPoints(minX, minY, maxX, maxY);
+
+    double width = maxX - minX;
+    double height = maxY - minY;
+
+    if (minX < 0)
+    {
+       offsetX = -minX;
+    }
+
+    if (minY < 0)
+    {
+       offsetY = -minY;
+    }
+
+    if (width < ui.drawAreaWidget->width())
+    {
+       scaleFactor = ui.drawAreaWidget->width() / width;
+    }
+
+    if (height < ui.drawAreaWidget->height())
+    {
+       double scaleFactor2 = ui.drawAreaWidget->height() / height;
+
+       if (scaleFactor2  < scaleFactor)
+       {
+           scaleFactor = scaleFactor2;
+       }
+    }
 }
 
 
@@ -797,35 +846,61 @@ void TrianglePPDemoApp::writeToFile()
 void TrianglePPDemoApp::readFromFile()
 {
    QString fileName = QFileDialog::getOpenFileName(this, tr("Read File"),
-                                                   "./", tr("Vertex File (*.node)")); // OPEN TODO::: .nodes?
-
+                                                   "./", tr("Triangle Files (*.node *.poly)"));
     std::vector<Delaunay::Point> points;
+    std::vector<int> segmentEndpoints;
+    std::vector<Delaunay::Point> holeMarkers;
+
     Delaunay trGenerator(points);
+    bool ok = false;
     
-    bool ok = trGenerator.readPoints(fileName.toStdString(), points);
+    if (fileName.endsWith(".node"))
+    {
+        ok = trGenerator.readPoints(fileName.toStdString(), points);
+    }
+    else
+    {
+        ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers);
+    }
     
     if (!ok)
     {
        QMessageBox::critical(this, tr("ERROR"), tr("File couldn't be opened!"));
     } 
 
-    // TEST:: scalings work for spiral.nodes & box.nodes!!!!
-
-    // OPEN TODO::: add automatic scaling ???
-
-    double offsetX = 200;
-    double offsetY = 200;
-    double scaleFactor = 50;
+    // convert points
+    std::vector<Point> dempAppPoints;
 
     for (size_t i = 0; i < points.size(); ++i)
-    {       
+    {
        double x = points[i][0];
        double y = points[i][1];
 
-       ui.drawAreaWidget->drawPoint({ int(x * scaleFactor + offsetX), int(y * scaleFactor + offsetY) });
+       dempAppPoints.emplace_back(x, y);
     }
 
+    // draw points
+    double offsetX = 0;
+    double offsetY = 0;
+    double scaleFactor = 1;
+
+    rescalePointsToDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
+
+    drawPoints(dempAppPoints, offsetX * scaleFactor, offsetY * scaleFactor, scaleFactor);    
     statusBar()->showMessage(QString("Read %1 points from %2").arg(points.size()).arg(fileName));
+
+    // add read segments
+    for (size_t i = 0; i < segmentEndpoints.size(); i += 2)
+    {
+        onSegmentEndpointsSelected(segmentEndpoints[i], segmentEndpoints[i + 1]);
+    }
+
+    // add read holes
+    for (auto& point : holeMarkers)
+    {
+       onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
+                                  { (int)((point[0] + offsetX)* scaleFactor), (int)((point[1] + offsetY)* scaleFactor)  });
+    }
 }
 
 

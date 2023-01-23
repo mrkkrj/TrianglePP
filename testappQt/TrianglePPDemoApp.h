@@ -48,6 +48,7 @@ private:
    void configDelaunay(tpp::Delaunay& trGenerator);
    bool isHoleMarker(const QPoint& point) const;
    void drawHoleMarker(const QPoint& pos);
+   void rescalePointsToDrawArea(const tpp::Delaunay& trGenerator, double& offsetX, double& offsetY, double& scaleFactor) const;
 
    void writeToFile();
    void readFromFile();

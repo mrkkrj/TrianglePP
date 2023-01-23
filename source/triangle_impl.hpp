@@ -14499,7 +14499,7 @@ int numberofpointattribs;
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef TRILIBRARY
+#if !defined(TRILIBRARY) || defined(TRIFILES_READ_SUPPORT)
 
 #ifdef ANSI_DECLARATORS
 void readholes(struct mesh *m, struct behavior *b,

@@ -10,13 +10,11 @@
 
  /*! \mainpage Triangle++
   \section intro Introduction
- <table border="0">
- <tr><td>
+
  If you do not know, what a Delaunay triangulation is, you can read more about it
  <a href="http://www.compgeom.com/~piyush/teach/5930/slides/lecture8.ppt">here</a> and
  <a href="http://en.wikipedia.org/wiki/Delaunay_triangulation">here</a>.
- This C++ library module is just a wrapper class on the
- <a href="http://www.cs.berkeley.edu/~jrs/">Triangle</a>
+ This C++ library module is just a wrapper class on the <a href="http://www.cs.berkeley.edu/~jrs/">Triangle</a>
  package of <a href="http://www.cs.berkeley.edu/~jrs/">Jonathan Shewchuk</a>.
 
  Many times I have had to use triangle in C++ code bases of mine and have been forced to use C.
@@ -28,17 +26,15 @@
 
  Look at the tpp_interface.hpp file for getting started on what this wrapper can do for you. Also
  have a look at main.cpp which shows an example of using this class. The class is thread-safe.
-  </td>
- <td><img src="http://upload.wikimedia.org/wikipedia/en/9/92/Delaunay_triangulation.png" alt="Delaunay Triangulation Example"></td>
- </tr>
- </table>
-
+ 
+ <img src="http://upload.wikimedia.org/wikipedia/en/9/92/Delaunay_triangulation.png" alt="Delaunay Triangulation Example">
+ 
  \section authors Authors
-     <ul>
-         <li><a href="http://compgeom.com/~piyush">Piyush Kumar</a></li>
-         <li><a href="http://www.ib-krajewski.de">Marek Krajewski</a></li>
-         <li>Hopefully more to come... (please feel free to extend this wrapper)</li>
-     </ul>
+  <ul>
+    <li><a href="http://compgeom.com/~piyush">Piyush Kumar</a></li>
+    <li><a href="http://www.ib-krajewski.de">Marek Krajewski</a></li>
+    <li>Hopefully more to come... (please feel free to extend this wrapper)</li>
+  </ul>
 
  \section changelog Change Log
 
@@ -61,8 +57,8 @@
 
  \todo
  <ol>
-     <li> Implement vertexmedian() in C++. </li>
-     <li> Implement the flip operator as a member function of Delaunay. </li>
+   <li> Implement vertexmedian() in C++. </li>
+   <li> Implement the flip operator as a member function of Delaunay. </li>
  </ol>
  */
 
@@ -76,6 +72,8 @@
 #include <vector>
 #include <string>
 
+struct triangulateio;
+
 
 namespace tpp {
 
@@ -87,6 +85,7 @@ namespace tpp {
       Vertex,  // gives vertex-by-vertex details, and prints so much that Triangle runs much more slowly
       Debug    // gives information only a debugger could love
    };
+
 
    //!  The main Delaunay Class that wraps around Triangle.
    /*!
@@ -105,10 +104,10 @@ namespace tpp {
    public:
       //! Point Typedef
       /*! Warning: If you want to use your own point class, you might have to work hard...
-      
+
            - mrkkrj: true!!! -> spare your time, use an adapter class!
       */
-      typedef reviver::dpoint <double, 2> Point;
+      typedef reviver::dpoint<double, 2> Point;
 
       //! The main constructor.
       /*!
@@ -245,84 +244,39 @@ namespace tpp {
 
       //! Set a user test function for the triangulation
       /*!
-        OPEN TODO::: (use the -u switch!!!!)
+        OPEN TODO::: NYI!!!
       */
       void setUserConstraint(bool (*f)()) { /* NYI !!!!! */ }
 
+      //! Triangulation results, numbers of:
+      int nedges() const;
+      int ntriangles() const;
+      int nvertices() const;
+      int hull_size() const;
+      int nholes() const;
+
+      //! Tesselation results, numbers of:
+      int nvpoints() const;
+      int nvedges() const;
+
+      //! Triangulation completed?
+      bool hasTriangulation() const;
+
+      //! Get min-max point coordinate values
+      void getMinMaxPoints(double& minX, double& minY, double& maxX, double& maxY) const;
 
       //! Output a geomview .off file containing the delaunay triangulation
       void writeoff(std::string& fname);
 
-      //! Save the vertices to a file. (added mrkkrj)
+      //! Save the vertices/segments to file. (added mrkkrj)
       bool savePoints(const std::string& filePath);
-
-      //! Save the PSLG graph to a file. (added mrkkrj)
       bool saveSegments(const std::string& filePath);
 
-      //! Read the vertices from a file. (added mrkkrj)
+      //! Read the vertices/segments from file. (added mrkkrj)
       bool readPoints(const std::string& filePath, std::vector<Point>& points);
+      bool readSegments(const std::string& filePath, std::vector<Point>& points, std::vector<int>& segmentEndpoints,
+                        std::vector<Delaunay::Point>& holeMarkers);
 
-      //! Read PSLG's segments from a file. (added mrkkrj)
-      bool readSegments(const std::string& filePath, std::vector<Point>& points, std::vector<Point>& segments);
-
-
-      //! Number of edges in the triangulation
-      /*!
-        \return Number of Edges
-        Remember to call Triangulate before using this function.
-      */
-      int nedges() const;
-
-      //! Number of triangles in the triangulation
-      /*!
-        \return Number of Triangles
-        Remember to call Triangulate before using this function.
-      */
-      int ntriangles() const;
-
-      //! Number of vertices in the triangulation
-      /*!
-        \return Number of Vertices
-        Remember to call Triangulate before using this function.
-      */
-      int nvertices() const;
-
-      //! Number of vertices on the convex hull.
-      /*!
-        \return Number of vertices on the convex hull.
-        Remember to call Triangulate before using this function.
-      */
-      int hull_size() const;
-
-      //! Number of Voronoi points in the tesselation
-      /*!
-        \return Number of Points
-        Remember to call Tesselate before using this function.
-      */
-      int nvpoints() const;
-
-      //! Number of Voronoi edges in the tesselation
-      /*!
-        \return Number of Edges
-        Remember to call Tesselate before using this function.
-      */
-      int nvedges() const;
-
-      //! Number of holes in the triangulation
-      /*!
-        \return Number of Holes
-        Remember to call Triangulate before using this function.
-      */
-      int nholes() const;
-
-      //! Triangulation completed?
-      /*!
-        \return Status of the triangulation
-      */
-      bool hasTriangulation() const
-      {
-          return m_triangulated;
-      }
 
       ///////////////////////////////
       //
@@ -340,7 +294,7 @@ namespace tpp {
 
       public:
          vIterator operator++();
-         vIterator() :vloop(nullptr) {};
+         vIterator() :vloop(nullptr) {}
          Point& operator*() const;
          ~vIterator();
 
@@ -349,14 +303,14 @@ namespace tpp {
          friend bool operator!=(vIterator const&, vIterator const&);
       };
 
-      vIterator vbegin() { return vIterator(this); };
+      vIterator vbegin() { return vIterator(this); }
       vIterator vend();
 
       //! Given an iterator, find its index in the input vector of points.
       int vertexId(vIterator const& vit) const;
 
       //! Given an index, return the actual double Point
-      const Point& point_at_vertex_id(int i) { return m_pointList[i]; };
+      const Point& point_at_vertex_id(int i) { return m_pointList[i]; }
 
 #if 0 // NYI!
       //! Return the Point additionally created in quality mesh generation ("q" option)
@@ -715,6 +669,9 @@ namespace tpp {
       void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
       void freeTriangleDataStructs();
       void initTriangleDataForPoints();
+      void initTriangleInputData(triangulateio* pin, const std::vector<Point>& points) const;
+      void readPointsFromMesh(std::vector<Point>& points) const;
+      void readSegmentsFromMesh(std::vector<int>& segments) const;
 
       friend class fIterator;
 

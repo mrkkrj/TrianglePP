@@ -185,7 +185,7 @@ namespace {
 
 // test cases
 
-TEST_CASE("unconstrained triangulation", "[trpp]")
+TEST_CASE("standard and quality triangulations", "[trpp]")
 {
     // prepare input
     std::vector<Delaunay::Point> delaunayInput;
@@ -214,7 +214,7 @@ TEST_CASE("unconstrained triangulation", "[trpp]")
 
     bool withQuality = true;
 
-    SECTION("TEST 2.1: default constraints (min angle = 20°)") 
+    SECTION("TEST 2.1: default quality (min angle = 20°)")
     {
        trGenerator.Triangulate(withQuality, dbgOutput);    
 
@@ -222,7 +222,7 @@ TEST_CASE("unconstrained triangulation", "[trpp]")
        checkTriangleCount(trGenerator, delaunayInput, expected, "Quality");
     }
 
-    SECTION("TEST 2.2: custom constraints (angle = 27.5°)") 
+    SECTION("TEST 2.2: custom quality (angle = 27.5°)")
     {
        trGenerator.setMinAngle(27.5f);
        REQUIRE(checkConstraints(trGenerator) == true);
@@ -233,7 +233,7 @@ TEST_CASE("unconstrained triangulation", "[trpp]")
        checkTriangleCount(trGenerator, delaunayInput, expected);
     }
 
-    SECTION("TEST 2.3: custom constraints (angle = 30.5°, area = 5.5)") 
+    SECTION("TEST 2.3: custom quality (angle = 30.5°, area = 5.5)")
     {
        trGenerator.setMinAngle(30.5f);
        trGenerator.setMaxArea(5.5f);
@@ -245,7 +245,7 @@ TEST_CASE("unconstrained triangulation", "[trpp]")
        checkTriangleCount(trGenerator, delaunayInput, expected);
     }
 
-    SECTION("TEST 2.4: custom constraints (angle = 44°)") 
+    SECTION("TEST 2.4: custom quality (angle = 44°)")
     {
        // 44 deg results in an endless loop 
        //  --> triangles too tiny for the floating point precision! 
@@ -254,18 +254,33 @@ TEST_CASE("unconstrained triangulation", "[trpp]")
 
        REQUIRE(checkConstraints(trGenerator) == false);               
     }
+}
 
-    // 3. Voronoi diagrams    
 
-    SECTION("TEST 3: Voronoi tesselation") 
+TEST_CASE("Voronoi tesselation", "[trpp]")
+{
+    // prepare input
+    std::vector<Delaunay::Point> delaunayInput;
+
+    delaunayInput.push_back(Delaunay::Point(0,0));
+    delaunayInput.push_back(Delaunay::Point(1,1));
+    delaunayInput.push_back(Delaunay::Point(0,2));
+    delaunayInput.push_back(Delaunay::Point(3,3));
+    delaunayInput.push_back(Delaunay::Point(1.5, 2.125));
+
+    Delaunay trGenerator(delaunayInput);
+
+    // 3. Voronoi diagram
+
+    SECTION("TEST 3: Voronoi tesselation")
     {
-       trGenerator.Tesselate();       
+       trGenerator.Tesselate();
        debugPrintVoronoiPoints(trGenerator);
 
        int voronoiPoints = trGenerator.nvpoints();
-       expected = 4;
+       int expected = 4;
 
-       REQUIRE(voronoiPoints == expected);              
+       REQUIRE(voronoiPoints == expected);
     }
 }
 
@@ -454,10 +469,10 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
 }
 
 
-TEST_CASE("Reading and writing files", "[trpp]")
+TEST_CASE("Reading files", "[trpp]")
 {
     Delaunay trReader;
-    bool ioResult;
+    bool ioStatus = false;
 
     // 7. reading files
 
@@ -465,26 +480,30 @@ TEST_CASE("Reading and writing files", "[trpp]")
     {
         std::vector<Delaunay::Point> points;
 
-        ioResult = trReader.readPoints("../exampleFiles/spiral.node", points);
+        ioStatus = trReader.readPoints("../exampleFiles/spiral.node", points);
 
-        REQUIRE(ioResult == true);
+        REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 15); // look inside the file
     }
 
-#if 0
     SECTION("TEST 7.2: reading a .poly file")
     {
         std::vector<Delaunay::Point> points;
-        std::vector<Delaunay::Point> segments;
+        std::vector<int> segments;
+        std::vector<Delaunay::Point> holes;
 
-        ioResult = trReader.readSegments("../exampleFiles/face.poly", points, segments);
+        ioStatus = trReader.readSegments("../exampleFiles/face.poly", points, segments, holes);
 
-        REQUIRE(ioResult == true);
-        REQUIRE(points.size() == 26);   // look inside the file
-        REQUIRE(segments.size() == 22); // look inside the file
-    }
-#endif
+        REQUIRE(ioStatus == true);
+        REQUIRE(points.size() == 26);       // look inside the file
+        REQUIRE(segments.size()/2  == 22);  // look inside the file
+        REQUIRE(holes.size() == 3);         // look inside the file
+    }  
+}
 
+
+TEST_CASE("Writing files", "[trpp]")
+{
     // 8. writing files
 
     std::vector<Delaunay::Point> pslgDelaunayInput;
@@ -493,39 +512,74 @@ TEST_CASE("Reading and writing files", "[trpp]")
     preparePLSGTestData(pslgDelaunayInput, pslgDelaunaySegments);
 
     Delaunay trWriter(pslgDelaunayInput);
+    Delaunay trReader;
+    bool ioStatus = false;
 
     SECTION("TEST 8.1: writing a .node file")
     {
-        ioResult = trWriter.savePoints("./test.node");
-        REQUIRE(ioResult == true);
+        ioStatus = trWriter.savePoints("./test.node");
+        REQUIRE(ioStatus == true);
 
         // read it back
         std::vector<Delaunay::Point> points;
-        ioResult = trReader.readPoints("./test.node", points);
+        ioStatus = trReader.readPoints("./test.node", points);
 
-        REQUIRE(ioResult == true);
+        REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());
     }
 
 #if 0
-    SECTION("TEST 8.2: writing a .poly file")
+    SECTION("TEST 8.2: writing a .poly file containing segments")
     {
         bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
         REQUIRE(segmentsOK);
 
-        ioResult = trWriter.saveSegments("./test.poly");
-        REQUIRE(ioResult == true);
+        ioStatus = trWriter.saveSegments("./test.poly");
+        REQUIRE(ioStatus == true);
 
         // read it back
-        std::vector<Delaunay::Point> segments;
-        ioResult = trReader.readSegments("./test.poly", segments);
+        std::vector<Delaunay::Point> points;
+        std::vector<int> segments;
+        std::vector<Delaunay::Point> holes;
 
-        REQUIRE(ioResult == true);
+        ioStatus = trReader.readSegments("./test.poly", points, segments, holes);
+
+        REQUIRE(ioStatus == true);
+        REQUIRE(points.size() == pslgDelaunayInput.size());
         REQUIRE(segments.size() == pslgDelaunaySegments.size());
+        REQUIRE(holes.size() == 0); // no holes!
     }
 #endif
 
-}
+#if 0
+    SECTION("TEST 8.2: writing a .poly file containig segments & holes")
+    {
+        bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
+        REQUIRE(segmentsOK);
 
+        std::vector<Delaunay::Point> pslgHoles;
+        pslgHoles.emplace_back(1, 1);
+        pslgHoles.emplace_back(1, 2);
+
+        bool holesOK = trWriter.setHolesConstraint(pslgDelaunaySegments);
+        REQUIRE(holesOK);
+
+        ioStatus = trWriter.saveSegments("./test.poly");
+        REQUIRE(ioStatus == true);
+
+        // read it back
+        std::vector<Delaunay::Point> points;
+        std::vector<int> segments;
+        std::vector<Delaunay::Point> holes;
+
+        ioStatus = trReader.readSegments("./test.poly", points, segments, holes);
+
+        REQUIRE(ioStatus == true);
+        REQUIRE(points.size() == pslgDelaunayInput.size());
+        REQUIRE(segments.size() == pslgDelaunaySegments.size());
+        REQUIRE(holes.size() == pslgHoles.size());
+    }
+#endif
+}
 
 // --- eof ---
