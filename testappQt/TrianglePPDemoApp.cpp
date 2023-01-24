@@ -490,41 +490,44 @@ void TrianglePPDemoApp::showExample2()
     pslgDelaunayInput.push_back(Point(2, 2));
     pslgDelaunayInput.push_back(Point(2, 3));
 
+    flipPoints(pslgDelaunayInput);
+
     float offsetX = 20;
     float offsetY = 20;
-    float scaleFactor = 80;
+    float scaleFactor = 80;       
 
     drawPoints(pslgDelaunayInput, offsetX, offsetY, scaleFactor);
     statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
 
-    // draw segments 
-    std::vector<Point> pslgDelaunaySegments;
+    // draw segments
+    std::vector<int> pslgSegmentEndpoints;
+
+    auto addSegment = [&](int start, int end) {
+        pslgSegmentEndpoints.push_back(start);
+        pslgSegmentEndpoints.push_back(end);
+    };
 
     // outer outline
-    pslgDelaunaySegments.push_back(Point(1, 0));
-    pslgDelaunaySegments.push_back(Point(0, 0));
-    pslgDelaunaySegments.push_back(Point(0, 0));
-    pslgDelaunaySegments.push_back(Point(2, 3));
-    pslgDelaunaySegments.push_back(Point(2, 3));
-    pslgDelaunaySegments.push_back(Point(4, 0));
-    pslgDelaunaySegments.push_back(Point(4, 0));
-    pslgDelaunaySegments.push_back(Point(3, 0));
-    pslgDelaunaySegments.push_back(Point(3, 0));
-    pslgDelaunaySegments.push_back(Point(2.5, 1));
-    pslgDelaunaySegments.push_back(Point(2.5, 1));
-    pslgDelaunaySegments.push_back(Point(1.5, 1));
-    pslgDelaunaySegments.push_back(Point(1.5, 1));
-    pslgDelaunaySegments.push_back(Point(1, 0));
+    addSegment(0, 9);
+    addSegment(9, 3);
+    addSegment(3, 2);
+    addSegment(2, 5);
+    addSegment(5, 4);
+    addSegment(4, 1);
+    addSegment(1, 0);
 
     // inner outline
-    pslgDelaunaySegments.push_back(Point(1.6, 1.5));
-    pslgDelaunaySegments.push_back(Point(2, 2));
-    pslgDelaunaySegments.push_back(Point(2, 2));
-    pslgDelaunaySegments.push_back(Point(2.4, 1.5));
-    pslgDelaunaySegments.push_back(Point(2.4, 1.5));
-    pslgDelaunaySegments.push_back(Point(1.6, 1.5));
+    addSegment(6, 8);
+    addSegment(8, 7);
+    addSegment(7, 6);
 
-    drawSegments(pslgDelaunaySegments, pslgDelaunayInput);
+    drawSegments(pslgSegmentEndpoints);
+
+
+    // OPEN TODO:: draw holes
+
+    // ....
+
 }
 
 
@@ -788,6 +791,36 @@ void TrianglePPDemoApp::rescalePointsToDrawArea(
 }
 
 
+void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
+{
+    float maxY = 0;
+    float minY = ui.drawAreaWidget->height();
+
+    for (const auto& pt : points)
+    {
+        if(pt.y < minY)
+        {
+            minY = pt.y;
+        }
+
+        if(pt.y > maxY)
+        {
+            maxY = pt.y;
+        }
+    }
+
+    if (maxY == minY)
+    {
+        return;
+    }
+
+    for (auto& pt : points)
+    {
+       pt.y = (maxY - minY) - pt.y;
+    }
+}
+
+
 void TrianglePPDemoApp::writeToFile()
 {
     // fill the points
@@ -810,23 +843,26 @@ void TrianglePPDemoApp::writeToFile()
 
     if (!segmentEndpointIndexes_.empty())
     {
-#if 1
-       QMessageBox::warning(this, tr("WARNING"), tr("Exporting of segments not yet working!!!"));
-       return;
-#else
-       // TEST::: 
-
        if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
        {
           QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
           return;
        }
 
+       if (!holePoints_.empty())
+       {
+           QMessageBox::warning(this, tr("WARNING"), tr("Exporting of holes not yet working!!!\n\nIgnoring the hole markers..."));
+
+           // OPEN TODO:::
+
+           //trGenerator.setHolesConstraint(holePoints_.toTrppPoint());
+           // .....
+       }
+
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                        "./Trpp_Segments.poly", tr("Segment File (*.poly)"));
 
        ok = trGenerator.saveSegments(fileName.toStdString());
-#endif
     }
     else
     {
@@ -886,14 +922,13 @@ void TrianglePPDemoApp::readFromFile()
 
     rescalePointsToDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
 
+    //flipPoints(dempAppPoints); // OPEN TODO:::: --> also flip the holes etc!
+
     drawPoints(dempAppPoints, offsetX * scaleFactor, offsetY * scaleFactor, scaleFactor);    
     statusBar()->showMessage(QString("Read %1 points from %2").arg(points.size()).arg(fileName));
 
     // add read segments
-    for (size_t i = 0; i < segmentEndpoints.size(); i += 2)
-    {
-        onSegmentEndpointsSelected(segmentEndpoints[i], segmentEndpoints[i + 1]);
-    }
+    drawSegments(segmentEndpoints);
 
     // add read holes
     for (auto& point : holeMarkers)
@@ -925,6 +960,15 @@ void TrianglePPDemoApp::drawSegments(const std::vector<Point>& segmentEndpoints,
         auto idx2 = std::distance(points.begin(), std::find(points.begin(), points.end(), pt2));
 
         onSegmentEndpointsSelected(idx1, idx2);
+    }
+}
+
+
+void TrianglePPDemoApp::drawSegments(const std::vector<int>& segmentEndpointsIndexes)
+{
+    for (size_t i = 0; i < segmentEndpointsIndexes.size(); i += 2)
+    {
+        onSegmentEndpointsSelected(segmentEndpointsIndexes[i], segmentEndpointsIndexes[i + 1]);
     }
 }
 

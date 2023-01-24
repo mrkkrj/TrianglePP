@@ -214,8 +214,8 @@ namespace tpp {
 
      //! Set the holes to constrain the triangulation
      /*!
-        OPEN TODO::: comment not correct????
-       Takes a vector of 2 dimensional points where each consecutive pair of points describes a single edge of a hole.
+       Takes a vector of 2 dimensional points where each points marks a hole, i.e. it infects all triangles
+       around in until it sees a segment.
 
        \return true if the input is valid, false otherwise
      */

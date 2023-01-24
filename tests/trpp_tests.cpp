@@ -138,7 +138,7 @@ namespace {
 
 
     // test data:
-    //   - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
+    //  - letter A, as in Triangle's documentation but simplified (https://www.cs.cmu.edu/~quake/triangle.defs.html#dt)
 
     void preparePLSGTestData(std::vector<Delaunay::Point>& pslgPoints, std::vector<Delaunay::Point>& pslgSegments)
     {
@@ -528,7 +528,6 @@ TEST_CASE("Writing files", "[trpp]")
         REQUIRE(points.size() == pslgDelaunayInput.size());
     }
 
-#if 0
     SECTION("TEST 8.2: writing a .poly file containing segments")
     {
         bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
@@ -549,20 +548,20 @@ TEST_CASE("Writing files", "[trpp]")
         REQUIRE(segments.size() == pslgDelaunaySegments.size());
         REQUIRE(holes.size() == 0); // no holes!
     }
-#endif
 
-#if 0
     SECTION("TEST 8.2: writing a .poly file containig segments & holes")
     {
-        bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
-        REQUIRE(segmentsOK);
+        // OPEN TODO::: not yet working!!!
 
         std::vector<Delaunay::Point> pslgHoles;
-        pslgHoles.emplace_back(1, 1);
-        pslgHoles.emplace_back(1, 2);
+        pslgHoles.push_back(Delaunay::Point(1, 1));
+        pslgHoles.push_back(Delaunay::Point(1, 2));
 
-        bool holesOK = trWriter.setHolesConstraint(pslgDelaunaySegments);
+        bool holesOK = trWriter.setHolesConstraint(pslgHoles);
         REQUIRE(holesOK);
+
+        bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
+        REQUIRE(segmentsOK);
 
         ioStatus = trWriter.saveSegments("./test.poly");
         REQUIRE(ioStatus == true);
@@ -576,10 +575,13 @@ TEST_CASE("Writing files", "[trpp]")
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());
+
+        // TEST::: not yet working!!!
         REQUIRE(segments.size() == pslgDelaunaySegments.size());
+        // TEST:::
+
         REQUIRE(holes.size() == pslgHoles.size());
     }
-#endif
 }
 
 // --- eof ---

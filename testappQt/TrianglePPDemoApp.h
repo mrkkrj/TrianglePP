@@ -61,6 +61,8 @@ private:
 
    void drawPoints(const std::vector<Point>& points, float offsetX = 0, float offsetY = 0, float scaleFactor = 1);
    void drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points);
+   void drawSegments(const std::vector<int>& segmentEndpointsIndexes);
+   void flipPoints(std::vector<Point>& points) const;
 
 private:
     Ui::TrianglePPDemoAppClass ui;
