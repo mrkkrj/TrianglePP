@@ -85,11 +85,14 @@ The original *Triangle* library documentation can be found at: http://www.cs.cmu
 Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 ## TODOs:
- - add more tests
+ - add support for sanitizing inputs with duplicates (work underway)
+ - fix a bug in .poly file writing with holes (!!!)
+ - remove warnings
+ - add support for regions and reading of region attributes from .poly file
  - add CI support (Travis?)
- - add file export/import to the Qt demo app (work is underway...)
+ - extract iterator code to own file
  - add convex hull demonstration to the Qt demo app
- - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc)
+ - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (???)
  - Port the Qt demo app to Emscripten
 
 

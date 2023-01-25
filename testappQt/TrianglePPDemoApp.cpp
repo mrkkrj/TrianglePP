@@ -16,6 +16,9 @@
 #include <random>
 #include <cassert>
 
+// debug support
+//#define TRIANGLE_DETAIL_DEBUG
+
 
 using namespace tpp;
 
@@ -34,9 +37,9 @@ namespace {
 
    // impl. helpers
    QPoint getDelaunayResultPoint(
-         std::vector<Delaunay::Point>& delaunayInput, 
-         int resultIndex, 
-         const Delaunay::Point& stPoint)
+         const Delaunay& trGenerator,
+         int resultIndex,
+         const Delaunay::Point& steinerPt)
    {
       double x;
       double y;
@@ -45,16 +48,14 @@ namespace {
       // ( aka Steiner points )
       if (resultIndex == -1)
       {
-         x = stPoint[0]; // an added vertex, it's data copied to resultPoint
-         y = stPoint[1];
+         x = steinerPt[0]; // an added vertex, it's data copied to resultPoint
+         y = steinerPt[1];
       }
       else
       {
           // point from original data
-          assert(resultIndex >= 0);
-
-          x = delaunayInput[static_cast<unsigned>(resultIndex)][0];
-          y = delaunayInput[static_cast<unsigned>(resultIndex)][1];
+          x = trGenerator.pointAtVertexId(resultIndex)[0];
+          y = trGenerator.pointAtVertexId(resultIndex)[1];
       }
 
       return QPoint(x, y);
@@ -160,17 +161,15 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
       delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
    }
 
-   Delaunay trGenerator(delaunayInput);
-   configDelaunay(trGenerator);
-   
-#if 0
-   auto trace = tpp::Debug; // TEST:::
+#ifdef TRIANGLE_DETAIL_DEBUG
+   auto trace = tpp::Debug;
 #else
    auto trace = tpp::None;
 #endif
 
-   trGenerator.useConvexHullWithSegments(includeConvexHull_);
-
+   Delaunay trGenerator(delaunayInput);
+   configDelaunay(trGenerator);
+   
    if (useConformingDelaunay_)
    {
       trGenerator.TriangulateConf(useConstraints_, trace);
@@ -183,49 +182,7 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    triangulated_ = true;
    
    // draw
-   for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
-   {
-      // Steiner points?
-      Delaunay::Point sp1;
-      Delaunay::Point sp2;
-      Delaunay::Point sp3;
-
-      int originIdx = trGenerator.Org(fit, &sp1);
-      int destIdx = trGenerator.Dest(fit, &sp2);
-      int apexIdx = trGenerator.Apex(fit, &sp3);
-
-      auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
-      {
-         return getDelaunayResultPoint(delaunayInput, index, dpoint);
-      };
-
-      // draw triangle
-      ui.drawAreaWidget->drawLine(getResultPoint(originIdx, sp1), getResultPoint(destIdx, sp2));
-      ui.drawAreaWidget->drawLine(getResultPoint(destIdx, sp2), getResultPoint(apexIdx, sp3));
-      ui.drawAreaWidget->drawLine(getResultPoint(apexIdx, sp3), getResultPoint(originIdx, sp1));
-   }
-
-   // draw used constraint segments
-   ui.drawAreaWidget->setDrawColor(c_SegmentColor);
-
-   for (int i = 0; i < segmentEndpointIndexes_.size(); ++i)
-   {
-      auto start = segmentEndpointIndexes_[i++];
-      auto end = segmentEndpointIndexes_[i];
-
-      ui.drawAreaWidget->drawLine(drawnPoints[start], drawnPoints[end]);
-   }
-
-   // and hole markers
-   for (auto& point : holePoints_)
-   {
-      drawHoleMarker(point);
-   }
-
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
-
-   // finished
-   statusBar()->showMessage(QString("Created %1 triangles").arg(trGenerator.ntriangles()));
+   drawTriangualtion(trGenerator, drawnPoints);
 }
 
 
@@ -536,7 +493,7 @@ void TrianglePPDemoApp::showTrianguationOptions()
    TrianglePpOptions dlg(this);
 
    dlg.fillContents(
-         minAngle_ > 0 ? minAngle_ : c_defaultMinAngle,
+         minAngle_ >= 0 ? minAngle_ : c_defaultMinAngle,
          maxArea_ > 0 ? maxArea_ : -1,
          minPoints_ > 0 ? minPoints_ : c_defaultMinPoints,
          maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints,
@@ -633,15 +590,63 @@ void TrianglePPDemoApp::clearVoronoiPoints()
 }
 
 
+void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPoint>& pointsOnScreen)
+{
+    // draw triangles
+    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    {
+       // Steiner points?
+       Delaunay::Point sp1;
+       Delaunay::Point sp2;
+       Delaunay::Point sp3;
+
+       int originIdx = trGenerator.Org(fit, &sp1);
+       int destIdx = trGenerator.Dest(fit, &sp2);
+       int apexIdx = trGenerator.Apex(fit, &sp3);
+
+       auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
+       {
+           return getDelaunayResultPoint(trGenerator, index, dpoint);
+       };
+
+       // draw triangle
+       ui.drawAreaWidget->drawLine(getResultPoint(originIdx, sp1), getResultPoint(destIdx, sp2));
+       ui.drawAreaWidget->drawLine(getResultPoint(destIdx, sp2), getResultPoint(apexIdx, sp3));
+       ui.drawAreaWidget->drawLine(getResultPoint(apexIdx, sp3), getResultPoint(originIdx, sp1));
+    }
+
+    // draw used constraint segments
+    ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+
+    for (int i = 0; i < segmentEndpointIndexes_.size(); ++i)
+    {
+       auto start = segmentEndpointIndexes_[i++];
+       auto end = segmentEndpointIndexes_[i];
+       ui.drawAreaWidget->drawLine(pointsOnScreen[start], pointsOnScreen[end]);
+    }
+
+    // ... and hole markers
+    for (auto& point : holePoints_)
+    {
+       drawHoleMarker(point);
+    }
+
+    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+
+    // ready
+    statusBar()->showMessage(QString("Created %1 triangles").arg(trGenerator.ntriangles()));
+}
+
+
 void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
 {
    // draw Voronoi points
    ui.drawAreaWidget->setDrawColor(c_VoronoiColor);
 
-   for (Delaunay::vvIterator fit = trGenerator.vvbegin(); fit != trGenerator.vvend(); ++fit)
+   for (Delaunay::vvIterator iter = trGenerator.vvbegin(); iter != trGenerator.vvend(); ++iter)
    {
       // access data
-      auto point = *fit;
+      auto point = *iter;
       double x = point[0];
       double y = point[1];
 
@@ -650,11 +655,11 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
    }
 
    // ... and Voronoi edges
-   for (Delaunay::veIterator fit = trGenerator.vebegin(); fit != trGenerator.veend(); ++fit)
+   for (Delaunay::veIterator iter = trGenerator.vebegin(); iter != trGenerator.veend(); ++iter)
    {
       bool finiteEdge = false;
-      Delaunay::Point p1 = trGenerator.Org(fit);
-      Delaunay::Point p2 = trGenerator.Dest(fit, finiteEdge);
+      Delaunay::Point p1 = trGenerator.Org(iter);
+      Delaunay::Point p2 = trGenerator.Dest(iter, finiteEdge);
 
       // access data
       double xstart = p1[0];
@@ -715,6 +720,8 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
       trGenerator.setMaxArea(-1);
    }
 
+   trGenerator.useConvexHullWithSegments(includeConvexHull_);
+
    if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
    {
       QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
@@ -748,7 +755,7 @@ void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos)
 }
 
 
-void TrianglePPDemoApp::rescalePointsToDrawArea(
+void TrianglePPDemoApp::findScalingForDrawArea(
         const tpp::Delaunay& trGenerator,
         double& offsetX,
         double& offsetY,
@@ -798,6 +805,21 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
 
     for (const auto& pt : points)
     {
+
+        // OPEN TODO:: after rescaling a slightly off-zero coordinates possible!!!!
+        //  - correct floating point arithmetic there!
+#if 1
+        if(pt.x >= 0 && pt.y >= 0)
+            ;
+        else
+        {
+            //Q_ASSERT(pt.x >= 0 && pt.y >= 0);
+            std::cout << " WARNING: flipPoints() - negative coordinate: point.x=" << pt.x << ", point.y=" << pt.y << std::endl;
+        }
+#else
+        Q_ASSERT(pt.x >= 0 && pt.y >= 0);
+#endif
+
         if(pt.y < minY)
         {
             minY = pt.y;
@@ -814,12 +836,25 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
         return;
     }
 
+    auto middle = (maxY - minY)/2 + minY;
+
     for (auto& pt : points)
-    {
-       pt.y = (maxY - minY) - pt.y;
+    {       
+        pt.y = pt.y < middle
+                ? middle + (middle - pt.y)
+                : middle - (pt.y - middle);
     }
 }
 
+
+void TrianglePPDemoApp::rescalePoints(std::vector<Point>& points, double offsetX, double offsetY, double scaleFactor) const
+{
+    for (auto& pt: points)
+    {
+        pt.x = (pt.x + offsetX) * scaleFactor;
+        pt.y = (pt.y + offsetY) * scaleFactor;
+    }
+}
 
 void TrianglePPDemoApp::writeToFile()
 {
@@ -907,34 +942,47 @@ void TrianglePPDemoApp::readFromFile()
     // convert points
     std::vector<Point> dempAppPoints;
 
-    for (size_t i = 0; i < points.size(); ++i)
+    auto convertPoints = [](std::vector<Delaunay::Point>& trppPoints, std::vector<Point>& xyPoints)
     {
-       double x = points[i][0];
-       double y = points[i][1];
+        for (size_t i = 0; i < trppPoints.size(); ++i)
+        {
+           double x = trppPoints[i][0];
+           double y = trppPoints[i][1];
 
-       dempAppPoints.emplace_back(x, y);
-    }
+           xyPoints.emplace_back(x, y);
+        }
+    };
+
+    convertPoints(points, dempAppPoints);
 
     // draw points
     double offsetX = 0;
     double offsetY = 0;
     double scaleFactor = 1;
 
-    rescalePointsToDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
+    findScalingForDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
+    rescalePoints(dempAppPoints, offsetX, offsetY, scaleFactor);
+    flipPoints(dempAppPoints);
 
-    //flipPoints(dempAppPoints); // OPEN TODO:::: --> also flip the holes etc!
+    drawPoints(dempAppPoints);
 
-    drawPoints(dempAppPoints, offsetX * scaleFactor, offsetY * scaleFactor, scaleFactor);    
     statusBar()->showMessage(QString("Read %1 points from %2").arg(points.size()).arg(fileName));
 
-    // add read segments
+    // ...and read segments
     drawSegments(segmentEndpoints);
 
-    // add read holes
-    for (auto& point : holeMarkers)
+    // draw holes
+    std::vector<Point> dempAppHoles;
+    convertPoints(holeMarkers, dempAppHoles);
+
+    rescalePoints(dempAppHoles, offsetX, offsetY, scaleFactor);
+    flipPoints(dempAppHoles);
+
+    for (auto& point : dempAppHoles)
     {
        onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
-                                  { (int)((point[0] + offsetX)* scaleFactor), (int)((point[1] + offsetY)* scaleFactor)  });
+                                  //{ (int)((point[0] + offsetX)* scaleFactor), (int)((point[1] + offsetY)* scaleFactor)  });
+                                  { (int)(point.x), (int)(point.y) });
     }
 }
 

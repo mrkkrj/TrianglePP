@@ -64,7 +64,6 @@ FILE* g_debugFile = nullptr;
 
 #include <iostream>
 #include <sstream>
-#include <cassert>
 #include <algorithm>
 
 
@@ -317,7 +316,10 @@ void Delaunay::Tesselate(bool useConformingDelaunay, DebugOutputLevel traceLvl)
    TP_MESH_BEHAVIOR_WRAP();
 
    // OPEN TODO::: check these preconditions??
-   if (tpmesh->holes != 0) { /* ............ */ }
+   if (tpmesh->holes != 0)
+   {
+       /* ............ */
+   }
 
    m_vorout = new triangulateio;
    TP_VOROUT();
@@ -526,7 +528,7 @@ bool Delaunay::savePoints(const std::string& filePath)
 
      if (!m_triangleWrap)
      {
-        assert(!m_pmesh && !m_pbehavior);
+        Assert(!m_pmesh && !m_pbehavior, "");
         initTriangleDataForPoints();
      }
 
@@ -602,7 +604,7 @@ bool Delaunay::readPoints(const std::string& filePath, std::vector<Delaunay::Poi
 {  
     if (!m_triangleWrap)
     {
-       assert(!m_pmesh && !m_pbehavior);
+       Assert(!m_pmesh && !m_pbehavior, "");
        initTriangleDataForPoints();
     }
 
@@ -633,7 +635,7 @@ bool Delaunay::readSegments(
 {
     if (!m_triangleWrap)
     {
-       assert(!m_pmesh && !m_pbehavior);
+       Assert(!m_pmesh && !m_pbehavior, "");
        initTriangleDataForPoints();
     }
 
@@ -836,6 +838,16 @@ void Delaunay::getMinMaxPoints(double& minX, double& minY, double& maxX, double&
 /*!
   added mrkkrj:
 */
+const Delaunay::Point& Delaunay::pointAtVertexId(int i) const
+{
+    Assert(i >= 0 || i < m_pointList.size(), "Point index out of bounds!\n");
+
+    return m_pointList[i];
+}
+
+/*!
+  added mrkkrj:
+*/
 void Delaunay::setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl)
 {
    switch (traceLvl)
@@ -853,7 +865,8 @@ void Delaunay::setDebugLevelOption(std::string& options, DebugOutputLevel traceL
       options.append("VVVV"); // much, much more!
       break;
    default:
-      assert(false && "unknown trace level");
+      //Assert(false && "unknown trace level");
+       Assert(false, "unknown trace level");
    }
 }
 
@@ -915,7 +928,7 @@ void Delaunay::freeTriangleDataStructs()
 */
 void Delaunay::initTriangleDataForPoints()
 {
-    assert(!m_triangleWrap && !m_pmesh && !m_pbehavior);
+    Assert(!m_triangleWrap && !m_pmesh && !m_pbehavior, "Expected empty instance!\n");
 
     m_triangleWrap = new Triwrap;
     m_pmesh = new Triwrap::__pmesh;
@@ -1360,9 +1373,9 @@ Delaunay::fIterator Delaunay::Sym(fIterator const & fit){
 */
 double Delaunay::area(fIterator const & fit){
     Point torg, tdest, tapex;
-    torg  = point_at_vertex_id(Org(fit));
-    tdest = point_at_vertex_id(Dest(fit));
-    tapex = point_at_vertex_id(Apex(fit));
+    torg  = pointAtVertexId(Org(fit));
+    tdest = pointAtVertexId(Dest(fit));
+    tapex = pointAtVertexId(Apex(fit));
     double dxod(torg[0] - tdest[0]);
     double dyod(torg[1] - tdest[1]);
     double dxda(tdest[0] - tapex[0]);
@@ -1572,7 +1585,7 @@ Delaunay::vvIterator::vvIterator(Delaunay* triangulator) {
    triangulateio* pvorout = (struct triangulateio*)triangulator->m_vorout;
 
    // TEST::: I hope so!
-   assert(triangulator->GetFirstIndexNumber() == 0);
+   Assert(triangulator->GetFirstIndexNumber() == 0, "");
 
    vvloop = pvorout->pointlist;
    vvindex = 0;
@@ -1609,7 +1622,7 @@ Delaunay::vvIterator Delaunay::vvIterator::operator++() {
 Delaunay::Point& Delaunay::vvIterator::operator*() const {
    Point::NT* pointlist = (Point::NT*)vvloop;
 
-   // UB! -> but also in original code...OPEN TODO::: !!!
+   // UB! -> but also in original code...  OPEN TODO::: !!!
    return *((Point*)(pointlist + vvindex));
 }
 
@@ -1617,7 +1630,7 @@ Delaunay::Point& Delaunay::vvIterator::operator*() const {
 */
 void Delaunay::vvIterator::advance(int steps) {
    int stepSize = 2;
-   assert(Point().dim() == stepSize);
+   Assert(Point().dim() == stepSize, "");
 
    if (vvindex/stepSize + steps < vvcount) {
       vvindex += steps * stepSize;
@@ -1628,7 +1641,7 @@ void Delaunay::vvIterator::advance(int steps) {
       vvloop = nullptr;
    }
 
-   assert(vvindex / stepSize < vvcount);
+   Assert(vvindex / stepSize < vvcount, "");
 }
 
 /*!
@@ -1668,7 +1681,7 @@ Delaunay::veIterator::veIterator(Delaunay* triangulator) {
    triangulateio* pvorout = (struct triangulateio*)triangulator->m_vorout;
 
    // TEST::: I hope so!
-   assert(triangulator->GetFirstIndexNumber() == 0);
+   Assert(triangulator->GetFirstIndexNumber() == 0, "");
 
    veloop = pvorout->edgelist; 
    veindex = 0; 
@@ -1704,7 +1717,7 @@ Delaunay::veIterator Delaunay::veIterator::operator++() {
       veloop = nullptr;
    }
 
-   assert(veindex / 2 < vecount);
+   Assert(veindex / 2 < vecount, "");
    return veit;
 }
 
@@ -1712,7 +1725,7 @@ Delaunay::veIterator Delaunay::veIterator::operator++() {
 */
 int Delaunay::veIterator::startPointId() const {
    if (!veloop) {
-      assert(false);
+      Assert(false, "");
       return -1;
    }
 
@@ -1724,11 +1737,11 @@ int Delaunay::veIterator::startPointId() const {
 */
 int Delaunay::veIterator::endPointId(Point& normvec) const {
    if (!veloop) {
-      assert(false);
+      Assert(false, "");
       return -1;
    }
 
-   assert(veindex / 2 < vecount);
+   Assert(veindex / 2 < vecount, "");
    auto edgelist = (int*)veloop;
    int idx = edgelist[veindex + 1];
    
@@ -1740,7 +1753,7 @@ int Delaunay::veIterator::endPointId(Point& normvec) const {
       normvec[0] = normlist[veindex];
       normvec[1] = normlist[veindex + 1];
 
-      assert(!(normvec[0] == 0.0 && normvec[1] == 0.0));
+      Assert(!(normvec[0] == 0.0 && normvec[1] == 0.0), "");
    }
    else {
       normvec[0] = 0.0;
@@ -1789,10 +1802,10 @@ Delaunay::Point Delaunay::Dest(veIterator const& eit, bool& finiteEdge)
    finiteEdge = pointId != -1;
 
    if (pointId == -1) {
-      assert(normvec.sqr_length() != 0.0);
+      Assert(normvec.sqr_length() != 0.0, "");
       return normvec;
    } else {
-      assert(normvec.sqr_length() == 0.0);
+      Assert(normvec.sqr_length() == 0.0, "");
       
       vvIterator vit(this);
       vit.advance(pointId);

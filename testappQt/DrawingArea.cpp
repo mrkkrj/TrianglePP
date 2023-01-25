@@ -342,6 +342,32 @@ void DrawingArea::deletPointAtLastPos()
 }
 
 
+void DrawingArea::deleteHoleMarkerAtLastPos()
+{
+    // OPEN TODO::: here or outside the class???
+    // OPEN TODO::: repetitive code!!!
+
+    int idx = holeMarkerPoints_.indexOf(startPos_);
+
+    if (idx != -1)
+    {
+       holeMarkerPoints_.remove(idx);
+
+       // overpaint
+       auto pointColor = penColor_;
+       penColor_ = Qt::white;
+
+       drawPointAt(startPos_);
+
+       // restore color
+       penColor_ = pointColor;
+
+       imgDirty_ = true;
+       emit holeMarkerDeleted(startPos_);
+    }
+}
+
+
 void DrawingArea::startMovingPoint()
 {
    int idx = points_.indexOf(startPos_);
@@ -478,8 +504,20 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
 {
    QMenu ctxtMenu(tr(""), this);
 
+   // OPEN TODO:: next --> can only be done in the event handler !!!!
+#if 0
+   bool isHoleMarker = holeMarkerPoints_.contains(pos);
+
+   QAction action1(isHoleMarker ? "Delete HoleMarker" : "Delete Point", this);
+   if (isHoleMarker)
+       connect(&action1, &QAction::triggered, this, &DrawingArea::deleteHoleMarkerAtLastPos); // ????
+   else
+      connect(&action1, &QAction::triggered, this, &DrawingArea::deletPointAtLastPos);
+#endif
+
    QAction action1("Delete Point", this);
    connect(&action1, &QAction::triggered, this, &DrawingArea::deletPointAtLastPos);
+
    ctxtMenu.addAction(&action1);
 
    // OPEN TODO::: next...

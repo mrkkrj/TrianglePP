@@ -44,11 +44,12 @@ private:
    void showInfo();
    void clearDisplay();
    void clearVoronoiPoints();
+   void drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPoint>& pointsOnScreen);
    void drawVoronoiTesselation(tpp::Delaunay& trGenerator);
    void configDelaunay(tpp::Delaunay& trGenerator);
    bool isHoleMarker(const QPoint& point) const;
    void drawHoleMarker(const QPoint& pos);
-   void rescalePointsToDrawArea(const tpp::Delaunay& trGenerator, double& offsetX, double& offsetY, double& scaleFactor) const;
+   void findScalingForDrawArea(const tpp::Delaunay& trGenerator, double& offsetX, double& offsetY, double& scaleFactor) const;
 
    void writeToFile();
    void readFromFile();
@@ -63,6 +64,7 @@ private:
    void drawSegments(const std::vector<Point>& segmentEndpoints, const std::vector<Point>& points);
    void drawSegments(const std::vector<int>& segmentEndpointsIndexes);
    void flipPoints(std::vector<Point>& points) const;
+   void rescalePoints(std::vector<Point>& points, double offsetX, double offsetY, double scaleFactor) const;
 
 private:
     Ui::TrianglePPDemoAppClass ui;

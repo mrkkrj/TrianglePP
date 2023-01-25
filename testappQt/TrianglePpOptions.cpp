@@ -112,7 +112,7 @@ void TrianglePpOptions::setMinAngleBoundaries(float maxOk, float maxWarning)
    // allow up to a warning!!!
 
    auto validator = new QDoubleValidator(0.0, maxWarning, 2, this);
-   validator->setLocale(QLocale::C); // always use point!
+   validator->setLocale(QLocale::C); // always use point as separator!
    ui.minAngleLineEdit->setValidator(nullptr);
    ui.minAngleLineEdit->setValidator(validator);
 }
@@ -168,7 +168,7 @@ void TrianglePpOptions::on_minAngleLineEdit_textChanged()
 
 void TrianglePpOptions::on_minAngleLineEdit_editingFinished()
 {
-   if (minAngleOk_ <= 0.0)
+   if (minAngleOk_ < 0.0)
    {
       return;
    }

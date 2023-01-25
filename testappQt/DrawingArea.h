@@ -52,6 +52,7 @@ public:
 signals:
    void pointAdded(const QPoint& pos);
    void pointDeleted(const QPoint& pos);
+   void holeMarkerDeleted(const QPoint& pos);
    void lineAdded(const QPoint& start, const QPoint& end);
    void lineDeleted(const QPoint& start, const QPoint& end);
    void linePointsSelected(int startIdx, int endIdx);
@@ -67,6 +68,7 @@ protected:
 
 private slots:
    void deletPointAtLastPos();
+   void deleteHoleMarkerAtLastPos();
    void startMovingPoint();
    void selectLineStartPoint();
    void selectLineEndPoint();

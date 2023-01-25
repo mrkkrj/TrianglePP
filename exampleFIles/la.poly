@@ -290,8 +290,11 @@
 146     80  110    0
 147    110  139    0
 148    139  141    0
+# hole count
 0
+# region count
 6
+# region number, x and y coordinates, maximum area | attribute, maximum area
 1        6   -0.2   0.05
 2       25   -0.1   0.05
 3        5   -1     0.2

@@ -584,4 +584,66 @@ TEST_CASE("Writing files", "[trpp]")
     }
 }
 
+
+TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
+{
+    // prepare points & segments of a PSLG (simplified letter "A")
+    std::vector<Delaunay::Point> pslgDelaunayInput;
+    std::vector<int> pslgSegmentEndpointIdx;
+
+    pslgDelaunayInput = {
+        { 0.0000,   0.0000 },
+        // start of inner shape
+        { 0.5000,   0.0000 },
+        { 0.5000,   0.2500 },
+        { 0.2500,   0.2500 },
+        { 0.2500,   0.7500 },
+        { 0.7500,   0.7500 },
+        { 0.7500,   0.2500 },
+        { 0.5000,   0.2500 },
+        { 0.5000,   0.0000 },
+        // end of inner shape
+        { 1.0000,   0.0000 },
+        { 1.0000,   1.0000 },
+        { 0.0000,   1.0000 },
+        { 0.0000,   0.0000 }
+    };
+    pslgSegmentEndpointIdx = {
+           0,   1,     1,   2,
+           2,   3,     3,   4,
+           4,   5,     5,   6,
+           6,   7,     7,   8,
+           8,   9,     9,  10,
+          10,  11,    11,  12,
+          12,  0
+    };
+
+    // 9. Duplicate points
+
+    int expected = 0;
+    bool withQuality = true;
+
+    Delaunay trPlsgGenerator(pslgDelaunayInput);
+
+    SECTION("TEST 9.1: PSLG triangluation with duplicate points")
+    {
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgSegmentEndpointIdx);
+       REQUIRE(segmentsOK);
+
+       // TEST:::
+       //dbgOutput = tpp::Debug;
+       // TEST:::
+
+       for (int i = 0; i < 100; ++i)
+       {
+          trPlsgGenerator.Triangulate(dbgOutput);
+
+          expected = 13;
+          checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "PSLG duplicate points");
+       }
+    }
+
+}
+
+
 // --- eof ---

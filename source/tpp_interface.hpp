@@ -265,6 +265,9 @@ namespace tpp {
       //! Get min-max point coordinate values
       void getMinMaxPoints(double& minX, double& minY, double& maxX, double& maxY) const;
 
+      //! Given an index, return the actual double Point
+      const Point& pointAtVertexId(int i) const;
+
       //! Output a geomview .off file containing the delaunay triangulation
       void writeoff(std::string& fname);
 
@@ -308,14 +311,6 @@ namespace tpp {
 
       //! Given an iterator, find its index in the input vector of points.
       int vertexId(vIterator const& vit) const;
-
-      //! Given an index, return the actual double Point
-      const Point& point_at_vertex_id(int i) { return m_pointList[i]; }
-
-#if 0 // NYI!
-      //! Return the Point additionally created in quality mesh generation ("q" option)
-      Point added_point_at_vertex_id(int i);
-#endif
 
       friend class vIterator;
 
