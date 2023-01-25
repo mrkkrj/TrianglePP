@@ -4,6 +4,8 @@
 
 A small demonstrator/tester for the library.
 
+![triangle-PP info screen](../triangle-PP-info-screen.jpg) 
+
 **Note:** On Windows it is compiled with *TRIANGLE_DBG_TO_FILE* define, so the debug traces will be written to the *./triangle.out.txt* file.
 
 ## TODOs:
