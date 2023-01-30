@@ -71,6 +71,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 struct triangulateio;
 
@@ -199,11 +200,11 @@ namespace tpp {
 
      //! Set the segments to constrain the triangulation
      /*!
-       Same as above, but usign indexes of the input points
+       Same as above, but using indexes of the input points
 
        \return true if the input is valid, false otherwise
      */
-     bool setSegmentConstraint(const std::vector<int>& segmentPointIndexes);
+     bool setSegmentConstraint(const std::vector<int>& segmentPointIndexes, DebugOutputLevel traceLvl = None);
 
      //! Use convex hull when segments are set to constrain the triangulation
      /*!
@@ -667,6 +668,7 @@ namespace tpp {
       void initTriangleInputData(triangulateio* pin, const std::vector<Point>& points) const;
       void readPointsFromMesh(std::vector<Point>& points) const;
       void readSegmentsFromMesh(std::vector<int>& segments) const;
+      std::unordered_map<int, int> checkForDuplicatePoints() const;
 
       friend class fIterator;
 

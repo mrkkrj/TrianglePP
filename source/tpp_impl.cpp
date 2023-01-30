@@ -10,6 +10,7 @@
 #define DREDUCED
 #define ANSI_DECLARATORS
 #define TRILIBRARY
+#define TRILIB_EXIT_BY_EXCEPTION
 #define TRIFILES_OUTPUT_SUPPORT
 #define TRIFILES_READ_SUPPORT
 //#define CDT_ONLY // no, we want all algorithms!
@@ -25,7 +26,6 @@
 #endif
 
 //#define TRIANGLE_DBG_TO_FILE 1
-#define TRIANGLE_DETAIL_DEBUG 0
 
 // mrkkrj::: DEBUG trace 
 //   - needed when debugging a GUI app. on Windows without console
@@ -88,6 +88,22 @@ FILE* g_debugFile = nullptr;
 
 #define TP_VOROUT() \
        triangulateio* tpvorout = static_cast<triangulateio*>(m_vorout);
+
+
+// custom specialization of std::hash for Delaunay::Points
+namespace std 
+{
+    template <>
+    struct hash<tpp::Delaunay::Point>
+    {
+        std::size_t operator()(const tpp::Delaunay::Point& p) const
+        {
+            std::size_t h1 = std::hash<double>{}(p[0]);
+            std::size_t h2 = std::hash<double>{}(p[1]);
+            return h1 ^ (h2 << 1); // combine hashes
+        }
+    };
+}
 
 
 namespace tpp {
@@ -160,13 +176,6 @@ void Delaunay::Triangulate(std::string& triswitches)
     {
        freeTriangleDataStructs();
     }
-
-#if TRIANGLE_DETAIL_DEBUG
-    size_t posV = triswitches.find("V");
-    if(posV != std::string::npos) {
-        triswitches.insert(posV, "V"); // detailed trace!
-    }
-#endif
 
     m_in = new triangulateio;
     triangulateio* pin = (struct triangulateio *)m_in;
@@ -421,7 +430,12 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
       }
    }
 
-   // OPEN TODO::: check the intersection constraints ...
+   // OPEN TODO::: check for intersections ???
+   //  - seems to be not needed, re-read what the documentiation of Trilibrary says!!!!
+
+
+   // OPEN TODO:::   sanitize inputs!!!!
+   //  -- needed??? --> First of the points will be found when determining the point index
 
    return true;
 }
@@ -430,7 +444,7 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
 /*!
   added mrkkrj:
 */
-bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes)
+bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes, DebugOutputLevel traceLvl)
 {
    m_segmentList.clear();
    m_segmentList.reserve(segmentPointIndexes.size());
@@ -451,6 +465,71 @@ bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes)
    }
 
    // OPEN TODO::: check for intersections ???
+   //  - seems to be not needed (???), re-read what the documentiation of Trilibrary says!!!!
+
+
+   // sanitize inputs
+
+   std::unordered_map<int, int> duplicates = checkForDuplicatePoints();
+
+   if (!duplicates.empty())
+   {
+       // don't use duplicated points in segments
+       for (size_t i = 0; i < m_segmentList.size(); ++i)
+       {
+           auto& pointIdx = m_segmentList[i];
+           auto iter = duplicates.find(pointIdx);
+
+           if (iter != duplicates.end())
+           {
+               TRACE2i(" -- sanitize: duplicate point as segment endpoint detected, index=", pointIdx);
+               TRACE2i(" --           replaced with index=", iter->second);
+
+               if (traceLvl != None)
+               {
+                   printf("Warning:  segments[%d] - a duplicate vertex (index=%d) replaced by original (index=%d).\n",
+                          i/2, pointIdx, iter->second);
+               }
+
+               pointIdx = iter->second;
+           }
+       }
+
+       // remove point duplicates
+       std::vector<int> duplicatePts(duplicates.size());
+       std::transform(duplicates.begin(), duplicates.end(), duplicatePts.begin(), [](auto& pair) { return pair.first; });
+       std::sort(duplicatePts.begin(), duplicatePts.end());
+
+       for (auto iter = duplicatePts.rbegin(); iter != duplicatePts.rend(); ++iter)
+       {
+           m_pointList.erase(m_pointList.begin() + *iter);
+
+           if (traceLvl != None)
+           {
+               printf("Warning:  A duplicate vertex point deleted at index=%d.\n", *iter);
+           }
+       }
+
+       // corrections for removed points
+       for (auto& pointIdx: m_segmentList)
+       {
+           int i = 0;
+           for (auto iter = duplicatePts.rbegin(); iter != duplicatePts.rend(); ++iter, ++i)
+           {
+               if (pointIdx > *iter)
+               {
+                   if (traceLvl != None)
+                   {
+                       printf("Warning:  Correction for segment endpoint - iter=%d pointIdx=%d, new_pointIdx=%d.\n",
+                           *iter, pointIdx, pointIdx - (duplicatePts.size() - i));
+                   }
+
+                   pointIdx -= (duplicatePts.size() - i);
+                   break;
+               }
+           }
+       }
+   }
 
    return true;
 }
@@ -856,16 +935,15 @@ void Delaunay::setDebugLevelOption(std::string& options, DebugOutputLevel traceL
       options.append("Q"); // Q: no trace, no debug
       break;
    case Info:
-      options.append("V"); // trace & debug
+      options.append("V"); // basic trace & debug
       break;
    case Vertex:
-      options.append("VV"); // more trace & debug
+      options.append("VV"); // detailed trace & debug
       break;
    case Debug:
-      options.append("VVVV"); // much, much more!
+      options.append("VVVV"); // much, much more - too much?
       break;
    default:
-      //Assert(false && "unknown trace level");
        Assert(false, "unknown trace level");
    }
 }
@@ -1008,7 +1086,6 @@ void Delaunay::readPointsFromMesh(std::vector<Point>& points) const
     }
 }
 
-
 /*!
   added mrkkrj:
 */
@@ -1050,6 +1127,35 @@ void Delaunay::readSegmentsFromMesh(std::vector<int>& segments) const
         subsegloop.ss = pTriangleWrap->subsegtraverse(tpmesh);
         subsegnumber++;
     }
+}
+
+/*!
+  added mrkkrj:
+*/
+std::unordered_map<int, int> Delaunay::checkForDuplicatePoints() const
+{
+    std::unordered_map<Delaunay::Point, size_t> uniqueMap;
+    std::unordered_map<int, int> duplicateMap;
+
+    std::equal_to<tpp::Delaunay::Point> eq;
+
+
+    for (size_t i = 0; i < m_pointList.size(); ++i)
+    {
+        auto& point = m_pointList[i];
+
+        auto iter = uniqueMap.find(point);
+        if (iter == uniqueMap.end())
+        {
+            uniqueMap.insert({ point, i });
+        }
+        else
+        {
+            duplicateMap.insert({ i, iter->second });
+        }
+    }
+
+    return duplicateMap;    
 }
 
 

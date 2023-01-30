@@ -354,7 +354,26 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
         //  CHECK( .... )
     }
 
-    SECTION("TEST 4.2: CDT triangulation with quality constr.")
+    SECTION("TEST 4.2: CDT triangulation using endpoint indexes")
+    {        
+        std::vector<int> segmentsEndpointIdx;
+        segmentsEndpointIdx.push_back(0);
+        segmentsEndpointIdx.push_back(9);
+
+        trConstrGenerator.setSegmentConstraint(std::vector<Delaunay::Point>());
+        trConstrGenerator.setSegmentConstraint(segmentsEndpointIdx);
+
+        trConstrGenerator.Triangulate(dbgOutput);
+
+        expected = 11; // count not changed, see "example constr segments.jpg" for visualisation!
+        checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (endpoint indexes)");
+
+
+        // OPEN TODO:: specify more segments by IDX ...
+
+    }
+
+    SECTION("TEST 4.3: CDT triangulation with quality constr.")
     {
         trConstrGenerator.Triangulate(withQuality, dbgOutput);
 
@@ -618,6 +637,7 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
           12,  0
     };
 
+
     // 9. Duplicate points
 
     int expected = 0;
@@ -625,24 +645,28 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
 
     Delaunay trPlsgGenerator(pslgDelaunayInput);
 
-    SECTION("TEST 9.1: PSLG triangluation with duplicate points")
+    SECTION("TEST 9.1: PSLG triangluation with duplicate points used in segments")
     {
-       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgSegmentEndpointIdx);
+        // TEST:::
+        //dbgOutput = tpp::Info;
+        // TEST:::
+
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgSegmentEndpointIdx, dbgOutput);
        REQUIRE(segmentsOK);
 
-       // TEST:::
-       //dbgOutput = tpp::Debug;
-       // TEST:::
+       trPlsgGenerator.Triangulate(dbgOutput);
 
-       for (int i = 0; i < 100; ++i)
-       {
-          trPlsgGenerator.Triangulate(dbgOutput);
-
-          expected = 13;
-          checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "PSLG duplicate points");
-       }
+       expected = 13;
+       checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "PSLG duplicate points");
     }
 
+    // TODO:::
+    //  SECTION("TEST 9.2: PSLG triangluation with duplicate points NOT used in segments")
+    //  SECTION("TEST 9.3: PSLG triangluation with duplicate segments")
+    //  SECTION("TEST 9.4: PSLG triangluation with duplicate holes")
+    //  SECTION("TEST 9.5: PSLG triangluation with colinear segments")
+
+    //SECTION("TEST 9.1: PSLG triangluation with duplicate points used in segments --> segments BY point coordinates")
 }
 
 

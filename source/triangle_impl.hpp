@@ -1480,7 +1480,11 @@ int status;
 #endif /* not ANSI_DECLARATORS */
 
 {
-  exit(status);
+#ifdef TRILIB_EXIT_BY_EXCEPTION
+    throw std::logic_error("Trilibrary's triexit(1) invoked!");
+#else
+    exit(status);
+#endif
 }
 
 #ifdef ANSI_DECLARATORS

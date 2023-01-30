@@ -87,6 +87,7 @@ Algorithm used for DCT construction: "*Fast segment insertion and incremental co
 ## TODOs:
  - add support for sanitizing inputs with duplicates (work underway)
  - fix a bug in .poly file writing with holes (!!!)
+ - fix a reading of .poly files with VisualStudio compiler (WTF???)
  - remove warnings
  - add support for regions and reading of region attributes from .poly file
  - add CI support (Travis?)
