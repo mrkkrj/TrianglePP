@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="TrianglePPDemoApp.qrc">
-    <normaloff>:/TrianglePPTest/triangle-PP-ico.png</normaloff>:/TrianglePPTest/triangle-PP-ico.png</iconset>
+    <normaloff>:/TrianglePPDemo/triangle-PP-ico.png</normaloff>:/TrianglePPDemo/triangle-PP-ico.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">

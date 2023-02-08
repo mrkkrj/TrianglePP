@@ -79,12 +79,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
       includeConvexHull_(true)
 {
    ui.setupUi(this);
-   
-#ifdef Q_OS_WINDOWS
-   // set .ico icon!
-
-#endif
-
+  
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
    ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)
 
@@ -556,10 +551,15 @@ void TrianglePPDemoApp::showInfo()
                "    Shewchuk, J.R., Brown, B.C, \"Fast segment insertion and incremental construction of constrained Delaunay triangulations\", Computational Geometry,"
                " Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006");
 
-   about.setIconPixmap(QPixmap(":/TrianglePPDemo/triangle-PP-sm.jpg"));
-   about.setWindowIcon(QIcon(":/TrianglePPDemo/triangle-PP-ico.jpg"));
    about.setWindowTitle("About Triangle++ Demo");
+   about.setIconPixmap(QPixmap(":/TrianglePPDemo/triangle-PP-sm.jpg"));
 
+#ifdef Q_OS_WINDOWS
+   about.setWindowIcon(QIcon(":/TrianglePPDemo/triangle-PP-ico.ico"));
+#else
+   about.setWindowIcon(QIcon(":/TrianglePPDemo/triangle-PP-ico.jpg"));
+#endif
+   
    about.setStandardButtons(QMessageBox::Ok);
    about.setDefaultButton(QMessageBox::Ok);   
    about.show();
