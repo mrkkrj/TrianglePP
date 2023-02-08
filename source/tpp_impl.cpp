@@ -433,7 +433,6 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
    // OPEN TODO::: check for intersections ???
    //  - seems to be not needed, re-read what the documentiation of Trilibrary says!!!!
 
-
    // OPEN TODO:::   sanitize inputs!!!!
    //  -- needed??? --> First of the points will be found when determining the point index
 
@@ -467,68 +466,12 @@ bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes,
    // OPEN TODO::: check for intersections ???
    //  - seems to be not needed (???), re-read what the documentiation of Trilibrary says!!!!
 
-
    // sanitize inputs
-
    std::unordered_map<int, int> duplicates = checkForDuplicatePoints();
 
    if (!duplicates.empty())
    {
-       // don't use duplicated points in segments
-       for (size_t i = 0; i < m_segmentList.size(); ++i)
-       {
-           auto& pointIdx = m_segmentList[i];
-           auto iter = duplicates.find(pointIdx);
-
-           if (iter != duplicates.end())
-           {
-               TRACE2i(" -- sanitize: duplicate point as segment endpoint detected, index=", pointIdx);
-               TRACE2i(" --           replaced with index=", iter->second);
-
-               if (traceLvl != None)
-               {
-                   printf("Warning:  segments[%d] - a duplicate vertex (index=%d) replaced by original (index=%d).\n",
-                          i/2, pointIdx, iter->second);
-               }
-
-               pointIdx = iter->second;
-           }
-       }
-
-       // remove point duplicates
-       std::vector<int> duplicatePts(duplicates.size());
-       std::transform(duplicates.begin(), duplicates.end(), duplicatePts.begin(), [](auto& pair) { return pair.first; });
-       std::sort(duplicatePts.begin(), duplicatePts.end());
-
-       for (auto iter = duplicatePts.rbegin(); iter != duplicatePts.rend(); ++iter)
-       {
-           m_pointList.erase(m_pointList.begin() + *iter);
-
-           if (traceLvl != None)
-           {
-               printf("Warning:  A duplicate vertex point deleted at index=%d.\n", *iter);
-           }
-       }
-
-       // corrections for removed points
-       for (auto& pointIdx: m_segmentList)
-       {
-           int i = 0;
-           for (auto iter = duplicatePts.rbegin(); iter != duplicatePts.rend(); ++iter, ++i)
-           {
-               if (pointIdx > *iter)
-               {
-                   if (traceLvl != None)
-                   {
-                       printf("Warning:  Correction for segment endpoint - iter=%d pointIdx=%d, new_pointIdx=%d.\n",
-                           *iter, pointIdx, pointIdx - (duplicatePts.size() - i));
-                   }
-
-                   pointIdx -= (duplicatePts.size() - i);
-                   break;
-               }
-           }
-       }
+       sanitizeInputData(duplicates, traceLvl);
    }
 
    return true;
@@ -692,8 +635,9 @@ bool Delaunay::readPoints(const std::string& filePath, std::vector<Delaunay::Poi
     tpbehavior->poly = 0; // poly file not provided!
     tpbehavior->usesegments = 0;
     FILE* polyfile = nullptr;
+    char* polyfileName = nullptr; // no poly file!
 
-    pTriangleWrap->readnodes(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()), nullptr, &polyfile);
+    pTriangleWrap->readnodes(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()), polyfileName, &polyfile);
 
     // read points from the mesh data
     readPointsFromMesh(m_pointList);
@@ -835,7 +779,7 @@ int Delaunay::hull_size() const
 */
 int Delaunay::vertexId(vIterator const &vit) const
 {
-    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) vit.MyDelaunay->m_pmesh;
+    Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) vit.m_delaunay->m_pmesh;
     return ((int *)vit.vloop)[tpmesh->vertexmarkindex];
 }
 
@@ -856,7 +800,6 @@ int Delaunay::nvedges() const
    }
 }
 
-
 /*!
   added mrkkrj:
 */
@@ -873,7 +816,6 @@ int Delaunay::nvpoints() const
       return tpvorout->numberofpoints;
    }
 }
-
 
 /*!
   added mrkkrj:
@@ -1014,7 +956,7 @@ void Delaunay::initTriangleDataForPoints()
 
     TP_MESH_BEHAVIOR_WRAP();
 
-    *tpmesh = {};
+    *tpmesh = {};  // OPEN TODO::: .............. {} too big for the stack, warning by VisualStudio!
     *tpbehavior = {};
 
     // nonzero defaults:
@@ -1042,6 +984,69 @@ void Delaunay::initTriangleInputData(triangulateio* pin, const std::vector<Point
     pin->numberofholes = 0;
     pin->numberofregions = 0;
     pin->regionlist = nullptr;
+}
+
+/*!
+  added mrkkrj:
+*/
+void Delaunay::sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap, DebugOutputLevel traceLvl)
+{
+    // don't use duplicated points in segments
+    //  - replace with "originals"
+    for (size_t i = 0; i < m_segmentList.size(); ++i)
+    {
+        auto& pointIdx = m_segmentList[i];
+        auto iter = duplicatePointsMap.find(pointIdx);
+
+        if (iter != duplicatePointsMap.end())
+        {
+            TRACE2i(" -- sanitize: duplicate point as segment endpoint detected, index=", pointIdx);
+            TRACE2i(" --           replaced with index=", iter->second);
+
+            if (traceLvl != None)
+            {
+                printf("Warning:  segments[%d] - a duplicate vertex (index=%d) replaced by original (index=%d).\n",
+                    i / 2, pointIdx, iter->second);
+            }
+
+            pointIdx = iter->second;
+        }
+    }
+
+    // remove point duplicates
+    std::vector<int> duplicatePts(duplicatePointsMap.size());
+    std::transform(duplicatePointsMap.begin(), duplicatePointsMap.end(), duplicatePts.begin(), [](auto& pair) { return pair.first; });
+    std::sort(duplicatePts.begin(), duplicatePts.end());
+
+    for (auto iter = duplicatePts.rbegin(); iter != duplicatePts.rend(); ++iter)
+    {
+        m_pointList.erase(m_pointList.begin() + *iter);
+
+        if (traceLvl != None)
+        {
+            printf("Warning:  A duplicate vertex point deleted at index=%d.\n", *iter);
+        }
+    }
+
+    // corrections for removed points
+    for (auto& pointIdx : m_segmentList)
+    {
+        int i = 0;
+        for (auto iter = duplicatePts.rbegin(); iter != duplicatePts.rend(); ++iter, ++i)
+        {
+            if (pointIdx > *iter)
+            {
+                if (traceLvl != None)
+                {
+                    printf("Warning:  Correction for segment endpoint - iter=%d pointIdx=%d, new_pointIdx=%d.\n",
+                        *iter, pointIdx, pointIdx - (duplicatePts.size() - i));
+                }
+
+                pointIdx -= (duplicatePts.size() - i);
+                break;
+            }
+        }
+    }
 }
 
 /*!
@@ -1169,7 +1174,7 @@ std::unordered_map<int, int> Delaunay::checkForDuplicatePoints() const
 */
 Delaunay::vIterator::vIterator(Delaunay* triangulator) {
      typedef Triwrap::vertex vertex;
-     MyDelaunay = triangulator;
+     m_delaunay = triangulator;
 
      Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) triangulator->m_pmesh;
      Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *) triangulator->m_pbehavior;
@@ -1206,11 +1211,11 @@ Delaunay::vIterator Delaunay::vend(){
 Delaunay::vIterator Delaunay::vIterator::operator++() {
      typedef Triwrap::vertex vertex;	
 
-     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) MyDelaunay->m_pmesh;
+     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *)m_delaunay->m_pmesh;
      Triwrap::__pbehavior * tpbehavior = 
-                (Triwrap::__pbehavior *) MyDelaunay->m_pbehavior;
+                (Triwrap::__pbehavior *) m_delaunay->m_pbehavior;
 
-     Triwrap *pTriangleWrap =  (Triwrap *) MyDelaunay->m_triangleWrap;
+     Triwrap *pTriangleWrap =  (Triwrap *) m_delaunay->m_triangleWrap;
 
      while
         (
@@ -1224,7 +1229,7 @@ Delaunay::vIterator Delaunay::vIterator::operator++() {
 
         vIterator vit;
         vit.vloop = vloop;
-        vit.MyDelaunay = MyDelaunay;
+        vit.m_delaunay = m_delaunay;
 
         return vit;
 }
@@ -1264,7 +1269,7 @@ Delaunay::fIterator::fIterator(Delaunay* triangulator) {
      typedef Triwrap::vertex vertex;
      typedef Triwrap::__otriangle trianglelooptype; // oriented triangle
 
-     MyDelaunay = triangulator;
+     m_delaunay = triangulator;
 
      Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) triangulator->m_pmesh;
      Triwrap *pTriangleWrap =  (Triwrap *)triangulator->m_triangleWrap;
@@ -1299,10 +1304,10 @@ void Delaunay::fIterator::operator++() {
      typedef Triwrap::triangle triangle;
      typedef Triwrap::__otriangle trianglelooptype;
 
-     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) MyDelaunay->m_pmesh;
+     Triwrap::__pmesh     * tpmesh     = (Triwrap::__pmesh *) m_delaunay->m_pmesh;
      
      trianglelooptype *ploop = (trianglelooptype *)(&floop);
-     Triwrap *pTriangleWrap =  (Triwrap *) MyDelaunay->m_triangleWrap;
+     Triwrap *pTriangleWrap =  (Triwrap *) m_delaunay->m_triangleWrap;
 
      ploop->tri = pTriangleWrap->triangletraverse(tpmesh);
      // cout << "tri val = " << ploop->tri << endl;
@@ -1349,8 +1354,8 @@ void Delaunay::SetPoint(Point& point, /*Triwrap::vertex*/ double* vertexptr){
 int Delaunay::GetVertexIndex(fIterator const & fit, /*Triwrap::vertex*/ double* vertexptr){
     // OPEN TODO: compile test type check - Triwrap::vertex == double* ???
      Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *)
-                                                ((fit.MyDelaunay)->m_pbehavior);
-     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.MyDelaunay->m_pmesh);
+                                                ((fit.m_delaunay)->m_pbehavior);
+     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.m_delaunay->m_pmesh);
 
      int ret =
         ( ((int *) (vertexptr))[tpmesh->vertexmarkindex] )
@@ -1423,9 +1428,9 @@ int Delaunay::Sym(fIterator const & fit, char i){
      triangle ptr;                         /* Temporary variable used by sym(). */
 
      //Triwrap::__pbehavior * tpbehavior = (Triwrap::__pbehavior *)
-     //                                           ((fit.MyDelaunay)->pbehavior);
+     //                                           ((fit.m_delaunay)->pbehavior);
 
-     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.MyDelaunay->m_pmesh);
+     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.m_delaunay->m_pmesh);
      trianglelooptype * ploop   = (trianglelooptype *)(&(fit.floop));
 
      char oval = (char)ploop->orient;
@@ -1448,14 +1453,14 @@ int Delaunay::Sym(fIterator const & fit, char i){
 */
 Delaunay::fIterator Delaunay::Sym(fIterator const & fit){
      fIterator retval;
-     retval.MyDelaunay = fit.MyDelaunay;
+     retval.m_delaunay = fit.m_delaunay;
 
      typedef Triwrap::vertex      vertex;
      typedef Triwrap::triangle    triangle;
      typedef Triwrap::__otriangle trianglelooptype;
      triangle ptr;                         /* Temporary variable used by sym(). */
 
-     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.MyDelaunay->m_pmesh);
+     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.m_delaunay->m_pmesh);
      trianglelooptype * ploop   = (trianglelooptype *)(&(fit.floop));
 
      
@@ -1495,7 +1500,7 @@ double Delaunay::area(fIterator const & fit){
 */
 Delaunay::fIterator Delaunay::locate(int vertexid){
     fIterator retval;
-    retval.MyDelaunay = this;
+    retval.m_delaunay = this;
 
     typedef Triwrap::vertex      vertex;
     typedef Triwrap::triangle    triangle;
@@ -1537,7 +1542,7 @@ Delaunay::fIterator Delaunay::Lnext(fIterator const & fit){
     typedef Triwrap::__otriangle trianglelooptype;
 
     fIterator retval;
-    retval.MyDelaunay = this;
+    retval.m_delaunay = this;
 
     lnext(   (*(trianglelooptype *)(&(fit.floop))), (*(trianglelooptype *)(&(retval.floop))));
     return retval;
@@ -1551,7 +1556,7 @@ Delaunay::fIterator Delaunay::Lprev(fIterator const & fit){
     typedef Triwrap::__otriangle trianglelooptype;
 
     fIterator retval;
-    retval.MyDelaunay = this;
+    retval.m_delaunay = this;
 
     lprev(   (*(trianglelooptype *)(&(fit.floop))), (*(trianglelooptype *)(&(retval.floop))));
     return retval;
@@ -1567,7 +1572,7 @@ Delaunay::fIterator Delaunay::Onext(fIterator const & fit){
 
     triangle ptr;
     fIterator retval;
-    retval.MyDelaunay = this;
+    retval.m_delaunay = this;
 
     //cout << "Onext called:\n " 
     //	 << Org(fit) << "\t" << Dest(fit) << "\t" << Apex(fit) << "\n";
@@ -1588,7 +1593,7 @@ Delaunay::fIterator Delaunay::Oprev(fIterator const & fit){
 
     triangle ptr;
     fIterator retval;
-    retval.MyDelaunay = this;
+    retval.m_delaunay = this;
 
     oprev(   (*(trianglelooptype *)(&(fit.floop))), (*(trianglelooptype *)(&(retval.floop))));
     return retval;

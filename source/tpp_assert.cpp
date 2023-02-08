@@ -13,8 +13,6 @@ namespace tpp {
 
 /*! \def MyAssertFunction
     \brief Function used by 'Assert' function in _DEBUG mode.
-   
-    Details.
 */
 bool MyAssertFunction( bool b, const char* desc, int line, const char* file)
 {

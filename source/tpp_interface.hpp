@@ -19,14 +19,10 @@
 
  Many times I have had to use triangle in C++ code bases of mine and have been forced to use C.
  At last I thought I would put a wrapper on his cool C code and it seems that this is what I got.
-
  The design is not perfect and the code was written in a day, but it does compile and run on the
  machines I tried (cygwin/redhat). The C++ wrapper will certainly slow access down if you want to
  mess with the triangulation but the basic delaunay triangulation should be as fast as triangle.
-
- Look at the tpp_interface.hpp file for getting started on what this wrapper can do for you. Also
- have a look at main.cpp which shows an example of using this class. The class is thread-safe.
- 
+  
  <img src="http://upload.wikimedia.org/wikipedia/en/9/92/Delaunay_triangulation.png" alt="Delaunay Triangulation Example">
  
  \section authors Authors
@@ -52,8 +48,9 @@
  17/04/20: mrkkrj – added support Voronoi tesselation <br>
  05/08/22: mrkkrj – added more tests for constrained PSLG triangulations, 
                     included (reworked) Yejneshwar's fix for removal of concavities <br>
- 17/12/22: mrkkrj – ported to Linux, reworked Yejneshwar's fix again<br>
+ 17/12/22: mrkkrj – Ported to Linux, reworked Yejneshwar's fix again<br>
  30/12/22: mrkkrj – added first file read-write support<br>
+ 03/02/23: mrkkrj – added first support for input sanitization<br>
 
  \todo
  <ol>
@@ -118,9 +115,6 @@ namespace tpp {
       Delaunay(const std::vector<Point>& points = std::vector<Point>());
 
       //! The main destructor.
-      /*!
-        Does memory cleanup mostly.
-      */
       ~Delaunay();
 
       //! Delaunay triangulate the input points
@@ -260,7 +254,7 @@ namespace tpp {
       int nvpoints() const;
       int nvedges() const;
 
-      //! Triangulation completed?
+      //! Triangulation completed? (added mrkkrj)
       bool hasTriangulation() const;
 
       //! Get min-max point coordinate values
@@ -293,12 +287,12 @@ namespace tpp {
       private:
          vIterator(Delaunay* tiangulator);   //! To set container
 
-         Delaunay* MyDelaunay;   //! Which container do I point
+         Delaunay* m_delaunay;   //! Which container do I point to?
          void* vloop;            //! Triangles Internal data.
 
       public:
          vIterator operator++();
-         vIterator() :vloop(nullptr) {}
+         vIterator() :vloop(nullptr), m_delaunay(nullptr) {}
          Point& operator*() const;
          ~vIterator();
 
@@ -335,13 +329,12 @@ namespace tpp {
 
          fIterator(Delaunay* tiangulator);  //! To set container
 
-         Delaunay* MyDelaunay;   //! Which container do I point
-         //void *floop;          //! Triangles Internal data.
-         poface floop;
+         Delaunay* m_delaunay;   //! Which container do I point to?
+         poface floop;           //! Triangles Internal data.
 
       public:
          void operator++();
-         fIterator() { floop.tri = nullptr; };
+         fIterator() : m_delaunay(nullptr) { floop.tri = nullptr; };
          ~fIterator();
 
          friend class Delaunay;
@@ -356,6 +349,8 @@ namespace tpp {
 #if 0 // NYI!
       int faceId(fIterator const&);
 #endif
+
+      friend class fIterator;
 
 
       //! Access the origin (Org) vertex of a face.
@@ -634,7 +629,7 @@ namespace tpp {
 
       //--------------------------------------
       // added mrkkrj - helper for Points 
-      //    OPEN:: compiler cannot instantiate less<> with operator<() for Point, why?!
+      //    OPEN:: compiler cannot instantiate less<> with operator<() for Point class, why?!
       //--------------------------------------
       struct OrderPoints
       {
@@ -663,14 +658,13 @@ namespace tpp {
       std::string formatFloatConstraint(float f) const;
       void setQualityOptions(std::string& options, bool quality);
       void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
+      void sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap, DebugOutputLevel traceLvl);
       void freeTriangleDataStructs();
       void initTriangleDataForPoints();
       void initTriangleInputData(triangulateio* pin, const std::vector<Point>& points) const;
       void readPointsFromMesh(std::vector<Point>& points) const;
       void readSegmentsFromMesh(std::vector<int>& segments) const;
-      std::unordered_map<int, int> checkForDuplicatePoints() const;
-
-      friend class fIterator;
+      std::unordered_map<int, int> checkForDuplicatePoints() const;      
 
    private:
       std::vector<Point> m_pointList;   /*! Stores the input point list. */

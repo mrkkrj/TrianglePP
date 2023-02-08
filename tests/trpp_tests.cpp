@@ -606,50 +606,46 @@ TEST_CASE("Writing files", "[trpp]")
 
 TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
 {
-    // prepare points & segments of a PSLG (simplified letter "A")
-    std::vector<Delaunay::Point> pslgDelaunayInput;
-    std::vector<int> pslgSegmentEndpointIdx;
-
-    pslgDelaunayInput = {
-        { 0.0000,   0.0000 },
-        // start of inner shape
-        { 0.5000,   0.0000 },
-        { 0.5000,   0.2500 },
-        { 0.2500,   0.2500 },
-        { 0.2500,   0.7500 },
-        { 0.7500,   0.7500 },
-        { 0.7500,   0.2500 },
-        { 0.5000,   0.2500 },
-        { 0.5000,   0.0000 },
-        // end of inner shape
-        { 1.0000,   0.0000 },
-        { 1.0000,   1.0000 },
-        { 0.0000,   1.0000 },
-        { 0.0000,   0.0000 }
-    };
-    pslgSegmentEndpointIdx = {
-           0,   1,     1,   2,
-           2,   3,     3,   4,
-           4,   5,     5,   6,
-           6,   7,     7,   8,
-           8,   9,     9,  10,
-          10,  11,    11,  12,
-          12,  0
-    };
-
-
     // 9. Duplicate points
 
     int expected = 0;
     bool withQuality = true;
 
-    Delaunay trPlsgGenerator(pslgDelaunayInput);
-
     SECTION("TEST 9.1: PSLG triangluation with duplicate points used in segments")
     {
-        // TEST:::
-        //dbgOutput = tpp::Info;
-        // TEST:::
+        // Testdata: as specified in ../exampleFiles/box-continuous.poly
+        std::vector<Delaunay::Point> pslgDelaunayInput;
+        std::vector<int> pslgSegmentEndpointIdx;
+                
+        pslgDelaunayInput = {
+            { 0.0000,   0.0000 },
+            // start of inner shape
+            { 0.5000,   0.0000 },
+            { 0.5000,   0.2500 },
+            { 0.2500,   0.2500 },
+            { 0.2500,   0.7500 },
+            { 0.7500,   0.7500 },
+            { 0.7500,   0.2500 },
+            { 0.5000,   0.2500 },
+            { 0.5000,   0.0000 },
+            // end of inner shape
+            { 1.0000,   0.0000 },
+            { 1.0000,   1.0000 },
+            { 0.0000,   1.0000 },
+            { 0.0000,   0.0000 }
+        };
+
+        pslgSegmentEndpointIdx = {
+               0,   1,      1,   2,
+               2,   3,      3,   4,
+               4,   5,      5,   6,
+               6,   7,      7,   8,
+               8,   9,      9,  10,
+              10,  11,     11,  12,
+              12,  0
+        };
+
+       Delaunay trPlsgGenerator(pslgDelaunayInput);
 
        bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgSegmentEndpointIdx, dbgOutput);
        REQUIRE(segmentsOK);
@@ -662,11 +658,102 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
 
     // TODO:::
     //  SECTION("TEST 9.2: PSLG triangluation with duplicate points NOT used in segments")
+    
     //  SECTION("TEST 9.3: PSLG triangluation with duplicate segments")
+    
     //  SECTION("TEST 9.4: PSLG triangluation with duplicate holes")
+    
     //  SECTION("TEST 9.5: PSLG triangluation with colinear segments")
 
     //SECTION("TEST 9.1: PSLG triangluation with duplicate points used in segments --> segments BY point coordinates")
+
+ 
+    // 10. Duplicate segments
+
+    SECTION("TEST 10.1: PSLG triangluation with duplicate points and duplicate segments")
+    {
+        // Testdata: as specified in ../exampleFiles/hex-overlap.poly
+        std::vector<Delaunay::Point> pslgDelaunayInput1;
+        std::vector<int> pslgSegmentEndpointIdx1;
+
+        pslgDelaunayInput1 = {
+            /*1*/ { 0.0000,     0.0000 },   
+            /*2*/ {  1.0000,    0.0000  }, 
+            /*3*/ {  1.0000,    1.0000  }, 
+            /*4*/ {  0.0000,    1.0000  }, 
+
+            // Points around hexagonal hole 1.
+            /*5*/ { 0.1500,    0.7500  },
+            /*6*/ { 0.2003,    0.6634  },
+            /*7*/ { 0.3002,    0.6640  },
+            /*8*/ { 0.3500,    0.7500  },
+            /*9*/ { 0.3002,    0.8360  },
+            /*10*/ { 0.2003,    0.8366  },
+
+            // Points around hexagonal hole 2.
+            /*11*/ { 0.5000,    0.4000  },
+            /*12*/ { 0.5503,    0.3134  },
+            /*13*/ { 0.6502,    0.3140  },
+            /*14*/ { 0.7000,    0.4000  },
+            /*15*/ { 0.6502,    0.4860  },
+            /*16*/ { 0.5503,    0.4866  },
+
+            // copy of Points around hexagonal hole 2.
+            /*17*/ { 0.5000,    0.4000 },
+            /*18*/ { 0.5503,    0.3134  },
+            /*19*/ { 0.6502,    0.3140  },
+            /*20*/ { 0.7000,    0.4000  },
+            /*21*/ { 0.6502,    0.4860  },
+            /*22*/ { 0.5503,    0.4866  }
+        };
+
+        pslgSegmentEndpointIdx1 = {
+            // Segment 1
+            1,   2,            2,   3,
+            3,   4,            4,   1,
+
+            // Segment 2 around the first hexagonal hole.
+            5,   6,            6,   7,
+            7,   8,            8,   9,
+            9,  10,            10,   5,
+            
+            // Segment 3 around the second hexagonal hole.
+            11,  12,            12,  13,
+            13,  14,            14,  15,
+            15,  16,            16,  11,
+            
+            // copy of segment 3.
+            17,  18,            18,  19,
+            19,  20,            20,  21,
+            21,  22,            22,  17
+        };
+
+        for (auto& index : pslgSegmentEndpointIdx1)
+        {
+            index -= 1; // zero based indexing!
+        }
+
+        std::vector<Delaunay::Point> constrDelaunayHoles =  {
+            // Define a hole by giving the coordinates of one point inside it.
+            { 0.2500,  0.7500 },
+            { 0.6000,  0.4000 },
+            { 0.6000,  0.4000 }
+        };
+
+        Delaunay trPlsgGenerator1(pslgDelaunayInput1);
+
+        bool segmentsOK = trPlsgGenerator1.setSegmentConstraint(pslgSegmentEndpointIdx1, dbgOutput);
+        REQUIRE(segmentsOK);
+
+        bool holesOK = trPlsgGenerator1.setHolesConstraint(constrDelaunayHoles);
+        REQUIRE(holesOK);
+
+        trPlsgGenerator1.Triangulate(dbgOutput);
+
+        expected = 18;
+        checkTriangleCount(trPlsgGenerator1, pslgDelaunayInput1, expected, "PSLG duplicate points & segments");
+    }
+
 }
 
 

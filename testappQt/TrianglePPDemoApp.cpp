@@ -80,6 +80,11 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
 {
    ui.setupUi(this);
    
+#ifdef Q_OS_WINDOWS
+   // set .ico icon!
+
+#endif
+
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
    ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)
 

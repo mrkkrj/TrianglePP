@@ -46,6 +46,10 @@ source_group("Resource Files" FILES ${Resource_Files})
 # Source groups
 ################################################################################
 set(Header_Files__tpp
+    "../source/triangle.h"
+    "../source/triangle_impl.hpp"
+    "../source/tpp_assert.hpp"
+    "../source/tpp_interface.hpp"
 )
 source_group("Header Files\\tpp" FILES ${Header_Files__tpp})
 
