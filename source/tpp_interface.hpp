@@ -655,16 +655,17 @@ namespace tpp {
       int GetFirstIndexNumber() const;
 
       // added mrkkrj 
-      std::string formatFloatConstraint(float f) const;
       void setQualityOptions(std::string& options, bool quality);
       void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
-      void sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap, DebugOutputLevel traceLvl);
+      void sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap, DebugOutputLevel traceLvl = None);
       void freeTriangleDataStructs();
       void initTriangleDataForPoints();
       void initTriangleInputData(triangulateio* pin, const std::vector<Point>& points) const;
       void readPointsFromMesh(std::vector<Point>& points) const;
       void readSegmentsFromMesh(std::vector<int>& segments) const;
-      std::unordered_map<int, int> checkForDuplicatePoints() const;      
+      bool readSegmentsFromFile(char* polyfileName, FILE* polyfile);
+      std::string formatFloatConstraint(float f) const;
+      std::unordered_map<int, int> checkForDuplicatePoints() const;    
 
    private:
       std::vector<Point> m_pointList;   /*! Stores the input point list. */
@@ -690,7 +691,7 @@ namespace tpp {
 
    }; // Class Delaunay
 
-} // namespace tpp ends.
+} // namespace tpp
 
 
 #endif

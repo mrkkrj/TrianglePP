@@ -5,7 +5,7 @@
  */
 
 
-// configuaration of the Triangle.h code:
+// configuaration of the Triangle.h (Trilib's) code:
 #define NO_TIMER
 #define DREDUCED
 #define ANSI_DECLARATORS
@@ -59,7 +59,7 @@ FILE* g_debugFile = nullptr;
 // 1. wrapped library
 #include "triangle_impl.hpp"
 
-// 2. the wrapper
+// 2. the wrapper itself
 #include "tpp_interface.hpp"
 
 #include <iostream>
@@ -90,7 +90,7 @@ FILE* g_debugFile = nullptr;
        triangulateio* tpvorout = static_cast<triangulateio*>(m_vorout);
 
 
-// custom specialization of std::hash for Delaunay::Points
+// mrkkrj: custom specialization of std::hash for Delaunay::Points
 namespace std 
 {
     template <>
@@ -190,12 +190,13 @@ void Delaunay::Triangulate(std::string& triswitches)
 
        triswitches.append("p"); // constrained Delaunay (Planar Straight Line Graph)
        triswitches.append("B"); // but no boundary info at the moment!
+
        if (m_convexHullWithSegments)
        {
           triswitches.append("c"); // -c Encloses the convex hull with segments - (preserve boudnaries in carveholes())  
+                                   //   --> Note: refining not supported yet!
                                    // If you are refining a mesh, this switch works differently; it generates the set of
-                                   // boundary edges of the mesh, including boundaries of holes.
-                                   // (https://www.cs.cmu.edu/~quake/triangle.c.html ) could use only during refine instead?
+                                   // boundary edges of the mesh, including boundaries of holes. 
        }
     }
 
@@ -208,6 +209,7 @@ void Delaunay::Triangulate(std::string& triswitches)
        {
           triswitches.append("p"); // constrained Delaunay (Planar Straight Line Graph)
           triswitches.append("B"); // but no boundary info at the moment!
+
           if (m_convexHullWithSegments)
           {
              triswitches.append("c"); // -c Encloses the convex hull with segments - (preserve boundaries in carveholes())
@@ -324,7 +326,7 @@ void Delaunay::Tesselate(bool useConformingDelaunay, DebugOutputLevel traceLvl)
    // now use the triangulation for a Voronoi diagram
    TP_MESH_BEHAVIOR_WRAP();
 
-   // OPEN TODO::: check these preconditions??
+   // OPEN TODO::: check those preconditions??
    if (tpmesh->holes != 0)
    {
        /* ............ */
@@ -567,7 +569,7 @@ bool Delaunay::savePoints(const std::string& filePath)
    const char* comments[] = { trppFileComment };
        
    pTriangleWrap->writenodes2file(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()),
-                                  1, const_cast<char**>(comments));
+                                  sizeof(comments)/sizeof(const char*), const_cast<char**>(comments));
    return true;
 }
 
@@ -614,7 +616,7 @@ bool Delaunay::saveSegments(const std::string& filePath)
     pTriangleWrap->writepoly2file(tpmesh, tpbehavior, polyfileName,
                                   holelist, numberofholes, regionlist, numberofregions,
                                   append,
-                                  1, const_cast<char**>(comments));
+                                  sizeof(comments)/sizeof(const char*), const_cast<char**>(comments));
 
     return true;
 }
@@ -673,38 +675,68 @@ bool Delaunay::readSegments(
     char* polyfileName = const_cast<char*>(filePath.c_str());
     pTriangleWrap->readnodes(tpmesh, tpbehavior, nullptr, polyfileName, &polyfile);
 
-    // triangulate to ensure formskeleton() will read segments!
-    tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);
-
-    // Ensure that no vertex can be mistaken for a triangular bounding box
-    // vertex in insertvertex()!
-    tpmesh->infvertex1 = nullptr;
-    tpmesh->infvertex2 = nullptr;
-    tpmesh->infvertex3 = nullptr;
-
-    tpmesh->checksegments = 1;
-
-    // no holes yet:
-    tpmesh->holes = 0;
-    tpmesh->regions = 0;
-
-    pTriangleWrap->formskeleton4file(tpmesh, tpbehavior, polyfile, polyfileName);
-
     // get points from the mesh data
     readPointsFromMesh(m_pointList);
     points = m_pointList; // OPEN TODO::: make it optional param????
-     
-    // get segments from the mesh data
-    readSegmentsFromMesh(m_segmentList);
-    segmentEndpoints = m_segmentList; // OPEN TODO::: make it optional param????
 
-    // rebase to start with 0!
-    if (tpbehavior->firstnumber != 0)
+    auto duplicates = checkForDuplicatePoints();
+    if (!duplicates.empty())
     {
-        for(auto& index : segmentEndpoints)
+        // read file directly
+        //  - Trilib's code doesn't support duplicate points!
+        if (!readSegmentsFromFile(polyfileName, polyfile))
         {
-            index -= tpbehavior->firstnumber;
+            fclose(polyfile);
+            return false;
         }
+
+        // rebase to start with 0
+        if (tpbehavior->firstnumber != 0)
+        {
+            for (auto& index : m_segmentList)
+            {
+                index -= tpbehavior->firstnumber;
+                Assert(index >= 0, "");
+            }
+        }
+
+        sanitizeInputData(duplicates); 
+
+        points = m_pointList; // OPEN TODO::: make it optional param????
+        segmentEndpoints = m_segmentList; // OPEN TODO::: make it optional param????
+    }
+    else
+    {
+        // triangulate to ensure formskeleton() will read segments!
+        tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);
+
+        // Ensure that no vertex can be mistaken for a triangular bounding box
+        // vertex in insertvertex()!
+        tpmesh->infvertex1 = nullptr;
+        tpmesh->infvertex2 = nullptr;
+        tpmesh->infvertex3 = nullptr;
+
+        tpmesh->checksegments = 1;
+
+        // no holes yet:
+        tpmesh->holes = 0;
+        tpmesh->regions = 0;
+
+        pTriangleWrap->formskeleton4file(tpmesh, tpbehavior, polyfile, polyfileName);
+
+        // get segments from the mesh data
+        readSegmentsFromMesh(m_segmentList);
+
+        // rebase to start with 0
+        if (tpbehavior->firstnumber != 0)
+        {
+            for (auto& index : m_segmentList)
+            {
+                index -= tpbehavior->firstnumber;
+            }
+        }
+
+        segmentEndpoints = m_segmentList; // OPEN TODO::: make it optional param????
     }
 
     // get hole marker points
@@ -1161,6 +1193,105 @@ std::unordered_map<int, int> Delaunay::checkForDuplicatePoints() const
     }
 
     return duplicateMap;    
+}
+
+/*!
+  added mrkkrj:
+*/
+bool Delaunay::readSegmentsFromFile(char* polyfileName, FILE* polyfile)
+{
+    char inputline[INPUTLINESIZE];
+    char* stringptr;
+    Triwrap::vertex endpoint1, endpoint2;
+    int segmentmarkers;
+    int end1, end2;
+    int boundmarker;
+    int i;
+
+    TP_MESH_BEHAVIOR_WRAP();
+
+    stringptr = pTriangleWrap->readline(inputline, polyfile, polyfileName);
+    int insegments = (int)strtol(stringptr, &stringptr, 0);
+
+    stringptr = pTriangleWrap->findfield(stringptr);
+    if (*stringptr == '\0') {
+        segmentmarkers = 0;
+    }
+    else {
+        segmentmarkers = (int)strtol(stringptr, &stringptr, 0);
+    }
+
+    boundmarker = 0;
+
+    /* Read and insert the segments. */
+    for (i = 0; i < /*m->*/insegments; i++)
+    {
+        stringptr = pTriangleWrap->readline(inputline, polyfile, polyfileName);
+        stringptr = pTriangleWrap->findfield(stringptr);
+        if (*stringptr == '\0') {
+            printf("Error:  Segment %d has no endpoints in %s.\n",
+                tpbehavior->firstnumber + i, polyfileName);
+            return false; //triexit(1);
+        }
+        else {
+            end1 = (int)strtol(stringptr, &stringptr, 0);
+        }
+        stringptr = pTriangleWrap->findfield(stringptr);
+        if (*stringptr == '\0') {
+            printf("Error:  Segment %d is missing its second endpoint in %s.\n",
+                tpbehavior->firstnumber + i, polyfileName);
+            return false; //triexit(1);
+        }
+        else {
+            end2 = (int)strtol(stringptr, &stringptr, 0);
+        }
+
+        if (segmentmarkers) {
+            stringptr = pTriangleWrap->findfield(stringptr);
+            if (*stringptr == '\0') {
+                boundmarker = 0;
+            }
+            else {
+                boundmarker = (int)strtol(stringptr, &stringptr, 0);
+            }
+        }
+
+        if ((end1 < tpbehavior->firstnumber) ||
+            (end1 >= tpbehavior->firstnumber + tpmesh->invertices)) {
+            if (!tpbehavior->quiet) {
+                printf("Warning:  Invalid first endpoint of segment %d in %s.\n",
+                    tpbehavior->firstnumber + i, polyfileName);
+            }
+        }
+        else if ((end2 < tpbehavior->firstnumber) ||
+            (end2 >= tpbehavior->firstnumber + tpmesh->invertices)) {
+            if (!tpbehavior->quiet) {
+                printf("Warning:  Invalid second endpoint of segment %d in %s.\n",
+                    tpbehavior->firstnumber + i, polyfileName);
+            }
+        }
+        else {
+            // OPEN TODO:::  one last check? ????
+#if 0
+            /* Find the vertices numbered `end1' and `end2'. */
+            endpoint1 = pTriangleWrap->getvertex(m, b, end1);
+            endpoint2 = pTriangleWrap->getvertex(m, b, end2);
+            if ((endpoint1[0] == endpoint2[0]) && (endpoint1[1] == endpoint2[1])) {
+                if (!tpbehavior->quiet) {
+                    printf("Warning:  Endpoints of segment %d are coincident in %s.\n",
+                        b->firstnumber + i, polyfilename);
+                }
+            }
+            else {
+                insertsegment(m, b, endpoint1, endpoint2, boundmarker);
+            }
+#endif
+            m_segmentList.push_back(end1);
+            m_segmentList.push_back(end2);
+        }
+    }
+
+    return true;
 }
 
 

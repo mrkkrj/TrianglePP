@@ -177,7 +177,7 @@ void TrianglePpOptions::on_minAngleLineEdit_editingFinished()
 
    if (val > minAngleOk_)
    {
-      QMessageBox::warning(this, "", 
+      QMessageBox::warning(this, "Triangle++", 
                QString("Caution!\n\nThe triangualtion will very probably terminate, "
                        "but mathematically this is only guaranteed up to: \n\n  minAngle=%1 deg\n")
                   .arg(minAngleOk_));
@@ -201,7 +201,7 @@ void TrianglePpOptions::on_segmentPointsLineEdit_editingFinished()
 
    if (!match.hasMatch())
    {
-      QMessageBox::critical(this, "",
+      QMessageBox::critical(this, "Triangle++",
          QString("Error!\n\n The required format is: number, number, number "));
    }
 }

@@ -148,7 +148,7 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    // triangulate
    if (drawnPoints.size() < 3)
    {
-      QMessageBox::critical(this, tr("ERROR"), tr("Not enough points to triangulate!"));
+      QMessageBox::critical(this, tr("Triangle++"), tr("Not enough points to triangulate!"));
       return;
    }
 
@@ -198,7 +198,7 @@ void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
 
    if (drawnPoints.size() < 3)
    {
-      QMessageBox::critical(this, tr("ERROR"), tr("Not enough points to tesselate!"));
+      QMessageBox::critical(this, tr("Triangle++"), tr("Not enough points to tesselate!"));
       return;
    }
 
@@ -228,7 +228,7 @@ void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
    switch (mode_)
    {
    case FromImageMode:
-      // OPEN TODO::: say that's not implemented!
+      // just say that's not implemented
       on_generatePointsPushButton_clicked();
       break;
    case FromFileMode:
@@ -373,20 +373,20 @@ void TrianglePPDemoApp::generateRandomPoints()
    std::uniform_int_distribution<int> udistr(minPoints, maxPoints);
    int count = udistr(reng);
 
-   statusBar()->showMessage(QString("Generated %1 points").arg(count));
+   statusBar()->showMessage(tr("Generated %1 points").arg(count));
 
    // 2. dice out points
    auto ptSize = ui.drawAreaWidget->getPointSize();
 
-   std::uniform_int_distribution<int> udistrWidth(0 + ptSize / 2, ui.drawAreaWidget->width() - 1 - (ptSize / 2));
-   std::uniform_int_distribution<int> udistrHeight(0 + ptSize / 2, ui.drawAreaWidget->height() - 1 - (ptSize / 2));
+   std::uniform_int_distribution<int> distrWidth(0 + ptSize / 2, ui.drawAreaWidget->width() - 1 - (ptSize / 2));
+   std::uniform_int_distribution<int> distrHeight(0 + ptSize / 2, ui.drawAreaWidget->height() - 1 - (ptSize / 2));
 
    for (int i = 0; i < count; ++i)
    {
       // OPEN TODO:: 
       //  -- check minimum distance to other points ????
 
-      ui.drawAreaWidget->drawPoint({ udistrWidth(reng), udistrHeight(reng) });
+      ui.drawAreaWidget->drawPoint({distrWidth(reng), distrHeight(reng)});
    }     
 }
 
@@ -416,7 +416,7 @@ void TrianglePPDemoApp::showExample1()
    float scaleFactor = 80;
 
    drawPoints(constrDelaunayInput, offsetX, offsetY, scaleFactor);
-   statusBar()->showMessage(QString("Created %1 Example-1 points").arg(constrDelaunayInput.size()));
+   statusBar()->showMessage(tr("Created %1 Example-1 points").arg(constrDelaunayInput.size()));
 
    // draw constrainig segment 
    std::vector<Point> constrDelaunaySegment;
@@ -454,7 +454,7 @@ void TrianglePPDemoApp::showExample2()
     float scaleFactor = 80;       
 
     drawPoints(pslgDelaunayInput, offsetX, offsetY, scaleFactor);
-    statusBar()->showMessage(QString("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
+    statusBar()->showMessage(tr("Created %1 Example-2 points").arg(pslgDelaunayInput.size()));
 
     // draw segments
     std::vector<int> pslgSegmentEndpoints;
@@ -639,7 +639,7 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
     ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
     // ready
-    statusBar()->showMessage(QString("Created %1 triangles").arg(trGenerator.ntriangles()));
+    statusBar()->showMessage(tr("Created %1 triangles").arg(trGenerator.ntriangles()));
 }
 
 
@@ -729,7 +729,7 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
 
    if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
    {
-      QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
+      QMessageBox::critical(this, tr("Triangle++"), tr("Incorrect segment constraints, ignoring!"));
    }
 
    std::vector<Delaunay::Point> constrDelaunayHoles;
@@ -810,7 +810,6 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
 
     for (const auto& pt : points)
     {
-
         // OPEN TODO:: after rescaling a slightly off-zero coordinates possible!!!!
         //  - correct floating point arithmetic there!
 #if 1
@@ -885,13 +884,13 @@ void TrianglePPDemoApp::writeToFile()
     {
        if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
        {
-          QMessageBox::critical(this, tr("ERROR"), tr("Incorrect segment constraints, ignoring!"));
+          QMessageBox::critical(this, tr("Triangle++"), tr("Incorrect segment constraints, ignoring!"));
           return;
        }
 
        if (!holePoints_.empty())
        {
-           QMessageBox::warning(this, tr("WARNING"), tr("Exporting of holes not yet working!!!\n\nIgnoring the hole markers..."));
+           QMessageBox::warning(this, tr("Triangle++"), tr("Exporting of holes not yet working!!!\n\nIgnoring the hole markers..."));
 
            // OPEN TODO:::
 
@@ -914,7 +913,7 @@ void TrianglePPDemoApp::writeToFile()
 
     if (!ok)
     {
-       QMessageBox::critical(this, tr("ERROR"), tr("File couldn't be written!"));
+       QMessageBox::critical(this, tr("Triangle++"), tr("File couldn't be written!"));
     }   
 }
 
@@ -930,18 +929,27 @@ void TrianglePPDemoApp::readFromFile()
     Delaunay trGenerator(points);
     bool ok = false;
     
-    if (fileName.endsWith(".node"))
+    try 
     {
-        ok = trGenerator.readPoints(fileName.toStdString(), points);
+        if (fileName.endsWith(".node"))
+        {
+            ok = trGenerator.readPoints(fileName.toStdString(), points);
+        }
+        else
+        {
+            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers);
+        }
     }
-    else
+    catch (std::exception& e)
     {
-        ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers);
+        QMessageBox::critical(this, tr("Triangle++"), tr("Exception thrown while reading the file!") + "\n\n \"" + e.what() + "\"");
+        return;
     }
     
     if (!ok)
     {
-       QMessageBox::critical(this, tr("ERROR"), tr("File couldn't be opened!"));
+       QMessageBox::critical(this, tr("Triangle++"), tr("File couldn't be opened!"));
+       return;
     } 
 
     // convert points
@@ -971,9 +979,9 @@ void TrianglePPDemoApp::readFromFile()
 
     drawPoints(dempAppPoints);
 
-    statusBar()->showMessage(QString("Read %1 points from %2").arg(points.size()).arg(fileName));
+    statusBar()->showMessage(tr("Read %1 points from %2").arg(points.size()).arg(fileName));
 
-    // ...and read segments
+    // ...and segments
     drawSegments(segmentEndpoints);
 
     // draw holes
@@ -986,7 +994,6 @@ void TrianglePPDemoApp::readFromFile()
     for (auto& point : dempAppHoles)
     {
        onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
-                                  //{ (int)((point[0] + offsetX)* scaleFactor), (int)((point[1] + offsetY)* scaleFactor)  });
                                   { (int)(point.x), (int)(point.y) });
     }
 }
@@ -1019,6 +1026,8 @@ void TrianglePPDemoApp::drawSegments(const std::vector<Point>& segmentEndpoints,
 
 void TrianglePPDemoApp::drawSegments(const std::vector<int>& segmentEndpointsIndexes)
 {
+    Q_ASSERT(segmentEndpointsIndexes.size() % 2 == 0);
+
     for (size_t i = 0; i < segmentEndpointsIndexes.size(); i += 2)
     {
         onSegmentEndpointsSelected(segmentEndpointsIndexes[i], segmentEndpointsIndexes[i + 1]);
