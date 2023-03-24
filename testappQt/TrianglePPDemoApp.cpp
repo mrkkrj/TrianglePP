@@ -167,7 +167,7 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    auto trace = tpp::None;
 #endif
 
-   Delaunay trGenerator(delaunayInput);
+   tpp::Delaunay trGenerator(delaunayInput);
    configDelaunay(trGenerator);
    
    if (useConformingDelaunay_)
@@ -209,7 +209,7 @@ void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
    }
 
    // tesselate
-   Delaunay trGenerator(delaunayInput);
+   tpp::Delaunay trGenerator(delaunayInput);
    trGenerator.Tesselate(useConformingDelaunay_);
 
    // draw
@@ -598,7 +598,7 @@ void TrianglePPDemoApp::clearVoronoiPoints()
 void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPoint>& pointsOnScreen)
 {
     // draw triangles
-    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    for (tpp::FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
        // Steiner points?
        Delaunay::Point sp1;
@@ -648,7 +648,7 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
    // draw Voronoi points
    ui.drawAreaWidget->setDrawColor(c_VoronoiColor);
 
-   for (Delaunay::vvIterator iter = trGenerator.vvbegin(); iter != trGenerator.vvend(); ++iter)
+   for (tpp::VoronoiVertexIterator iter = trGenerator.vvbegin(); iter != trGenerator.vvend(); ++iter)
    {
       // access data
       auto point = *iter;
@@ -660,7 +660,7 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
    }
 
    // ... and Voronoi edges
-   for (Delaunay::veIterator iter = trGenerator.vebegin(); iter != trGenerator.veend(); ++iter)
+   for (tpp::VoronoiEdgeIterator iter = trGenerator.vebegin(); iter != trGenerator.veend(); ++iter)
    {
       bool finiteEdge = false;
       Delaunay::Point p1 = trGenerator.Org(iter);
@@ -875,7 +875,7 @@ void TrianglePPDemoApp::writeToFile()
 
     }
 
-    Delaunay trGenerator(delaunayInput);
+    tpp::Delaunay trGenerator(delaunayInput);
 
     // write out
     bool ok = false;
@@ -926,7 +926,7 @@ void TrianglePPDemoApp::readFromFile()
     std::vector<int> segmentEndpoints;
     std::vector<Delaunay::Point> holeMarkers;
 
-    Delaunay trGenerator(points);
+    tpp::Delaunay trGenerator(points);
     bool ok = false;
     
     try 

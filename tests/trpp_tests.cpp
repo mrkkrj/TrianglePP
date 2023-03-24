@@ -1,14 +1,18 @@
-/*! \file trpp_tests.cpp
-    \brief tests for the Triangle++ code
+ /**
+    @file  trpp_tests.cpp
+    @brief test cases for the Triangle++ code
  */
 
 #include "tpp_interface.hpp"
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <numbers> // C++20!
+#include <algorithm>
 
 // debug support
 #define DEBUG_OUTPUT_STDOUT false 
@@ -58,7 +62,7 @@ namespace {
         }
 
         // iterate over triangles
-        for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+        for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
         {
             Delaunay::Point sp1;
             Delaunay::Point sp2;
@@ -96,7 +100,7 @@ namespace {
         }
 
        // iterate over Voronoi points
-       for (Delaunay::vvIterator vit = trGenerator.vvbegin(); vit != trGenerator.vvend(); ++vit)
+       for (tpp::VoronoiVertexIterator vit = trGenerator.vvbegin(); vit != trGenerator.vvend(); ++vit)
        {
           Delaunay::Point vp = *vit;
           double x1 = vp[0];
@@ -105,7 +109,7 @@ namespace {
           std::cout << " -- Voronoi point: " << "{" << x1 << "," << y1 << "}\n";
        }
 
-       std::cout << " -- Voronoi points count: " << trGenerator.nvpoints() << "\n";
+       std::cout << " -- Voronoi points count: " << trGenerator.voronoiPointCount() << "\n";
     }
 
     void checkTriangleCount(/*const*/ Delaunay& trGenerator, const std::vector<Delaunay::Point>& delaunayInput, 
@@ -113,7 +117,7 @@ namespace {
     {
        debugPrintTriangles(trGenerator, delaunayInput);
 
-       int triangleCt = trGenerator.ntriangles();
+       int triangleCt = trGenerator.triangleCount();
 
        if (dbgOutput != tpp::None)
           std::cout << " - " << (descr ? descr : "") << " triangle count: " << triangleCt << "\n\n";
@@ -277,7 +281,7 @@ TEST_CASE("Voronoi tesselation", "[trpp]")
        trGenerator.Tesselate();
        debugPrintVoronoiPoints(trGenerator);
 
-       int voronoiPoints = trGenerator.nvpoints();
+       int voronoiPoints = trGenerator.voronoiPointCount();
        int expected = 4;
 
        REQUIRE(voronoiPoints == expected);
@@ -313,7 +317,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
     SECTION("TEST 4.0: reference triangulation (without quality constr.)")
     {
         trConstrGenerator.Triangulate(!withQuality, dbgOutput);
-        referenceCt = trConstrGenerator.ntriangles();
+        referenceCt = trConstrGenerator.triangleCount();
 
         expected = 11;
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Unconstrained (quality=false)");
@@ -324,7 +328,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
     SECTION("TEST 4.0: reference triangulation with quality constr.")
     {
         trConstrGenerator.Triangulate(withQuality, dbgOutput);
-        referenceQualityCt = trConstrGenerator.ntriangles();
+        referenceQualityCt = trConstrGenerator.triangleCount();
 
         expected = 11; // checked with GUI
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Unconstrained (quality=true)");
@@ -756,5 +760,380 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
 
 }
 
+
+TEST_CASE("Usage of iterators", "[trpp]")
+{
+   //  ---- code by Ivan Notaros ---->
+   class PointHasher {
+   public:
+      size_t operator() (const Delaunay::Point& key) const
+      {
+         std::size_t h1 = std::hash<double>{}(key[0]);
+         std::size_t h2 = std::hash<double>{}(key[1]);
+         return h1 ^ (h2 << 1);
+      }
+   };
+
+   class PointKeyeq {
+   public:
+      bool operator() (const Delaunay::Point& p0, const Delaunay::Point& p1) const {
+         return 
+            p0[0] == p1[0] && p0[1] == p1[1];
+      }
+   };
+   
+   struct Vertex {
+      float x, y, z;
+      float colr, colg, colb;
+
+      Vertex(float xp, float yp, float zp) : x(xp), y(yp), z(zp), colr(0.0f), colg(0.0f), colb(0.0f) {}
+   };
+
+   const auto ToVert = [](const Delaunay::Point& point) {
+      Vertex v{ static_cast<float>(point[0]), static_cast<float>(point[1]), 0.f };
+      return v;
+   };
+
+   struct Mesh {
+      std::vector<int> indices;
+      std::vector<Vertex> vertices;
+   } 
+   mesh;
+
+   struct GenParams {
+      float radius;
+      int circleSegments;
+      float minAngle, maxArea;
+   }
+   genParams;
+
+   std::vector<Delaunay::Point> inputPoints;
+   bool mergeVertices;
+
+   const auto Regenerate = [&]() {
+      inputPoints.clear();
+      mesh.indices.clear();
+      mesh.vertices.clear();
+
+      // Make a circle of points
+      {
+         const float radX = genParams.radius;
+         const float radY = genParams.radius;
+         const float centerX = 0.f;
+         const float centerY = 0.f;
+         const int interpolations = genParams.circleSegments;
+
+         // C++20!
+         float step = (2.f * std::numbers::pi_v<float>) / interpolations;
+
+         for (int i = 0; i < interpolations; i++)
+         {
+            float theta = i * step;
+
+            auto p = tpp::Delaunay::Point(
+               centerX + (cos(theta) * radX),
+               centerY + (sin(theta) * radY)
+            );
+
+            inputPoints.push_back(p);
+         }
+      }
+
+      tpp::Delaunay gen(inputPoints);
+
+      gen.setMinAngle(genParams.minAngle);
+      gen.setMaxArea(genParams.maxArea);
+      gen.TriangulateConf(true);
+
+      using Point = tpp::Delaunay::Point;
+
+      // Obtain points and triangles
+      std::unordered_map<Point, int, PointHasher, PointKeyeq> vertMap; // For merging
+      vertMap.reserve(1024);
+
+      const bool _merge = mergeVertices;
+
+      int index = 0;
+      for (tpp::FaceIterator it = gen.fbegin(); it != gen.fend(); ++it)
+      {
+         Point p0; gen.Org(it, &p0); // These return index of a point in the input list (useless)!!!
+         Point p1; gen.Dest(it, &p1);
+         Point p2; gen.Apex(it, &p2);
+
+         if (_merge) // with vertex merging
+         {
+            const auto AddVert = [&](const Point& _p) {
+               // C++20!
+               if (vertMap.contains(_p)) // use existing vertex
+               {
+                  mesh.indices.push_back(vertMap[_p]);
+               }
+               else // create a new vertex
+               {
+                  vertMap[_p] = index;
+                  mesh.indices.push_back(index);
+                  index++;
+
+                  mesh.vertices.push_back(ToVert(_p));
+               }
+            };
+
+            AddVert(p0);
+            AddVert(p1);
+            AddVert(p2);
+
+         }
+         else // without vertex merging
+         {
+            mesh.indices.push_back(index++);
+            mesh.indices.push_back(index++);
+            mesh.indices.push_back(index++);
+
+            mesh.vertices.push_back(ToVert(p0));
+            mesh.vertices.push_back(ToVert(p1));
+            mesh.vertices.push_back(ToVert(p2));
+         }
+      }
+   };
+   //  ---- code by Ivan Notaros (end) ----> 
+
+   // 1. run a reference test
+   float radius = 10;
+   int circleSegments = 100;
+   float minAngle = 20;
+   float maxArea = 20;
+
+   genParams = { radius, circleSegments , minAngle, maxArea };
+   mergeVertices = true;
+
+   Regenerate();   
+
+   REQUIRE(!inputPoints.empty());
+   REQUIRE(!mesh.indices.empty());
+   REQUIRE(!mesh.vertices.empty());
+
+   // 2. run test sections
+   using Point = tpp::Delaunay::Point;
+
+   tpp::Delaunay gen(inputPoints);
+   gen.enableMeshIndexGeneration();
+
+   gen.setMinAngle(genParams.minAngle);
+   gen.setMaxArea(genParams.maxArea);
+   gen.TriangulateConf(true);
+
+   Point p0, p1, p2;
+   int meshIdx0 = -1, meshIdx1 = -1, meshIdx2 = -1;
+
+   auto insertMeshPoint = [&](Mesh& mesh, int& vertexCount, const Point& pt, int vertexIdx)
+   {
+      if (vertexIdx > vertexCount)
+      {
+         // new point!
+         mesh.vertices.push_back(ToVert(pt));
+         assert(mesh.vertices.size() == ((std::size_t)vertexIdx + 1)); // correct indexing?
+
+         assert(vertexIdx == vertexCount + 1); // vertex numbered as expected? 
+         vertexCount = vertexIdx;
+      }
+
+      mesh.indices.push_back(vertexIdx);
+   };
+
+   SECTION("TEST 11.1: Vertex iterator usage")
+   {
+      Mesh mesh_Vi;
+
+      for (tpp::VertexIterator it = gen.vbegin(); it != gen.vend(); ++it)
+      {
+         auto vertexId = it.vertexId();
+         auto pt = *it;
+
+         mesh_Vi.indices.push_back(vertexId);
+         mesh_Vi.vertices.push_back(ToVert(pt));
+      }
+
+      std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
+      std::cout << " ### vertices_Viter =" << mesh_Vi.vertices.size() << std::endl;
+
+      std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
+      std::cout << " ### indexes_Viter =" << mesh_Vi.indices.size() << std::endl;
+
+      // checks
+      REQUIRE(mesh.indices.size() != mesh_Vi.indices.size()); // not equal!
+      REQUIRE(mesh.vertices.size() == mesh_Vi.vertices.size());
+   }
+
+   SECTION("TEST 11.2: Face iterator with mesh indexing")
+   {
+      Mesh mesh_meFi;
+      int count = -1;
+
+      auto insertMeshPt = [&](const Point& pt, int vertexIdx) {
+         insertMeshPoint(mesh_meFi, count, pt, vertexIdx);
+      };
+
+      for (tpp::FaceIterator it = gen.fbegin(); it != gen.fend(); ++it)
+      {
+         it.Org(p0, meshIdx0);
+         insertMeshPt(p0, meshIdx0);
+
+         it.Dest(p1, meshIdx1);
+         insertMeshPt(p1, meshIdx1);
+
+         it.Apex(p2, meshIdx2);
+         insertMeshPt(p2, meshIdx2);
+
+         //std::cout << " ### idx0=" << idx0 << " idx1=" << idx1 << " idx2=" << idx2 << std::endl;   
+         REQUIRE(meshIdx0 >= 0); REQUIRE(meshIdx1 >= 0); REQUIRE(meshIdx2 >= 0);
+      }
+
+      std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
+      std::cout << " ### vertices_MeshIter =" << mesh_meFi.vertices.size() << std::endl;
+
+      std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
+      std::cout << " ### indexes_MeshIter =" << mesh_meFi.indices.size() << std::endl;
+
+      // checks
+      REQUIRE(mesh.indices.size() == mesh_meFi.indices.size());
+      REQUIRE(mesh.vertices.size() == mesh_meFi.vertices.size());
+   }
+
+   SECTION("TEST 11.3: Delaunay::faces() with a foreach loop")
+   {
+      Mesh mesh_meFi;
+      int count = -1;
+
+      auto insertMeshPt = [&](const Point& pt, int vertexIdx) {
+         insertMeshPoint(mesh_meFi, count, pt, vertexIdx);
+      };
+
+      for (const auto& f : gen.faces())
+      {
+         f.Org(p0, meshIdx0);
+         insertMeshPt(p0, meshIdx0);
+
+         f.Dest(p1, meshIdx1);
+         insertMeshPt(p1, meshIdx1);
+
+         f.Apex(p2, meshIdx2);
+         insertMeshPt(p2, meshIdx2);
+
+         //std::cout << " ### idx0=" << idx0 << " idx1=" << idx1 << " idx2=" << idx2 << std::endl;   
+         REQUIRE(meshIdx0 >= 0); REQUIRE(meshIdx1 >= 0); REQUIRE(meshIdx2 >= 0);
+      }
+
+      REQUIRE(mesh.indices.size() == mesh_meFi.indices.size());
+      REQUIRE(mesh.vertices.size() == mesh_meFi.vertices.size());
+   }
+
+   SECTION("TEST 11.4: Face iterator, but mesh indexing not enabled")
+   {
+      tpp::Delaunay genNoMeshIdx(inputPoints);
+
+      genNoMeshIdx.setMinAngle(genParams.minAngle);
+      genNoMeshIdx.setMaxArea(genParams.maxArea);
+      genNoMeshIdx.TriangulateConf(true);
+
+      auto iter = genNoMeshIdx.fbegin();
+
+      // disable assertions for this line...
+      bool tmp = tpp::g_disableAsserts;
+      tpp::g_disableAsserts = true;
+
+      // should throw (as in Release mode):
+      REQUIRE_THROWS_MATCHES(iter.Org(p0, meshIdx0),
+         std::runtime_error, Catch::Matchers::Message("Mesh indexing not enabled"));
+
+      tpp::g_disableAsserts = tmp;
+   }
+
+   // ... more to come...
+
+}
+
+
+TEST_CASE("Usage of Points", "[trpp]")
+{
+   // prepare points
+   std::vector<Delaunay::Point> pslgExamplePoints;
+
+   pslgExamplePoints.push_back(Delaunay::Point(0, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(1, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(3, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(4, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(1.5, 1));
+   pslgExamplePoints.push_back(Delaunay::Point(2.5, 1));
+   pslgExamplePoints.push_back(Delaunay::Point(1.6, 1.5));
+   pslgExamplePoints.push_back(Delaunay::Point(2.4, 1.5));
+   pslgExamplePoints.push_back(Delaunay::Point(2, 2));
+   pslgExamplePoints.push_back(Delaunay::Point(2, 3));
+
+   // Sorting
+   // std::sort(pslgExamplePoints.begin(), pslgExamplePoints.end()); ---> not working!
+
+   std::sort(pslgExamplePoints.begin(), pslgExamplePoints.end(), Delaunay::OrderPoints());
+
+   REQUIRE(std::is_sorted(pslgExamplePoints.begin(), pslgExamplePoints.end(), Delaunay::OrderPoints()));
+}
+
+
+TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
+{
+   // prepare points
+   std::vector<Delaunay::Point> pslgExamplePoints;
+
+   pslgExamplePoints.push_back(Delaunay::Point(0, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(1, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(3, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(4, 0));
+   pslgExamplePoints.push_back(Delaunay::Point(1.5, 1));
+   pslgExamplePoints.push_back(Delaunay::Point(2.5, 1));
+   pslgExamplePoints.push_back(Delaunay::Point(1.6, 1.5));
+   pslgExamplePoints.push_back(Delaunay::Point(2.4, 1.5));
+   pslgExamplePoints.push_back(Delaunay::Point(2, 2));
+   pslgExamplePoints.push_back(Delaunay::Point(2, 3));
+
+
+   Delaunay trGenerator(pslgExamplePoints);
+   trGenerator.Triangulate(dbgOutput);
+
+   auto mesh = trGenerator.mesh();
+   auto iterFirst = trGenerator.fbegin();
+   auto iter = trGenerator.fend(); 
+   
+   SECTION("TEST XX.XX: Walk over triangles in the mesh")
+   {
+      iter = mesh.Lnext(iterFirst);
+      iter = mesh.Lprev(iterFirst);
+      iter = mesh.Onext(iterFirst);
+      iter = mesh.Oprev(iterFirst);
+      iter = mesh.Sym(iterFirst);
+
+      // OPEN TODO::
+      
+      //REQUIRE();
+      //REQUIRE();
+      //REQUIRE();
+      //REQUIRE();
+      //REQUIRE();
+   }
+
+   SECTION("TEST XX.XX: Locate vertex in a mesh")
+   {
+      iter = mesh.locate(iterFirst.Org());
+      REQUIRE(iter == iterFirst);
+   }
+
+   SECTION("TEST XX.XX: Find triangles around vertex in a mesh")
+   {
+      std::vector<int> ivv;     
+      mesh.trianglesAroundVertex(iterFirst.Org(), ivv);
+
+      REQUIRE(iterFirst.Org() == 0);
+      REQUIRE(ivv.size() == 9);
+   }
+
+}
 
 // --- eof ---

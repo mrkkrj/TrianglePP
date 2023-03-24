@@ -1,6 +1,7 @@
-/*! \file assert.hpp
-    \brief Implements a better 'Assert'. 
-           Used in the reviver::dpoint inplementation.
+ /** 
+    @file  assert.hpp
+    @brief Implements a better 'Assert'.
+           Needed for the reviver::dpoint inplementation.
  */
 
 namespace tpp {
@@ -8,21 +9,17 @@ namespace tpp {
 #ifndef REVIVER_ASSERT_HPP
 #define REVIVER_ASSERT_HPP
 
-/*! \def MyAssertFunction
-    \brief Function used by 'Assert' function in _DEBUG mode.
-*/
+extern bool g_disableAsserts;
 extern bool MyAssertFunction( bool b, const char* desc, int line, const char* file);
 
-
+// macro
 #if defined( _DEBUG )
-// changed mrkkrj --
-//#define Assert( exp, description ) MyAssertFunction( (int)(exp), description, __LINE__, __FILE__ )
-#define Assert( exp, description ) tpp::MyAssertFunction( (int)(exp), description, __LINE__, __FILE__ )
-// END changed --
+#define Assert( exp, description ) tpp::g_disableAsserts \
+          ? true \
+          : tpp::MyAssertFunction( (int)(exp), description, __LINE__, __FILE__ )
 #else
 #define Assert( exp, description )
 #endif
-
 
 #endif
 

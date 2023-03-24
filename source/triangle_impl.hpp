@@ -1,11 +1,11 @@
+/** 
+    @file  triangle_impl.hpp
+    @brief The original JPS's C-implementation of TriLib, wrapped in the Triwrap 
+           class by @piyush. 
 
-/*! \file triangle_impl.hpp
-    \brief The original JPS's C-implementation of Triangle; wrapped in the 
-           Triwrap class.
-
-    For for backgroud info on the implementation see "Triangle: Engineering a 2D 
-    Quality Mesh Generator and Delaunay Triangulator" by JP Shewchuk: 
-    www.cs.cmu.edu/~quake-papers/triangle.ps
+           It also contains some extensions and changes by @mrkkrj like e.g.:
+           TRILIB_EXIT_BY_EXCEPTION, TRIFILES_OUTPUT_SUPPORT and
+           TRIFILES_READ_SUPPORT ifdefs, addition of TRACE() macros, etc.
  */
 
 /*****************************************************************************/
@@ -380,8 +380,13 @@
 
 /* Fast lookup arrays to speed some of the mesh manipulation primitives.     */
 
+#ifndef TRIWRAP_ONLY_DEFINITIONS
 int plus1mod3[3] = {1, 2, 0};
 int minus1mod3[3] = {2, 0, 1};
+#else
+extern int plus1mod3[3];
+extern int minus1mod3[3];
+#endif
 
 
 //!  The inner helper class that wraps around the original Triangle.

@@ -6,7 +6,7 @@
     supported using <a href="http://www.cs.berkeley.edu/~jrs/">Jonathan's</a> code. This class 
     forms the building block of other classes like dplane, dsphere etc.
 
-    \author <a href="www.compgeom.com/~piyush">Piyush Kumar</a>
+    \author <a href="http://www.compgeom.com/~piyush">Piyush Kumar</a>
     \bug    No known bugs.
  */
 
@@ -14,7 +14,6 @@
 #define REVIVER_POINT_HPP
 
 // changed mrkkrj --
-//#include "assert.hpp"
 #include "tpp_assert.hpp"
 // END changed --
 #include <iostream>

@@ -33,7 +33,7 @@ For usage patterns see the examples in the *trpp_example.cpp* source file. The i
     trGenerator.Triangulate();
 
     // iterate over triangles
-    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
         int keypointIdx1 = trGenerator.Org(fit); 
         int keypointIdx2 = trGenerator.Dest(fit);
@@ -91,9 +91,9 @@ Algorithm used for DCT construction: "*Fast segment insertion and incremental co
  - remove warnings
  - add support for regions and reading of region attributes from .poly file
  - add CI support (Travis?)
- - extract iterator code to own file
+ - extract iterator code to own file (possible???)
  - add convex hull demonstration to the Qt demo app
- - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (???)
+ - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (needed???)
  - Port the Qt demo app to Emscripten
 
 

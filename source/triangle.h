@@ -1,10 +1,10 @@
+/** 
+    @file  triangle.h
+    @brief Original Triangle package's include file.
 
-/*! \file triangle.h
-    \brief Original Triangle package's include file.
-
-    Exports triangulateio structure for use in tpp_impl.hpp. You should not 
-    use struct triangulateio in your application if you are using Triangle++ 
-    wrapper! 
+    Exports triangulateio structure for use in tpp_impl.hpp. You should not
+    use struct triangulateio in your application if you are using Triangle++
+    wrapper!
  */
 
 /*****************************************************************************/

@@ -1,35 +1,38 @@
-/*! \file trpp_example.cpp
-    \brief example usage of the Triangle++ wrapper
+/** 
+    @file  trpp_example.cpp
+    @brief  example usage of the Triangle++ wrapper
  */
 
 #include "tpp_interface.hpp"
+
 #include <vector>
+#include <iostream>
 #include <cassert>
 
-
 using namespace tpp;
+using Point = Delaunay::Point;
 
 
 int main()
 {
     // prepare input
-    std::vector<Delaunay::Point> delaunayInput;
+    std::vector<Point> delaunayInput;
     
-    delaunayInput.push_back(Delaunay::Point(0,0));
-    delaunayInput.push_back(Delaunay::Point(1,1));
-    delaunayInput.push_back(Delaunay::Point(0,2));
-    delaunayInput.push_back(Delaunay::Point(3,3));
+    delaunayInput.push_back(Point(0,0));
+    delaunayInput.push_back(Point(1,1));
+    delaunayInput.push_back(Point(0,2));
+    delaunayInput.push_back(Point(3,3));
 
     // 1. standard triangulation
     Delaunay trGenerator(delaunayInput);
     trGenerator.Triangulate();
 
     // iterate over triangles
-    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-        int keypointIdx1 = trGenerator.Org(fit); 
-        int keypointIdx2 = trGenerator.Dest(fit);
-        int keypointIdx3 = trGenerator.Apex(fit);
+        int keypointIdx1 = fit.Org();
+        int keypointIdx2 = fit.Dest();
+        int keypointIdx3 = fit.Apex();
 
         // access data
         double x1 = delaunayInput[keypointIdx1][0];
@@ -49,15 +52,14 @@ int main()
     trGenerator.Triangulate(enforceQuality);
 
     // iterate over triangles
-    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-       Delaunay::Point sp1;
-       Delaunay::Point sp2;
-       Delaunay::Point sp3;
+       // potential Steiner points:
+       Point sp1, sp2, sp3;
 
-       int keypointIdx1 = trGenerator.Org(fit, &sp1);
-       int keypointIdx2 = trGenerator.Dest(fit, &sp2);
-       int keypointIdx3 = trGenerator.Apex(fit, &sp3);
+       int keypointIdx1 = fit.Org(&sp1);
+       int keypointIdx2 = fit.Dest(&sp2);
+       int keypointIdx3 = fit.Apex(&sp3);
 
        // new vertices might have been added to enforce constraints!
        //  (i.e. Steiner points)
@@ -83,26 +85,27 @@ int main()
     // 3. creation of a Voronoi diagram
     trGenerator.Tesselate();
 
-    auto vPointCount = trGenerator.nvpoints();
-    auto vEdgesCount = trGenerator.nvedges();
+    auto vPointCount = trGenerator.voronoiPointCount(); // how many?
+    auto vEdgesCount = trGenerator.voronoiEdgeCount();
 
     // iterate over Voronoi points
-    for (Delaunay::vvIterator fit = trGenerator.vvbegin(); fit != trGenerator.vvend(); ++fit)
+    for (VoronoiVertexIterator vit = trGenerator.vvbegin(); vit != trGenerator.vvend(); ++vit)
     {
        // access data
-       auto point = *fit;
+       auto point = *vit;
        double x1 = point[0];
        double y1 = point[1];
     }
 
     std::cout << ", 3a";
 
-    // ... and Voronoi edges
-    for (Delaunay::veIterator fit = trGenerator.vebegin(); fit != trGenerator.veend(); ++fit)
+    // and Voronoi edges
+    bool infiniteRay = false;
+
+    for (VoronoiEdgeIterator eit = trGenerator.vebegin(); eit != trGenerator.veend(); ++eit)
     {       
-       bool infiniteRay = false;
-       Delaunay::Point p1 = trGenerator.Org(fit);
-       Delaunay::Point p2 = trGenerator.Dest(fit, infiniteRay);
+       Point p1 = eit.Org();
+       Point p2 = eit.Dest(infiniteRay);
 
        // access data
        double xstart = p1[0];
@@ -125,7 +128,7 @@ int main()
     std::cout << ", 3b";
 
     // 4. constrained Delaunay
-    std::vector<Delaunay::Point> segments;
+    std::vector<Point> segments;
 
     segments.push_back(delaunayInput[2]);
     segments.push_back(delaunayInput[1]);
@@ -133,19 +136,15 @@ int main()
     trGenerator.setSegmentConstraint(segments);
     // trGenerator.setHolesConstraint(holes); --> also supported!
 
-    trGenerator.Triangulate(!enforceQuality); // no quality constraint, thus no Steiner points!
-    int triCount = trGenerator.ntriangles();
+    trGenerator.Triangulate(!enforceQuality);   // no quality constraint, thus NO Steiner points!
+    int triCount = trGenerator.triangleCount(); // how many?
 
     // iterate over triangles
-    for (Delaunay::fIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
+    for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-       Delaunay::Point sp1;
-       Delaunay::Point sp2;
-       Delaunay::Point sp3;
-
-       int keypointIdx1 = trGenerator.Org(fit, &sp1);
-       int keypointIdx2 = trGenerator.Dest(fit, &sp2);
-       int keypointIdx3 = trGenerator.Apex(fit, &sp3);
+       int keypointIdx1 = fit.Org();
+       int keypointIdx2 = fit.Dest();
+       int keypointIdx3 = fit.Apex();
 
        // access data
        double x1 = delaunayInput[keypointIdx1][0];
