@@ -35,9 +35,9 @@ For usage patterns see the examples in the *trpp_example.cpp* source file. The i
     // iterate over triangles
     for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-        int keypointIdx1 = trGenerator.Org(fit); 
-        int keypointIdx2 = trGenerator.Dest(fit);
-        int keypointIdx3 = trGenerator.Apex(fit);
+        int keypointIdx1 = fit.Org(); 
+        int keypointIdx2 = fit.Dest();
+        int keypointIdx3 = fit.Apex();
 
         // access data
         double x1 = delaunayInput[keypointIdx1][0];
