@@ -387,9 +387,9 @@ namespace tpp
 
 #ifdef TRPP_OLD_NAMES_SUPPORTED
       //  -> for backward comp. only!!! (Will be removed, use methods of the iterator!)          
-      int Org(FaceIterator const& fit, Point* point = 0) const;
-      int Dest(FaceIterator const& fit, Point* point = 0) const;
-      int Apex(FaceIterator const& fit, Point* point = 0) const;
+      int Org(FaceIterator const& fit, Point* point = nullptr) const;
+      int Dest(FaceIterator const& fit, Point* point = nullptr) const;
+      int Apex(FaceIterator const& fit, Point* point = nullptr) const;
 
       const Point& Org(VoronoiEdgeIterator const& eit);
       Point Dest(VoronoiEdgeIterator const& eit, bool& finiteEdge);
@@ -464,7 +464,7 @@ namespace tpp
    public:
       void operator++();
 
-      fIterator() : m_delaunay(nullptr), meshPointCount(0) { floop.tri = nullptr; };
+      fIterator() : m_delaunay(nullptr), meshPointCount(0) { floop.tri = nullptr; }
 
       bool empty() const;      
       bool isdummy() const;  // pointing to the dummy triangle?
@@ -478,9 +478,9 @@ namespace tpp
          @param point: if specified - the cordinates of the vertex
          @return: index of the vertex in the input vector, or -1 if a new vertex was created
        */
-      int Org(Delaunay::Point* point = 0) const;
-      int Dest(Delaunay::Point* point = 0) const;
-      int Apex(Delaunay::Point* point = 0) const;
+      int Org(Delaunay::Point* point = nullptr) const;
+      int Dest(Delaunay::Point* point = nullptr) const;
+      int Apex(Delaunay::Point* point = nullptr) const;
 
       /**
          @brief: Get the origin point of the triangle (@see Org() above) and its mesh index
@@ -503,9 +503,9 @@ namespace tpp
          Face(fIterator* iter) : m_iter(iter) {}
 
          // gets index in the input array
-         int Org(Delaunay::Point* point = 0)   const { return m_iter->Org(point); }
-         int Dest(Delaunay::Point* point = 0)  const { return m_iter->Dest(point); }
-         int Apex(Delaunay::Point* point = 0)  const { return m_iter->Apex(point); }
+         int Org(Delaunay::Point* point = nullptr)   const { return m_iter->Org(point); }
+         int Dest(Delaunay::Point* point = nullptr)  const { return m_iter->Dest(point); }
+         int Apex(Delaunay::Point* point = nullptr)  const { return m_iter->Apex(point); }
 
          // gets index in the resulting mesh
          void Org(Delaunay::Point& point, int& meshIndex)   const { m_iter->Org(point, meshIndex); }
@@ -581,8 +581,8 @@ namespace tpp
    private:
       vIterator(Delaunay* triangulator);   
 
-      Delaunay* m_delaunay;   
       void* vloop;  // TriLib's internal data
+      Delaunay* m_delaunay;   
    };
 
 

@@ -11,7 +11,9 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#if __cplusplus >= 202002L
 #include <numbers> // C++20!
+#endif
 #include <algorithm>
 
 // debug support
@@ -823,9 +825,12 @@ TEST_CASE("Usage of iterators", "[trpp]")
          const float centerY = 0.f;
          const int interpolations = genParams.circleSegments;
 
+#if __cplusplus >= 202002L
          // C++20!
          float step = (2.f * std::numbers::pi_v<float>) / interpolations;
-
+#else
+         float step = (2.f * 3.141592653589793f) / interpolations;
+#endif
          for (int i = 0; i < interpolations; i++)
          {
             float theta = i * step;
@@ -863,8 +868,12 @@ TEST_CASE("Usage of iterators", "[trpp]")
          if (_merge) // with vertex merging
          {
             const auto AddVert = [&](const Point& _p) {
+#if __cplusplus >= 202002L
                // C++20!
                if (vertMap.contains(_p)) // use existing vertex
+#else
+               if (vertMap.find(_p) != vertMap.end()) // use existing vertex
+#endif
                {
                   mesh.indices.push_back(vertMap[_p]);
                }

@@ -1,0 +1,7 @@
+
+*.obj
+*.cmake
+*.make
+*.a
+*.vsidx
+*.user

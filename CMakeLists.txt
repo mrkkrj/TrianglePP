@@ -1,7 +1,7 @@
 if(UNIX)
 	cmake_minimum_required(VERSION 3.10)
 else()
-	cmake_minimum_required(VERSION 3.13)
+        cmake_minimum_required(VERSION 3.12)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -26,6 +26,7 @@ set(Source_Files__trpp
     "source/dpoint.hpp"
     "source/tpp_assert.cpp"
     "source/tpp_assert.hpp"
+    "source/tpp_trace.hpp"
     "source/tpp_impl.cpp"
     "source/tpp_interface.hpp"
     "source/triangle_impl.hpp"
