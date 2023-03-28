@@ -77,6 +77,8 @@ You can also save and read your work:
 
 ![triangle-PP's File I/O](triangle-pp-testApp-File_IO.jpg)
 
+Note: still some problems when reading/writing files (see TODOs below), work uderway!
+
 ## Theory:
 
 ![Triangle logo](T.gif) 
@@ -88,7 +90,6 @@ The original *Triangle* library documentation can be found at: http://www.cs.cmu
 Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 ## TODOs:
- - add support for sanitizing inputs with duplicates (work underway)
  - fix a bug in .poly file writing with holes (!!!)
  - fix a reading of .poly files with VisualStudio compiler (WTF???)
  - remove warnings

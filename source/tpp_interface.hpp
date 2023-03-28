@@ -26,6 +26,7 @@
        30/12/22: mrkkrj – added first file read-write support 
        03/02/23: mrkkrj – added first support for input sanitization 
        15/03/23: mrkkrj – added support for iteration over the resulting mesh, some refactorings 
+       27/03/23: mrkkrj – API break, removed old (i.e. deprecated) names
  */
 
 #ifndef TRPP_INTERFACE
@@ -37,26 +38,18 @@
 #include <string>
 #include <unordered_map>
 
-// backwards compatibility:
-#define TRPP_OLD_NAMES_SUPPORTED 1
-
 class Triwrap;
 struct triangulateio;
 
-
 namespace tpp 
 {
-   class vIterator;
-   class fIterator;
-   class vvIterator;
-   class veIterator;
+   class FaceIterator;
+   class VertexIterator;
+   class VoronoiVertexIterator;
+   class VoronoiEdgeIterator;
+
    class TriangulationMesh;
    struct FacesList;
-
-   typedef vIterator VertexIterator;
-   typedef fIterator FaceIterator;
-   typedef vvIterator VoronoiVertexIterator;
-   typedef veIterator VoronoiEdgeIterator;
 
    enum DebugOutputLevel
    {
@@ -267,17 +260,8 @@ namespace tpp
       int hullSize() const;
       int holeCount() const;
 
-#ifdef TRPP_OLD_NAMES_SUPPORTED
-      //!  -> same, for backward comp. only!!! (Will be removed...)
-      int nedges() const;
-      int ntriangles() const;
-      int nvertices() const;
-      int hull_size() const;
-      int nholes() const;
-#endif
-
       /**
-        @brief: Min-max point coordinates values in the resulting triangulation
+        @brief: Min-max point coordinate values in the resulting triangulation
        */
       void getMinMaxPoints(double& minX, double& minY, double& maxX, double& maxY) const;
 
@@ -295,12 +279,6 @@ namespace tpp
        */
       int voronoiPointCount() const;
       int voronoiEdgeCount() const;
-
-#ifdef TRPP_OLD_NAMES_SUPPORTED
-      //!  -> same, for backward comp. only!!! (Will be removed...)
-      int nvpoints() const;
-      int nvedges() const;
-#endif
 
       /**
         @brief: Iterate over Voronoi vertices and edges
@@ -362,14 +340,6 @@ namespace tpp
       //---------------------------------
 
       /**
-         @brief:  Point locate a vertex V
-
-         @param vertexId: the vertex
-         @return: a face iterator whose origin is V
-       */
-      FaceIterator locate(int vertexId); // OPEN:: doesn't seem to be working!
-
-      /**
          @brief: Given a vertex index, return the actual Point from the input data
        */
       const Point& pointAtVertexId(int vertexId) const;
@@ -383,17 +353,6 @@ namespace tpp
         @brief: Class for operations on oriented triangles (faces)
        */
       TriangulationMesh mesh();
-
-
-#ifdef TRPP_OLD_NAMES_SUPPORTED
-      //  -> for backward comp. only!!! (Will be removed, use methods of the iterator!)          
-      int Org(FaceIterator const& fit, Point* point = nullptr) const;
-      int Dest(FaceIterator const& fit, Point* point = nullptr) const;
-      int Apex(FaceIterator const& fit, Point* point = nullptr) const;
-
-      const Point& Org(VoronoiEdgeIterator const& eit);
-      Point Dest(VoronoiEdgeIterator const& eit, bool& finiteEdge);
-#endif
 
       /**
          @brief: helper, use it to sort the Points first on their X then on Y coord.
@@ -417,23 +376,22 @@ namespace tpp
       void static SetPoint(Point& point, /*Triwrap::vertex*/ double* vertexptr);
 
       bool readSegmentsFromFile(char* polyfileName, FILE* polyfile);
-      std::string formatFloatConstraint(float f) const;
       std::unordered_map<int, int> checkForDuplicatePoints() const;   
       int GetFirstIndexNumber() const;           
 
-      friend class vIterator;
-      friend class fIterator;
-      friend class vvIterator;
-      friend class veIterator;
+      friend class VertexIterator;
+      friend class FaceIterator;
+      friend class VoronoiVertexIterator;
+      friend class VoronoiEdgeIterator;
       friend class TriangulationMesh;
       
    private:
-      Triwrap* m_triangleWrap;  // the inner helper class Triwrap grouping the original TriLib's C functions.
+      Triwrap* m_triangleWrap;  // inner helper class grouping the original TriLib's C functions.
 
-      void* m_in;         // pointers to TriLib's intput, mesh & behavior
+      void* m_in;      // pointers to TriLib's intput, mesh & behavior
       void* m_pmesh;             
       void* m_pbehavior;      
-      void* m_vorout;     // pointer to Voronoi output
+      void* m_vorout;  // pointer to TriLib's Voronoi output
 
       float m_minAngle;
       float m_maxArea;
@@ -459,12 +417,12 @@ namespace tpp
    /**
       @brief: The face iterator for a Delaunay triangulation
     */
-   class fIterator
+   class FaceIterator
    {
    public:
       void operator++();
 
-      fIterator() : m_delaunay(nullptr), meshPointCount(0) { floop.tri = nullptr; }
+      FaceIterator() : m_delaunay(nullptr), meshPointCount(0) { floop.tri = nullptr; }
 
       bool empty() const;      
       bool isdummy() const;  // pointing to the dummy triangle?
@@ -483,7 +441,7 @@ namespace tpp
       int Apex(Delaunay::Point* point = nullptr) const;
 
       /**
-         @brief: Get the origin point of the triangle (@see Org() above) and its mesh index
+         @brief: Get the origin point of the triangle (@see Org() above) and its *mesh index*
 
          @param point: the cordinates of the vertex
          @param meshIndex: Index of the vertex in mesh (in order of iteration!)
@@ -500,7 +458,7 @@ namespace tpp
       // support for iterator dereferencing
       struct Face
       {
-         Face(fIterator* iter) : m_iter(iter) {}
+         Face(FaceIterator* iter) : m_iter(iter) {}
 
          // gets index in the input array
          int Org(Delaunay::Point* point = nullptr)   const { return m_iter->Org(point); }
@@ -513,14 +471,14 @@ namespace tpp
          void Apex(Delaunay::Point& point, int& meshIndex)  const { m_iter->Apex(point, meshIndex); }
 
       private:
-         fIterator* m_iter;
+         FaceIterator* m_iter;
       };
 
       Face operator*() { return Face(this); }
 
-      friend bool operator==(fIterator const&, fIterator const&);
-      friend bool operator!=(fIterator const&, fIterator const&);
-      friend bool operator<(fIterator const&, fIterator const&); // added mrkkrj
+      friend bool operator==(FaceIterator const&, FaceIterator const&);
+      friend bool operator!=(FaceIterator const&, FaceIterator const&);
+      friend bool operator<(FaceIterator const&, FaceIterator const&); // added mrkkrj
 
    private:
       struct tdata // TriLib's internal data
@@ -531,7 +489,7 @@ namespace tpp
 
       typedef struct tdata poface; // = ptr. to oriented face
 
-      fIterator(Delaunay* triangulator);
+      FaceIterator(Delaunay* triangulator);
 
       int getVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const;
       int getMeshVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const;
@@ -564,22 +522,22 @@ namespace tpp
    /**
       @brief: The vertex iterator for a Delaunay triangulation
     */
-   class vIterator
+   class VertexIterator
    {
    public:
-      vIterator operator++();
+      VertexIterator operator++();
       Delaunay::Point& operator*() const;
 
-      vIterator() : vloop(nullptr), m_delaunay(nullptr) {}
+      VertexIterator() : vloop(nullptr), m_delaunay(nullptr) {}
 
       int vertexId() const;
 
       friend class Delaunay;
-      friend bool operator==(vIterator const&, vIterator const&);
-      friend bool operator!=(vIterator const&, vIterator const&);
+      friend bool operator==(VertexIterator const&, VertexIterator const&);
+      friend bool operator!=(VertexIterator const&, VertexIterator const&);
 
    private:
-      vIterator(Delaunay* triangulator);   
+      VertexIterator(Delaunay* triangulator);   
 
       void* vloop;  // TriLib's internal data
       Delaunay* m_delaunay;   
@@ -589,21 +547,21 @@ namespace tpp
    /**
       @brief: The points iterator for a Voronoi tesselation
     */
-   class vvIterator 
+   class VoronoiVertexIterator 
    {
    public:
-      vvIterator operator++();
+      VoronoiVertexIterator operator++();
       Delaunay::Point& operator*() const;
 
-      vvIterator();
+      VoronoiVertexIterator();
       void advance(int steps);
 
       friend class Delaunay;
-      friend bool operator==(vvIterator const&, vvIterator const&);
-      friend bool operator!=(vvIterator const&, vvIterator const&);
+      friend bool operator==(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
+      friend bool operator!=(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
 
    private:
-      vvIterator(Delaunay* tiangulator);
+      VoronoiVertexIterator(Delaunay* tiangulator);
 
       Delaunay* m_delaunay;   
 
@@ -616,12 +574,12 @@ namespace tpp
    /**
       @brief: The edges iterator for a Voronoi tesselation
     */
-   class veIterator 
+   class VoronoiEdgeIterator 
    {
    public:    
-      veIterator operator++();
+      VoronoiEdgeIterator operator++();
 
-      veIterator();
+      VoronoiEdgeIterator();
 
       // OPEN TODO:: comment!
       int startPointId() const;
@@ -642,11 +600,11 @@ namespace tpp
       Delaunay::Point Dest(bool& finiteEdge);
 
       friend class Delaunay;
-      friend bool operator==(veIterator const&, veIterator const&);
-      friend bool operator!=(veIterator const&, veIterator const&);
+      friend bool operator==(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
+      friend bool operator!=(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
 
    private:
-      veIterator(Delaunay* tiangulator);
+      VoronoiEdgeIterator(Delaunay* tiangulator);
 
       Delaunay* m_delaunay;   
       void* veloop;  // TriLib's internal data
@@ -674,7 +632,7 @@ namespace tpp
          @param fit: face iterator
          @param i: edge number (N)
          @return: The vertex on the opposite face, or -1 if the edge is part of the convex hull
-                  (@see fIterator::Org() above)
+                  (@see FaceIterator::Org() above)
        */
       int Sym(FaceIterator const& fit, char i) const;
 
@@ -739,7 +697,7 @@ namespace tpp
          @param vertexId: the vertex
          @return: a face iterator whose origin is V
        */
-      FaceIterator locate(int vertexId); // OPEN:: doesn't seem to be working!
+      FaceIterator locate(int vertexId);
 
 
       // TODO List: 
@@ -754,6 +712,7 @@ namespace tpp
       /*                                                                           */
       /*  rprev:  Find the previous edge (clockwise) of the adjacent triangle.     */
       /*  rprev(abc) -> b**                                                        */
+
 
    private:
       TriangulationMesh(Delaunay* triangulator);

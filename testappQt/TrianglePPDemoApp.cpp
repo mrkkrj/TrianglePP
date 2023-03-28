@@ -605,9 +605,9 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
        Delaunay::Point sp2;
        Delaunay::Point sp3;
 
-       int originIdx = trGenerator.Org(fit, &sp1);
-       int destIdx = trGenerator.Dest(fit, &sp2);
-       int apexIdx = trGenerator.Apex(fit, &sp3);
+       int originIdx = fit.Org(&sp1);
+       int destIdx = fit.Dest(&sp2);
+       int apexIdx = fit.Apex(&sp3);
 
        auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
        {
@@ -639,7 +639,7 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
     ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
     // ready
-    statusBar()->showMessage(tr("Created %1 triangles").arg(trGenerator.ntriangles()));
+    statusBar()->showMessage(tr("Created %1 triangles").arg(trGenerator.triangleCount()));
 }
 
 
@@ -663,8 +663,8 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
    for (tpp::VoronoiEdgeIterator iter = trGenerator.vebegin(); iter != trGenerator.veend(); ++iter)
    {
       bool finiteEdge = false;
-      Delaunay::Point p1 = trGenerator.Org(iter);
-      Delaunay::Point p2 = trGenerator.Dest(iter, finiteEdge);
+      Delaunay::Point p1 = iter.Org();
+      Delaunay::Point p2 = iter.Dest(finiteEdge);
 
       // access data
       double xstart = p1[0];

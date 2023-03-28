@@ -39,4 +39,4 @@ bool MyAssertFunction( bool b, const char* desc, int line, const char* file)
 #endif
 }
 
-} // end of namespace
+} 

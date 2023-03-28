@@ -70,9 +70,9 @@ namespace {
             Delaunay::Point sp2;
             Delaunay::Point sp3;
 
-            int keypointIdx1 = trGenerator.Org(fit, &sp1);
-            int keypointIdx2 = trGenerator.Dest(fit, &sp2);
-            int keypointIdx3 = trGenerator.Apex(fit, &sp3);
+            int keypointIdx1 = fit.Org(&sp1);
+            int keypointIdx2 = fit.Dest(&sp2);
+            int keypointIdx3 = fit.Apex(&sp3);
 
             double x1 = -1;
             double y1 = -1;
@@ -596,7 +596,7 @@ TEST_CASE("Writing files", "[trpp]")
         std::vector<int> segments;
         std::vector<Delaunay::Point> holes;
 
-        ioStatus = trReader.readSegments("./test.poly", points, segments, holes);
+        REQUIRE_NOTHROW(ioStatus = trReader.readSegments("./test.poly", points, segments, holes));
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());
@@ -861,9 +861,9 @@ TEST_CASE("Usage of iterators", "[trpp]")
       int index = 0;
       for (tpp::FaceIterator it = gen.fbegin(); it != gen.fend(); ++it)
       {
-         Point p0; gen.Org(it, &p0); // These return index of a point in the input list (useless)!!!
-         Point p1; gen.Dest(it, &p1);
-         Point p2; gen.Apex(it, &p2);
+         Point p0; it.Org(&p0); // These return index of a point in the input list (useless)!!!
+         Point p1; it.Dest(&p1);
+         Point p2; it.Apex(&p2);
 
          if (_merge) // with vertex merging
          {
@@ -1084,6 +1084,12 @@ TEST_CASE("Usage of Points", "[trpp]")
    std::sort(pslgExamplePoints.begin(), pslgExamplePoints.end(), Delaunay::OrderPoints());
 
    REQUIRE(std::is_sorted(pslgExamplePoints.begin(), pslgExamplePoints.end(), Delaunay::OrderPoints()));
+
+   
+   // OPEN TODO:: hashing support
+
+   // ...
+
 }
 
 
@@ -1114,24 +1120,27 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
    SECTION("TEST XX.XX: Walk over triangles in the mesh")
    {
       iter = mesh.Lnext(iterFirst);
-      iter = mesh.Lprev(iterFirst);
+      iter = mesh.Lprev(iter);
+
+      REQUIRE(iter == iterFirst);
+
       iter = mesh.Onext(iterFirst);
-      iter = mesh.Oprev(iterFirst);
+      iter = mesh.Oprev(iter);
+      
+      REQUIRE(iter == iterFirst);
+
       iter = mesh.Sym(iterFirst);
 
-      // OPEN TODO::
-      
-      //REQUIRE();
-      //REQUIRE();
-      //REQUIRE();
-      //REQUIRE();
-      //REQUIRE();
+      // OPEN TODO::      
+      //REQUIRE(); ....
    }
 
    SECTION("TEST XX.XX: Locate vertex in a mesh")
    {
       iter = mesh.locate(iterFirst.Org());
       REQUIRE(iter == iterFirst);
+
+      // OPEN TODO:: more tests for location!!!
    }
 
    SECTION("TEST XX.XX: Find triangles around vertex in a mesh")
@@ -1143,6 +1152,45 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
       REQUIRE(ivv.size() == 9);
    }
 
+   SECTION("TEST XX.XX: Triangle's area")
+   {
+      // 4 points forming a 2x2 square
+      std::vector<Delaunay::Point> in;
+
+      in.push_back(Delaunay::Point(0, 0));
+      in.push_back(Delaunay::Point(0, 2));
+      in.push_back(Delaunay::Point(2, 0));
+      in.push_back(Delaunay::Point(2, 2));
+
+      Delaunay trGenerator(in);
+      trGenerator.Triangulate(dbgOutput);
+
+      // 1st triangle
+      iter = trGenerator.fbegin();
+      auto area = iter.area(); // OPEN TODO:: move to mesh???
+
+      REQUIRE(area == 2); // == 0.5 * 4 !
+
+      // 2nd triangle
+      ++iter;
+      area = iter.area(); // OPEN TODO:: move to mesh???
+
+      REQUIRE(area == 2); // == 0.5 * 4 !
+
+      // no 3rd!
+      ++iter;
+      REQUIRE(iter == trGenerator.fend());
+
+
+      // OPEN TODO::: N.Y.I. !!!
+#if 0     
+      auto second = trGenerator.fbegin()++;
+      auto area = (trGenerator.fbegin()++).area(); 
+      REQUIRE(area == 2); // == 0.5 * 4 !
+#endif
+   }
+
 }
+
 
 // --- eof ---

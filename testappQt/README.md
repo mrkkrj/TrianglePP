@@ -9,8 +9,10 @@ A small demonstrator/tester for the library.
 **Note:** On Windows it is compiled with *TRIANGLE_DBG_TO_FILE* define, so the debug traces will be written to the *./triangle.out.txt* file.
 
 ## TODOs:
+ - BUG: after showing Examples 1+2 reading of files (face.poly) doesn't really work - some blurred image shown !!!!
  - add deletion of hole marker points
  - add support for moving points
+ - remember last directory when R/W files
  - remove warnings
  - correct rescaling so that points on the border of frame will be entirely visible
  - rescale the inputs only on explicit request (and back...)

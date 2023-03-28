@@ -8,7 +8,6 @@
    @author  + others!!! (@see tpp_interface.hpp)
  */
 
-
 // configuaration of the Triangle.h (i.e. TriLib's code):
 #define NO_TIMER
 #define DREDUCED
@@ -44,34 +43,8 @@
 #include <sstream>
 #include <algorithm>
 
-
 // helper macros
-#define TP_MESH_BEHAVIOR() \
-    Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh); \
-    Triwrap::__pbehavior* tpbehavior = static_cast<Triwrap::__pbehavior *>(m_pbehavior);
-
-#define TP_MESH() \
-    Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh);
-
-#define TP_MESH_PTR() \
-    static_cast<Triwrap::__pmesh *>(m_pmesh)
-
-#define TP_MESH_BEHAVIOR_WRAP() \
-    Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh); \
-    Triwrap::__pbehavior* tpbehavior = static_cast<Triwrap::__pbehavior *>(m_pbehavior); \
-    Triwrap* pTriangleWrap = static_cast<Triwrap *>(m_triangleWrap);
-
-#define TP_WRAP_PTR() \
-    static_cast<Triwrap *>(m_triangleWrap);
-
-#define TP_VOROUT() \
-    triangulateio* tpvorout = static_cast<triangulateio*>(m_vorout);
-
-#define TP_PLOOP_PTR(fit) ((Triwrap::__otriangle *)(&(fit.floop)))
-
-#define TP_MESH_PLOOP(fit) \
-     Triwrap::__pmesh  * tpmesh  = (Triwrap::__pmesh *) (fit.m_delaunay->m_pmesh); \
-     Triwrap::__otriangle* ploop = (Triwrap::__otriangle*)(&(fit.floop));
+#include "tpp_triangle_macros.hpp"
 
 
 // custom specialization of std::hash for Delaunay::Points
@@ -260,7 +233,7 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
    m_segmentList.reserve(segments.size());
 
    // OPEN TODO::: optimize - unquadrat it...
-   for (int i = 0; i < segments.size(); ++i)
+   for (size_t i = 0; i < segments.size(); ++i)
    {
       const std::vector<Point>::iterator it = std::find(m_pointList.begin(), m_pointList.end(), segments[i]);
       if (it == m_pointList.end())
@@ -270,7 +243,7 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
       }
       else
       {
-         m_segmentList.push_back(std::distance(m_pointList.begin(), it));
+         m_segmentList.push_back(std::distance(m_pointList.begin(), it));  // OPEN TODO:: warning !!!
       }
    }
 
@@ -289,11 +262,11 @@ bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes,
    m_segmentList.clear();
    m_segmentList.reserve(segmentPointIndexes.size());
 
-   for (int i = 0; i < segmentPointIndexes.size(); ++i)
+   for (size_t i = 0; i < segmentPointIndexes.size(); ++i)
    {      
       const int& pointIdx = segmentPointIndexes[i];
       if (pointIdx < 0 ||
-          pointIdx >= m_pointList.size())
+          unsigned(pointIdx) >= m_pointList.size())
       {
          m_segmentList.clear();
          return false;
@@ -359,7 +332,7 @@ void Delaunay::writeoff(std::string& fname)
 {
     if(!m_triangulated)
     {
-        std::cerr << "ERROR: Write called before triangulation!\n";
+        std::cerr << "ERROR: Write called before triangulation!";
         throw std::runtime_error("Write called before triangulation");
     }
 
@@ -412,6 +385,7 @@ bool Delaunay::saveSegments(const std::string& filePath)
    {
        // TEST:: disable carving of holes!
        //TP_BEHAVIOR_PTR()->refine = 1;
+       
        // TEST:::
        //m_convexHullWithSegments = true; ??????
 
@@ -630,50 +604,21 @@ int Delaunay::hullSize() const
 }
 
 
-#ifdef TRPP_OLD_NAMES_SUPPORTED
-int Delaunay::nedges() const
-{
-   return edgeCount();
-}
-int Delaunay::ntriangles() const
-{
-   return triangleCount();
-}
-int Delaunay::nvertices() const
-{
-   return verticeCount();
-}
-int Delaunay::hull_size() const
-{
-   return hullSize();
-}
-int Delaunay::nvedges() const
-{
-   return voronoiEdgeCount();
-}
-int Delaunay::nvpoints() const
-{
-   return voronoiPointCount();
-}
-int Delaunay::nholes() const
-{
-   return holeCount();
-}
-#endif // TRPP_OLD_NAMES_SUPPORTED
-
-
 int Delaunay::voronoiEdgeCount() const
 {
    TP_VOROUT();
 
-   if (!tpvorout)
-   {
-      return 0;
-   }
-   else
-   {
-      return tpvorout->numberofedges;
-   }
+   return
+      !tpvorout ? 0 : tpvorout->numberofedges;
+
+   //if (!tpvorout)
+   //{
+   //   return 0;
+   //}
+   //else
+   //{
+   //   return tpvorout->numberofedges;
+   //}
 }
 
 
@@ -681,14 +626,17 @@ int Delaunay::voronoiPointCount() const
 {
    TP_VOROUT();
 
-   if (!tpvorout)
-   {
-      return 0;
-   }
-   else
-   {
-      return tpvorout->numberofpoints;
-   }
+   return
+      !tpvorout ? 0 : tpvorout->numberofpoints;
+
+   //if (!tpvorout)
+   //{
+   //   return 0;
+   //}
+   //else
+   //{
+   //   return tpvorout->numberofpoints;
+   //}
 }
 
 
@@ -704,15 +652,15 @@ bool Delaunay::hasTriangulation() const
 }
 
 
-fIterator Delaunay::fbegin()
+FaceIterator Delaunay::fbegin()
 {
-   return fIterator(this);
+   return FaceIterator(this);
 }
 
 
-fIterator Delaunay::fend()
+FaceIterator Delaunay::fend()
 {
-   fIterator fit;
+   FaceIterator fit;
    fit.floop.tri = (double***) nullptr;
    return fit;
 }
@@ -724,41 +672,42 @@ FacesList Delaunay::faces()
 };
 
 
-fIterator FacesList::begin()
+FaceIterator FacesList::begin()
 {
    return m_delaunay->fbegin();
 }
 
 
-fIterator FacesList::end()
+FaceIterator FacesList::end()
 {
    return m_delaunay->fend();
 }
 
 
-vIterator Delaunay::vbegin()
+VertexIterator Delaunay::vbegin()
 {
-   return vIterator(this);
+   return VertexIterator(this);
 }
 
 
-vIterator Delaunay::vend()
+VertexIterator Delaunay::vend()
 {
-   vIterator vit;
+   VertexIterator vit;
    vit.vloop = ((Triwrap::vertex) nullptr);
    return vit;
 }
 
 
-vvIterator Delaunay::vvbegin()
+VoronoiVertexIterator Delaunay::vvbegin()
 {
-   return vvIterator(this);
+   return VoronoiVertexIterator(this);
 }
 
 
-vvIterator Delaunay::vvend()
+VoronoiVertexIterator Delaunay::vvend()
 {
-   vvIterator vvit;
+   VoronoiVertexIterator vvit;
+
    vvit.vvloop = nullptr;
    vvit.vvindex = 0;
    vvit.vvcount = 0;
@@ -768,15 +717,16 @@ vvIterator Delaunay::vvend()
 }
 
 
-veIterator Delaunay::vebegin()
+VoronoiEdgeIterator Delaunay::vebegin()
 {
-   return veIterator(this);
+   return VoronoiEdgeIterator(this);
 }
 
 
-veIterator Delaunay::veend()
+VoronoiEdgeIterator Delaunay::veend()
 {
-   veIterator veit;
+   VoronoiEdgeIterator veit;
+
    veit.veloop = nullptr;
    veit.veindex = 0;
    veit.vecount = 0;
@@ -799,18 +749,18 @@ void Delaunay::getMinMaxPoints(double& minX, double& minY, double& maxX, double&
 
 const Delaunay::Point& Delaunay::pointAtVertexId(int i) const
 {
-    Assert(i >= 0 || i < m_pointList.size(), "Point index out of bounds!\n");
+    Assert((i >= 0) && (unsigned(i) < m_pointList.size()), "Point index out of bounds!");
 
     return m_pointList[i];
 }
 
 
-double Delaunay::area(fIterator const& fit)
+double Delaunay::area(FaceIterator const& fit)
 {
-   Point torg, tdest, tapex;
-   torg = pointAtVertexId(Org(fit));
-   tdest = pointAtVertexId(Dest(fit));
-   tapex = pointAtVertexId(Apex(fit));
+   Point torg = pointAtVertexId(fit.Org());
+   Point tdest = pointAtVertexId(fit.Dest());
+   Point tapex = pointAtVertexId(fit.Apex());
+   
    double dxod(torg[0] - tdest[0]);
    double dyod(torg[1] - tdest[1]);
    double dxda(tdest[0] - tapex[0]);
@@ -829,7 +779,8 @@ TriangulationMesh Delaunay::mesh()
 
 bool Delaunay::OrderPoints::operator() (const Point& lhs, const Point& rhs) const
 {
-   // first sort on X coordinates, then on Y coordinates
+   // first sort on X, then on Y coordinates!
+
    if (lhs[0] < rhs[0])
    {
       return true;
@@ -1004,6 +955,13 @@ void Delaunay::setQualityOptions(std::string& options, bool quality)
 {
     if (quality)
     {
+        auto formatFloatConstraint = [](float f)
+        {
+            std::ostringstream ss;
+            ss << f;
+            return ss.str();
+        };
+
         options.append("q");
 
         if (m_minAngle > 0)
@@ -1051,7 +1009,7 @@ void Delaunay::freeTriangleDataStructs()
 
 void Delaunay::initTriangleDataForPoints()
 {
-    Assert(!m_triangleWrap && !m_pmesh && !m_pbehavior, "Expected empty instance!\n");
+    Assert(!m_triangleWrap && !m_pmesh && !m_pbehavior, "Expected empty instance!");
 
     m_triangleWrap = new Triwrap;
     m_pmesh = new Triwrap::__pmesh;
@@ -1116,7 +1074,7 @@ void Delaunay::sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap
 
             if (traceLvl != None)
             {
-                printf("Warning:  segments[%d] - a duplicate vertex (index=%d) replaced by original (index=%d).\n",
+                printf("Warning:  segments[%zd] - a duplicate vertex (index=%d) replaced by original (index=%d).\n",
                     i / 2, pointIdx, iter->second);
             }
 
@@ -1149,11 +1107,11 @@ void Delaunay::sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap
             {
                 if (traceLvl != None)
                 {
-                    printf("Warning:  Correction for segment endpoint - iter=%d pointIdx=%d, new_pointIdx=%d.\n",
+                    printf("Warning:  Correction for segment endpoint - iter=%d pointIdx=%d, new_pointIdx=%zd.\n",
                         *iter, pointIdx, pointIdx - (duplicatePts.size() - i));
                 }
 
-                pointIdx -= (duplicatePts.size() - i);
+                pointIdx -= (duplicatePts.size() - i);  // OPEN TODO:: warning !!!
                 break;
             }
         }
@@ -1191,7 +1149,6 @@ void Delaunay::readPointsFromMesh(std::vector<Point>& points) const
                 pmlist[vertexnumber - tpbehavior->firstnumber] = vertexmark(vertexloop);
             }
 #endif
-
             setvertexmark(vertexloop, vertexnumber);
             vertexnumber++;
         }
@@ -1242,21 +1199,10 @@ void Delaunay::readSegmentsFromMesh(std::vector<int>& segments) const
 }
 
 
-std::string Delaunay::formatFloatConstraint(float f) const
-{
-   std::ostringstream ss;
-   ss << f;
-   return ss.str();
-}
-
-
 std::unordered_map<int, int> Delaunay::checkForDuplicatePoints() const
 {
     std::unordered_map<Delaunay::Point, size_t> uniqueMap;
     std::unordered_map<int, int> duplicateMap;
-
-    std::equal_to<tpp::Delaunay::Point> eq;
-
 
     for (size_t i = 0; i < m_pointList.size(); ++i)
     {
@@ -1269,7 +1215,7 @@ std::unordered_map<int, int> Delaunay::checkForDuplicatePoints() const
         }
         else
         {
-            duplicateMap.insert({ i, iter->second });
+            duplicateMap.insert({ i, iter->second });  // OPEN TODO:: warning !!!
         }
     }
 
@@ -1281,7 +1227,6 @@ bool Delaunay::readSegmentsFromFile(char* polyfileName, FILE* polyfile)
 {
     char inputline[INPUTLINESIZE];
     char* stringptr;
-    Triwrap::vertex endpoint1, endpoint2;
     int segmentmarkers;
     int end1, end2;
     int boundmarker;
@@ -1293,13 +1238,8 @@ bool Delaunay::readSegmentsFromFile(char* polyfileName, FILE* polyfile)
     int insegments = (int)strtol(stringptr, &stringptr, 0);
 
     stringptr = pTriangleWrap->findfield(stringptr);
-    if (*stringptr == '\0') {
-        segmentmarkers = 0;
-    }
-    else {
-        segmentmarkers = (int)strtol(stringptr, &stringptr, 0);
-    }
-
+    segmentmarkers = (*stringptr == '\0') 
+                        ? 0 : (int)strtol(stringptr, &stringptr, 0);
     boundmarker = 0;
 
     /* Read and insert the segments. */
@@ -1307,61 +1247,71 @@ bool Delaunay::readSegmentsFromFile(char* polyfileName, FILE* polyfile)
     {
         stringptr = pTriangleWrap->readline(inputline, polyfile, polyfileName);
         stringptr = pTriangleWrap->findfield(stringptr);
-        if (*stringptr == '\0') {
-            printf("Error:  Segment %d has no endpoints in %s.\n",
-                tpbehavior->firstnumber + i, polyfileName);
-            return false; //triexit(1);
+        if (*stringptr == '\0') 
+        {
+            printf("Error:  Segment %d has no endpoints in %s.\n", 
+                   tpbehavior->firstnumber + i, polyfileName);
+            return false; 
         }
-        else {
+        else 
+        {
             end1 = (int)strtol(stringptr, &stringptr, 0);
         }
+        
         stringptr = pTriangleWrap->findfield(stringptr);
-        if (*stringptr == '\0') {
-            printf("Error:  Segment %d is missing its second endpoint in %s.\n",
-                tpbehavior->firstnumber + i, polyfileName);
-            return false; //triexit(1);
+        if (*stringptr == '\0') 
+        {
+            printf("Error:  Segment %d is missing its second endpoint in %s.\n", 
+                   tpbehavior->firstnumber + i, polyfileName);
+            return false;
         }
-        else {
+        else 
+        {
             end2 = (int)strtol(stringptr, &stringptr, 0);
         }
 
-        if (segmentmarkers) {
+        if (segmentmarkers) 
+        {
             stringptr = pTriangleWrap->findfield(stringptr);
-            if (*stringptr == '\0') {
-                boundmarker = 0;
-            }
-            else {
-                boundmarker = (int)strtol(stringptr, &stringptr, 0);
-            }
+            boundmarker = (*stringptr == '\0')
+                             ? 0 : (int)strtol(stringptr, &stringptr, 0);
         }
 
         if ((end1 < tpbehavior->firstnumber) ||
-            (end1 >= tpbehavior->firstnumber + tpmesh->invertices)) {
-            if (!tpbehavior->quiet) {
+            (end1 >= tpbehavior->firstnumber + tpmesh->invertices)) 
+        {
+            if (!tpbehavior->quiet) 
+            {
                 printf("Warning:  Invalid first endpoint of segment %d in %s.\n",
-                    tpbehavior->firstnumber + i, polyfileName);
+                       tpbehavior->firstnumber + i, polyfileName);
             }
         }
         else if ((end2 < tpbehavior->firstnumber) ||
-            (end2 >= tpbehavior->firstnumber + tpmesh->invertices)) {
-            if (!tpbehavior->quiet) {
+                 (end2 >= tpbehavior->firstnumber + tpmesh->invertices)) 
+        {
+            if (!tpbehavior->quiet) 
+            {
                 printf("Warning:  Invalid second endpoint of segment %d in %s.\n",
-                    tpbehavior->firstnumber + i, polyfileName);
+                       tpbehavior->firstnumber + i, polyfileName);
             }
         }
-        else {
+        else 
+        {
             // OPEN TODO:::  one last check? ????
 #if 0
             /* Find the vertices numbered `end1' and `end2'. */
-            endpoint1 = pTriangleWrap->getvertex(m, b, end1);
-            endpoint2 = pTriangleWrap->getvertex(m, b, end2);
-            if ((endpoint1[0] == endpoint2[0]) && (endpoint1[1] == endpoint2[1])) {
-                if (!tpbehavior->quiet) {
+            Triwrap::vertex endpoint1 = pTriangleWrap->getvertex(m, b, end1);
+            Triwrap::vertex endpoint2 = pTriangleWrap->getvertex(m, b, end2);
+            if ((endpoint1[0] == endpoint2[0]) && (endpoint1[1] == endpoint2[1])) 
+            {
+                if (!tpbehavior->quiet) 
+                {
                     printf("Warning:  Endpoints of segment %d are coincident in %s.\n",
-                        b->firstnumber + i, polyfilename);
+                           b->firstnumber + i, polyfilename);
                 }
             }
-            else {
+            else 
+            {
                 insertsegment(m, b, endpoint1, endpoint2, boundmarker);
             }
 #endif
@@ -1391,63 +1341,9 @@ int Delaunay::GetFirstIndexNumber() const
 }
 
 
-#ifdef TRPP_OLD_NAMES_SUPPORTED
-int Delaunay::Org(fIterator const& fit, Point* point) const
-{
-   return fit.Org(point);
-}
-int Delaunay::Dest(fIterator const& fit, Point* point) const
-{
-   return fit.Dest(point);
-}
-int Delaunay::Apex(fIterator const& fit, Point* point) const
-{
-   return fit.Apex(point);
-}
-#endif // TRPP_OLD_NAMES_SUPPORTED
-
-
 typedef Triwrap::vertex   vertex;
 typedef Triwrap::triangle triangle;
 typedef Triwrap::__otriangle trianglelooptype; // oriented triangle
-
-
-fIterator Delaunay::locate(int vertexid)
-{
-   // OPEN:: doesn't seem to be working!
-   // OPEN TODO:: move out from Delaunay????
-
-   fIterator retval;
-   retval.m_delaunay = this;
-
-   trianglelooptype horiz;               /* Temporary variable for use in locate(). */
-   triangle ptr;                         /* Temporary variable used by sym(). */
-
-   TP_MESH_BEHAVIOR_WRAP();
-
-   horiz.tri = tpmesh->dummytri;
-   horiz.orient = 0;
-   symself(horiz);
-   double dv[2];
-   dv[0] = m_pointList[vertexid][0];
-   dv[1] = m_pointList[vertexid][1];
-
-   /* Search for a triangle containing `newvertex'. */
-   int intersect = pTriangleWrap->locate(tpmesh, tpbehavior, dv, &horiz);
-   Assert(intersect == Triwrap::ONVERTEX, "Something went wrong in point location\n");
-
-   if (intersect != Triwrap::ONVERTEX)
-   {
-      // Not on vertex!
-      std::cerr << "ERROR: Something went wrong in point location!\n";
-      pTriangleWrap->triexit(1);
-   }
-
-   retval.floop.tri = horiz.tri;
-   retval.floop.orient = horiz.orient;
-
-   return retval;
-}
 
 
 ///////////////////////////////
@@ -1456,31 +1352,28 @@ fIterator Delaunay::locate(int vertexid)
 //
 ///////////////////////////////
 
-fIterator::fIterator(Delaunay* triangulator)
+FaceIterator::FaceIterator(Delaunay* triangulator)
    : m_delaunay(triangulator),
      meshPointCount(0)
 {
    floop.tri = nullptr;
 
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)triangulator->m_pmesh;
-   Triwrap* pTriangleWrap = (Triwrap*)triangulator->m_triangleWrap;
+   TP_MESH_WRAP_ITER();
+   TP_PLOOP_ITER();
 
    pTriangleWrap->traversalinit(&(tpmesh->triangles));
 
-   trianglelooptype* ploop = (trianglelooptype*)(&floop);
    ploop->tri = pTriangleWrap->triangletraverse(tpmesh);
    ploop->orient = 0;
 }
 
 
-void fIterator::operator++()
+void FaceIterator::operator++()
 {
    // cout << "++ called\n";
 
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_delaunay->m_pmesh;
-
-   trianglelooptype* ploop = (trianglelooptype*)(&floop);
-   Triwrap* pTriangleWrap = (Triwrap*)m_delaunay->m_triangleWrap;
+   TP_MESH_WRAP_ITER();   
+   TP_PLOOP_ITER();
 
    ploop->tri = pTriangleWrap->triangletraverse(tpmesh);
 
@@ -1488,21 +1381,22 @@ void fIterator::operator++()
 }
 
 
-bool fIterator::isdummy() const
+bool FaceIterator::isdummy() const
 {
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_delaunay->m_pmesh;
+   TP_MESH_ITER();
+   TP_PLOOP_ITER();
 
-   return (((trianglelooptype*)(&(floop)))->tri == tpmesh->dummytri);
+   return (ploop->tri == tpmesh->dummytri);
 }
 
 
-bool fIterator::empty() const
+bool FaceIterator::empty() const
 {
    return floop.tri == nullptr;
-};
+}
 
 
-int fIterator::Org(Delaunay::Point* point) const
+int FaceIterator::Org(Delaunay::Point* point) const
 {
    vertex vertexptr = nullptr;
    org(*TP_PLOOP_PTR((*this)), vertexptr);
@@ -1513,7 +1407,7 @@ int fIterator::Org(Delaunay::Point* point) const
 }
 
 
-int fIterator::Dest(Delaunay::Point* point) const
+int FaceIterator::Dest(Delaunay::Point* point) const
 {
    vertex vertexptr = nullptr;
    dest(*TP_PLOOP_PTR((*this)), vertexptr);
@@ -1524,7 +1418,7 @@ int fIterator::Dest(Delaunay::Point* point) const
 }
 
 
-int fIterator::Apex(Delaunay::Point* point) const
+int FaceIterator::Apex(Delaunay::Point* point) const
 {
    vertex vertexptr = nullptr;
    apex(*TP_PLOOP_PTR((*this)), vertexptr);
@@ -1535,7 +1429,7 @@ int fIterator::Apex(Delaunay::Point* point) const
 }
 
 
-void fIterator::Org(Delaunay::Point& point, int& meshIndex) const
+void FaceIterator::Org(Delaunay::Point& point, int& meshIndex) const
 {
    Assert(m_delaunay->m_extraVertexAttr, "");
 
@@ -1547,7 +1441,7 @@ void fIterator::Org(Delaunay::Point& point, int& meshIndex) const
 }
 
 
-void fIterator::Dest(Delaunay::Point& point, int& meshIndex) const
+void FaceIterator::Dest(Delaunay::Point& point, int& meshIndex) const
 {
    Assert(m_delaunay->m_extraVertexAttr, "");
 
@@ -1559,7 +1453,7 @@ void fIterator::Dest(Delaunay::Point& point, int& meshIndex) const
 }
 
 
-void fIterator::Apex(Delaunay::Point& point, int& meshIndex) const
+void FaceIterator::Apex(Delaunay::Point& point, int& meshIndex) const
 {
    Assert(m_delaunay->m_extraVertexAttr, "");
 
@@ -1571,22 +1465,21 @@ void fIterator::Apex(Delaunay::Point& point, int& meshIndex) const
 }
 
 
-double fIterator::area() const
+double FaceIterator::area() const
 {
    // OPEN TODO:: move impl. from Delaunay class!!!
-
    // ???? really ???? 
 
    return m_delaunay->area(*this);
 }
 
 
-int fIterator::getVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const
+int FaceIterator::getVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const
 {
    // OPEN TODO: compile test type check - Triwrap::vertex == double* ???
 
-   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)(m_delaunay->m_pbehavior);
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)(m_delaunay->m_pmesh);
+   TP_MESH_ITER();
+   TP_BEHAVIOR_ITER();
 
    int ret =
       (((int*)(vertexptr))[tpmesh->vertexmarkindex])
@@ -1597,7 +1490,7 @@ int fIterator::getVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const
 }
 
 
-int fIterator::getMeshVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const
+int FaceIterator::getMeshVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const
 {
    if (!m_delaunay->m_extraVertexAttr)
    {
@@ -1626,26 +1519,26 @@ int fIterator::getMeshVertexIndex(/*Triwrap::vertex*/ double* vertexptr) const
       }
    }
 
-   int idx = (vertexptr)[2];
+   int idx = (vertexptr)[2];  // OPEN TODO:: warning !!!
    Assert(idx >= 0, "");
 
-   return (vertexptr)[2];
+   return idx;
 }
 
 
-bool operator==(fIterator const& fit1, fIterator const& fit2)
+bool operator==(FaceIterator const& fit1, FaceIterator const& fit2)
 {
    return (fit1.floop.tri == fit2.floop.tri);
 }
 
 
-bool operator!=(fIterator const& fit1, fIterator const& fit2)
+bool operator!=(FaceIterator const& fit1, FaceIterator const& fit2)
 {
    return !(operator==(fit1, fit2));
 }
 
 
-bool operator<(fIterator const& fit1, fIterator const& fit2)
+bool operator<(FaceIterator const& fit1, FaceIterator const& fit2)
 {
    return (fit1.floop.tri < fit2.floop.tri);
 }
@@ -1657,13 +1550,12 @@ bool operator<(fIterator const& fit1, fIterator const& fit2)
 //
 ///////////////////////////////
 
-vIterator::vIterator(Delaunay* triangulator)
+VertexIterator::VertexIterator(Delaunay* triangulator)
 {
    m_delaunay = triangulator;
 
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)triangulator->m_pmesh;
-   Triwrap::__pbehavior* tpbehavior = (Triwrap::__pbehavior*)triangulator->m_pbehavior;
-   Triwrap* pTriangleWrap = (Triwrap*)triangulator->m_triangleWrap;
+   TP_MESH_WRAP_ITER();
+   TP_BEHAVIOR_ITER();
 
    pTriangleWrap->traversalinit(&(tpmesh->vertices));
    vloop = pTriangleWrap->vertextraverse(tpmesh);
@@ -1672,8 +1564,7 @@ vIterator::vIterator(Delaunay* triangulator)
       (
          tpbehavior->jettison ||
          (
-            ((int*)vloop)[tpmesh->vertexmarkindex + 1] == UNDEADVERTEX
-            )
+            ((int*)vloop)[tpmesh->vertexmarkindex + 1] == UNDEADVERTEX)
          )
    {
       vloop = (void*)pTriangleWrap->vertextraverse(tpmesh);
@@ -1681,20 +1572,16 @@ vIterator::vIterator(Delaunay* triangulator)
 }
 
 
-vIterator vIterator::operator++()
+VertexIterator VertexIterator::operator++()
 {
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_delaunay->m_pmesh;
-   Triwrap::__pbehavior* tpbehavior =
-      (Triwrap::__pbehavior*)m_delaunay->m_pbehavior;
-
-   Triwrap* pTriangleWrap = (Triwrap*)m_delaunay->m_triangleWrap;
+   TP_MESH_WRAP_ITER();
+   TP_BEHAVIOR_ITER();
 
    while
       (
          tpbehavior->jettison ||
          (
-            ((int*)vloop)[tpmesh->vertexmarkindex + 1] == UNDEADVERTEX
-            )
+            ((int*)vloop)[tpmesh->vertexmarkindex + 1] == UNDEADVERTEX)
          )
    {
       vloop = (void*)pTriangleWrap->vertextraverse(tpmesh);
@@ -1702,7 +1589,7 @@ vIterator vIterator::operator++()
 
    vloop = (void*)pTriangleWrap->vertextraverse(tpmesh);
 
-   vIterator vit;
+   VertexIterator vit;
    vit.vloop = vloop;
    vit.m_delaunay = m_delaunay;
 
@@ -1710,27 +1597,27 @@ vIterator vIterator::operator++()
 }
 
 
-int vIterator::vertexId() const
+int VertexIterator::vertexId() const
 {
-   Triwrap::__pmesh* tpmesh = (Triwrap::__pmesh*)m_delaunay->m_pmesh;
+   TP_MESH_ITER();
    return ((int*)vloop)[tpmesh->vertexmarkindex];
 }
 
 
-Delaunay::Point& vIterator::operator*() const
+Delaunay::Point& VertexIterator::operator*() const
 {
    return *((Delaunay::Point*)vloop);
 }
 
 
-bool operator==(vIterator const& vit1, vIterator const& vit2)
+bool operator==(VertexIterator const& vit1, VertexIterator const& vit2)
 {
    if (vit1.vloop == vit2.vloop) return true;
    return false;
 }
 
 
-bool operator!=(vIterator const& vit1, vIterator const& vit2)
+bool operator!=(VertexIterator const& vit1, VertexIterator const& vit2)
 {
    if (vit1.vloop != vit2.vloop) return true;
    return false;
@@ -1743,13 +1630,13 @@ bool operator!=(vIterator const& vit1, vIterator const& vit2)
 //
 /////////////////////////////////
 
-vvIterator::vvIterator()
+VoronoiVertexIterator::VoronoiVertexIterator()
    : m_delaunay(nullptr), vvloop(nullptr), vvindex(0), vvcount(0) 
 {
 }
 
 
-vvIterator::vvIterator(Delaunay* triangulator) 
+VoronoiVertexIterator::VoronoiVertexIterator(Delaunay* triangulator) 
 {
    m_delaunay = triangulator;
    triangulateio* pvorout = (struct triangulateio*)triangulator->m_vorout;
@@ -1763,9 +1650,10 @@ vvIterator::vvIterator(Delaunay* triangulator)
 }
 
 
-vvIterator vvIterator::operator++() 
+VoronoiVertexIterator VoronoiVertexIterator::operator++() 
 {
-   vvIterator vit;
+   VoronoiVertexIterator vit;
+
    vit.vvloop = vvloop;
    vit.vvindex = vvindex;
    vit.m_delaunay = m_delaunay;
@@ -1775,7 +1663,7 @@ vvIterator vvIterator::operator++()
 }
 
 
-Delaunay::Point& vvIterator::operator*() const 
+Delaunay::Point& VoronoiVertexIterator::operator*() const 
 {
    Delaunay::Point::NT* pointlist = (Delaunay::Point::NT*)vvloop;
 
@@ -1784,15 +1672,17 @@ Delaunay::Point& vvIterator::operator*() const
 }
 
 
-void vvIterator::advance(int steps) 
+void VoronoiVertexIterator::advance(int steps) 
 {
    int stepSize = 2;
    Assert(Delaunay::Point().dim() == stepSize, "");
 
-   if (vvindex/stepSize + steps < vvcount) {
+   if (vvindex/stepSize + steps < vvcount) 
+   {
       vvindex += steps * stepSize;
    }
-   else {
+   else 
+   {
       // at end
       vvindex = 0;
       vvloop = nullptr;
@@ -1802,7 +1692,7 @@ void vvIterator::advance(int steps)
 }
 
 
-bool operator==(vvIterator const& lhs, vvIterator const& rhs) 
+bool operator==(VoronoiVertexIterator const& lhs, VoronoiVertexIterator const& rhs) 
 {
    if (lhs.vvloop == rhs.vvloop && lhs.vvindex == rhs.vvindex) 
       return true;
@@ -1811,7 +1701,7 @@ bool operator==(vvIterator const& lhs, vvIterator const& rhs)
 }
 
 
-bool operator!=(vvIterator const& lhs, vvIterator const& rhs) 
+bool operator!=(VoronoiVertexIterator const& lhs, VoronoiVertexIterator const& rhs) 
 {
    return !(lhs == rhs);
 }
@@ -1823,13 +1713,13 @@ bool operator!=(vvIterator const& lhs, vvIterator const& rhs)
 //
 /////////////////////////////////
 
-veIterator::veIterator()
+VoronoiEdgeIterator::VoronoiEdgeIterator()
    : m_delaunay(nullptr), veloop(nullptr), veindex(0), vecount(0) 
 {
 }
 
 
-veIterator::veIterator(Delaunay* triangulator) 
+VoronoiEdgeIterator::VoronoiEdgeIterator(Delaunay* triangulator) 
 {
    m_delaunay = triangulator;
    triangulateio* pvorout = (struct triangulateio*)triangulator->m_vorout;
@@ -1843,9 +1733,10 @@ veIterator::veIterator(Delaunay* triangulator)
 }
 
 
-veIterator veIterator::operator++() 
+VoronoiEdgeIterator VoronoiEdgeIterator::operator++() 
 {
-   veIterator veit;
+   VoronoiEdgeIterator veit;
+
    veit.veloop = veloop;
    veit.veindex = veindex;
    veit.m_delaunay = m_delaunay;
@@ -1866,7 +1757,7 @@ veIterator veIterator::operator++()
 }
 
 
-int veIterator::startPointId() const 
+int VoronoiEdgeIterator::startPointId() const 
 {
    if (!veloop) 
    {
@@ -1879,7 +1770,7 @@ int veIterator::startPointId() const
 }
 
 
-int veIterator::endPointId(Delaunay::Point& normvec) const
+int VoronoiEdgeIterator::endPointId(Delaunay::Point& normvec) const
 {
    if (!veloop) 
    {
@@ -1912,21 +1803,44 @@ int veIterator::endPointId(Delaunay::Point& normvec) const
 }
 
 
-const Delaunay::Point& veIterator::Org()
+const Delaunay::Point& VoronoiEdgeIterator::Org()
 {
-   // OPEN TODO:: move impl. from Delaunay class!!!
-   return m_delaunay->Org(*this);
+   auto pointId = startPointId();
+
+   VoronoiVertexIterator vit = m_delaunay->vvbegin();
+   vit.advance(pointId);
+   return *vit;
 }
 
 
-Delaunay::Point veIterator::Dest(bool& finiteEdge)
+Delaunay::Point VoronoiEdgeIterator::Dest(bool& finiteEdge)
 {
-   // OPEN TODO:: move impl. from Delaunay class!!!
-   return m_delaunay->Dest(*this, finiteEdge);
+   // OPEN TODO::: optimization --- use const& as return value!
+   //  -> don't uderstand this anymore, needed????
+
+   Delaunay::Point normvec;
+
+   auto pointId = endPointId(normvec);
+   finiteEdge = pointId != -1;
+
+   if (pointId == -1)
+   {
+      Assert(normvec.sqr_length() != 0.0, "");
+      return normvec;
+   }
+   else
+   {
+      Assert(normvec.sqr_length() == 0.0, "");
+
+      VoronoiVertexIterator vit = m_delaunay->vvbegin(); 
+      vit.advance(pointId);
+      return *vit;
+   }
+
 }
 
 
-bool operator==(veIterator const& lhs, veIterator const& rhs) 
+bool operator==(VoronoiEdgeIterator const& lhs, VoronoiEdgeIterator const& rhs) 
 {
    if (lhs.veloop == rhs.veloop && lhs.veindex == rhs.veindex) 
       return true;
@@ -1935,44 +1849,9 @@ bool operator==(veIterator const& lhs, veIterator const& rhs)
 }
 
 
-bool operator!=(veIterator const& lhs, veIterator const& rhs) 
+bool operator!=(VoronoiEdgeIterator const& lhs, VoronoiEdgeIterator const& rhs) 
 {
    return !(lhs == rhs);
-}
-
-
-const Delaunay::Point& Delaunay::Org(veIterator const& eit)
-{
-   auto pointId = eit.startPointId();
-
-   vvIterator vit(this);
-   vit.advance(pointId);
-   return *vit;
-}
-
-
-Delaunay::Point Delaunay::Dest(veIterator const& eit, bool& finiteEdge)
-{
-   // OPEN TODO::: optimization --- use const& as return value!
-
-   Point normvec;
-
-   auto pointId = eit.endPointId(normvec);
-   finiteEdge = pointId != -1;
-
-   if (pointId == -1) 
-   {
-      Assert(normvec.sqr_length() != 0.0, "");
-      return normvec;
-   } 
-   else
-   {
-      Assert(normvec.sqr_length() == 0.0, "");
-      
-      vvIterator vit(this);
-      vit.advance(pointId);
-      return *vit;
-   }
 }
 
 
@@ -1988,7 +1867,7 @@ TriangulationMesh::TriangulationMesh(Delaunay* triangulator)
 }
 
 
-int TriangulationMesh::Sym(fIterator const& fit, char i) const
+int TriangulationMesh::Sym(FaceIterator const& fit, char i) const
 {
    TP_MESH_PLOOP(fit);
 
@@ -2011,9 +1890,9 @@ int TriangulationMesh::Sym(fIterator const& fit, char i) const
 }
 
 
-fIterator TriangulationMesh::Sym(fIterator const& fit) const
+FaceIterator TriangulationMesh::Sym(FaceIterator const& fit) const
 {
-   fIterator retval;
+   FaceIterator retval;
    retval.m_delaunay = fit.m_delaunay;
 
    TP_MESH_PLOOP(fit);
@@ -2035,30 +1914,28 @@ fIterator TriangulationMesh::Sym(fIterator const& fit) const
 }
 
 
-fIterator TriangulationMesh::locate(int vertexid)
+FaceIterator TriangulationMesh::locate(int vertexid)
 {
-   // OPEN TODO:: move impl from Delaunay???
-   return m_delaunay->locate(vertexid);
+   FaceIterator retval;
+   retval.m_delaunay = this->m_delaunay;
 
-# if 0
-   fIterator retval;
-   retval.m_delaunay = m_delaunay;
+   TP_MESH_WRAP_ITER();
+   TP_BEHAVIOR_ITER();
 
-   trianglelooptype horiz;               /* Temporary variable for use in locate(). */
-   triangle ptr;                         /* Temporary variable used by sym(). */
-
-   TP_MESH_BEHAVIOR_WRAP();
+   trianglelooptype horiz;  // temp. variables for locate() & sym() macros!
+   triangle ptr;
 
    horiz.tri = tpmesh->dummytri;
    horiz.orient = 0;
    symself(horiz);
-   double dv[2];
-   dv[0] = m_pointList[vertexid][0];
-   dv[1] = m_pointList[vertexid][1];
 
-   /* Search for a triangle containing `newvertex'. */
+   double dv[2];
+   dv[0] = m_delaunay->m_pointList[vertexid][0];
+   dv[1] = m_delaunay->m_pointList[vertexid][1];
+
+   // Search for a triangle containing `newvertex'
    int intersect = pTriangleWrap->locate(tpmesh, tpbehavior, dv, &horiz);
-   Assert(intersect != Triwrap::ONVERTEX, "Something went wrong in point location\n");
+   Assert(intersect == Triwrap::ONVERTEX, "Something went wrong in point location");
 
    if (intersect != Triwrap::ONVERTEX)
    {
@@ -2071,60 +1948,62 @@ fIterator TriangulationMesh::locate(int vertexid)
    retval.floop.orient = horiz.orient;
 
    return retval;
-#endif
 }
 
 
-fIterator TriangulationMesh::Lnext(fIterator const& fit)
+FaceIterator TriangulationMesh::Lnext(FaceIterator const& fit)
 {
-   fIterator retval;
+   FaceIterator retval;
    retval.m_delaunay = m_delaunay;
 
-   lnext((*(trianglelooptype*)(&(fit.floop))), (*(trianglelooptype*)(&(retval.floop))));
+   lnext(*TP_PLOOP_PTR(fit), *TP_PLOOP_PTR(retval));
+
    return retval;
 }
 
 
-fIterator TriangulationMesh::Lprev(fIterator const& fit)
+FaceIterator TriangulationMesh::Lprev(FaceIterator const& fit)
 {
-   fIterator retval;
+   FaceIterator retval;
    retval.m_delaunay = m_delaunay;
 
-   lprev((*(trianglelooptype*)(&(fit.floop))), (*(trianglelooptype*)(&(retval.floop))));
+   lprev(*TP_PLOOP_PTR(fit), *TP_PLOOP_PTR(retval));
+
    return retval;
 }
 
 
-fIterator TriangulationMesh::Onext(fIterator const& fit)
+FaceIterator TriangulationMesh::Onext(FaceIterator const& fit)
 {
    triangle ptr;
-   fIterator retval;
+   FaceIterator retval;
    retval.m_delaunay = m_delaunay;
 
    //cout << "Onext called:\n " 
-   //	 << Org(fit) << "\t" << Dest(fit) << "\t" << Apex(fit) << "\n";
+   //	 << Org(fit) << "\t" << Dest(fit) << "\t" << Apex(fit) << "";
 
-   onext((*(trianglelooptype*)(&(fit.floop))), (*(trianglelooptype*)(&(retval.floop))));
+   onext(*TP_PLOOP_PTR(fit), *TP_PLOOP_PTR(retval));
 
    // retval could be dummy!
    return retval;
 }
 
 
-fIterator TriangulationMesh::Oprev(fIterator const& fit)
+FaceIterator TriangulationMesh::Oprev(FaceIterator const& fit)
 {
    triangle ptr;
-   fIterator retval;
+   FaceIterator retval;
    retval.m_delaunay = m_delaunay;
 
-   oprev((*(trianglelooptype*)(&(fit.floop))), (*(trianglelooptype*)(&(retval.floop))));
+   oprev(*TP_PLOOP_PTR(fit), *TP_PLOOP_PTR(retval));
+
    return retval;
 }
 
 
 void TriangulationMesh::trianglesAroundVertex(int vertexid, std::vector<int>& ivv)
 {
-   fIterator fit = locate(vertexid);
+   FaceIterator fit = locate(vertexid);
    ivv.clear();
 
    int start = fit.Dest();
@@ -2134,8 +2013,8 @@ void TriangulationMesh::trianglesAroundVertex(int vertexid, std::vector<int>& iv
    ivv.push_back(start);
    ivv.push_back(linkn);
 
-   fIterator nfit = fit;
-   fIterator pnfit = fit; // follows nfit by one triangle
+   FaceIterator nfit = fit;
+   FaceIterator pnfit = fit; // follows nfit by one triangle
 
    while (linkn != start)
    {
