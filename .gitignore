@@ -5,3 +5,10 @@
 *.a
 *.vsidx
 *.user
+/.vs
+/CMakeFiles
+/out/build/x64-Debug
+/testappQt/.vs/TrianglePPDemoApp/v16
+/testappQt-build
+/tests-build
+/x64/Debug
