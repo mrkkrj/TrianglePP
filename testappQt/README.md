@@ -9,7 +9,7 @@ A small demonstrator/tester for the library.
 **Note:** On Windows it is compiled with *TRIANGLE_DBG_TO_FILE* define, so the debug traces will be written to the *./triangle.out.txt* file.
 
 ## TODOs:
- - BUG: after showing Examples 1+2 reading of files (face.poly) doesn't really work - some blurred image shown !!!!
+ - BUG - reading files with holes: hole positions off!!! (tppDataFiles/hex-overlap.poly)
  - add deletion of hole marker points
  - add support for moving points
  - remember last directory when R/W files

@@ -13,7 +13,7 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="Quelldateien\trpp">
+    <Filter Include="Quelldateien\tpp">
       <UniqueIdentifier>{61dec4fb-90f2-4283-bc94-b72a0e2796ae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -21,28 +21,28 @@
     <ClCompile Include="trpp_example.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="source\tpp_assert.cpp">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClCompile Include="../source\tpp_assert.cpp">
+      <Filter>Quelldateien\tpp</Filter>
     </ClCompile>
-    <ClCompile Include="source\tpp_impl.cpp">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClCompile Include="../source\tpp_impl.cpp">
+      <Filter>Quelldateien\tpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\dpoint.hpp">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClInclude Include="../source\dpoint.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="source\tpp_assert.hpp">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClInclude Include="../source\tpp_assert.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="source\tpp_interface.hpp">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClInclude Include="../source\tpp_interface.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="source\triangle.h">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClInclude Include="../source\triangle.h">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="source\triangle_impl.hpp">
-      <Filter>Quelldateien\trpp</Filter>
+    <ClInclude Include="../source\triangle_impl.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

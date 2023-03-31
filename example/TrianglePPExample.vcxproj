@@ -89,7 +89,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -104,7 +104,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -124,7 +124,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>./source;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -152,16 +152,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\tpp_assert.cpp" />
-    <ClCompile Include="source\tpp_impl.cpp" />
+	  <ClCompile Include="../source\tpp_assert.cpp" />
+	  <ClCompile Include="../source\tpp_impl.cpp" />
     <ClCompile Include="trpp_example.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\dpoint.hpp" />
-    <ClInclude Include="source\tpp_assert.hpp" />
-    <ClInclude Include="source\tpp_interface.hpp" />
-    <ClInclude Include="source\triangle.h" />
-    <ClInclude Include="source\triangle_impl.hpp" />
+	  <ClInclude Include="../source\dpoint.hpp" />
+	  <ClInclude Include="../source\tpp_assert.hpp" />
+	  <ClInclude Include="../source\tpp_interface.hpp" />
+	  <ClInclude Include="../source\triangle.h" />
+	  <ClInclude Include="../source\triangle_impl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

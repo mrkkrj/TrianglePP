@@ -61,31 +61,31 @@ If compiled with *TRIANGLE_DBG_TO_FILE* define, debug traces will be written to 
 
 Additionally, under *testappQt* you'll find a GUI programm to play with the triangulations:
 
-![triangle-PP's GUI test program](triangle-pp-testApp.gif)
+![triangle-PP's GUI test program](docs/pics/triangle-pp-testApp.gif)
 
 quality triangulations:
 
-![triangle-PP's GUI screenshot](triangle-pp-testApp-Constrained.jpg)
+![triangle-PP's GUI screenshot](docs/pics/triangle-pp-testApp-Constrained.jpg)
 
 constrained triangulations:
 
-![triangle-PP's GUI test program 1](tri-w-segment-constarints.gif)
+![triangle-PP's GUI test program 1](docs/pics/tri-w-segment-constarints.gif)
 
 (also with holes!):
 
-![triangle-PP's GUI Screenshot 1](triangle-pp-testApp-with-hole.jpg)
+![triangle-PP's GUI Screenshot 1](docs/pics/triangle-pp-testApp-with-hole.jpg)
 
 (also without enclosing convex hull):
 
-![triangle-PP's GUI Screenshot Linux 1](triangle-pp-Linux-constrained-with-hole.jpg)
+![triangle-PP's GUI Screenshot Linux 1](docs/pics/triangle-pp-Linux-constrained-with-hole.jpg)
 
 and with tesselations:
 
-![triangle-PP's GUI screenshot 2](triangle-pp-testApp-Voronoi.jpg)
+![triangle-PP's GUI screenshot 2](docs/pics/triangle-pp-testApp-Voronoi.jpg)
 
 You can also save and read your work:
 
-![triangle-PP's File I/O](triangle-pp-testApp-File_IO.jpg)
+![triangle-PP's File I/O](docs/pics/triangle-pp-testApp-File_IO.jpg)
 
 Note: still some problems when reading/writing files (see TODOs below), work uderway!
 

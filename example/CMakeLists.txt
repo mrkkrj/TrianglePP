@@ -23,13 +23,13 @@ set(Header_Files
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files__trpp
-    "source/dpoint.hpp"
-    "source/tpp_assert.cpp"
-    "source/tpp_assert.hpp"
-    "source/tpp_trace.hpp"
-    "source/tpp_impl.cpp"
-    "source/tpp_interface.hpp"
-    "source/triangle_impl.hpp"
+    "../source/dpoint.hpp"
+    "../source/tpp_assert.cpp"
+    "../source/tpp_assert.hpp"
+    "../source/tpp_trace.hpp"
+    "../source/tpp_impl.cpp"
+    "../source/tpp_interface.hpp"
+    "../source/triangle_impl.hpp"
 )
 source_group("Source Files\\trpp" FILES ${Source_Files__trpp})
 
@@ -58,7 +58,7 @@ endif()
 # Include directories
 ################################################################################
 target_include_directories(${PROJECT_NAME} PRIVATE
-	"${CMAKE_CURRENT_SOURCE_DIR}/source;"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../source;"
 )
 
 ################################################################################

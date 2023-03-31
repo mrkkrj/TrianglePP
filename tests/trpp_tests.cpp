@@ -505,12 +505,12 @@ TEST_CASE("Reading files", "[trpp]")
     {
         std::vector<Delaunay::Point> points;
 
-        ioStatus = trReader.readPoints("../exampleFiles/spiral.node", points);
+        ioStatus = trReader.readPoints("../tppDataFiles/spiral.node", points);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 15); // look inside the file
 
-        ioStatus = trReader.readPoints("../exampleFiles/dots.node", points);
+        ioStatus = trReader.readPoints("../tppDataFiles/dots.node", points);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 100); // look inside the file
@@ -522,21 +522,21 @@ TEST_CASE("Reading files", "[trpp]")
         std::vector<int> segments;
         std::vector<Delaunay::Point> holes;
 
-        ioStatus = trReader.readSegments("../exampleFiles/face.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("../tppDataFiles/face.poly", points, segments, holes);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 26);       // look inside the file
         REQUIRE(segments.size()/2  == 22);  // look inside the file
         REQUIRE(holes.size() == 3);         // look inside the file
 
-        ioStatus = trReader.readSegments("../exampleFiles/box.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("../tppDataFiles/box.poly", points, segments, holes);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 8);        // look inside the file
         REQUIRE(segments.size() / 2 == 5);  // look inside the file
         REQUIRE(holes.size() == 1);         // look inside the file
 
-        ioStatus = trReader.readSegments("../exampleFiles/la.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("../tppDataFiles/la.poly", points, segments, holes);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 141);        // look inside the file
@@ -634,7 +634,7 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
 
     SECTION("TEST 9.1: PSLG triangluation with duplicate points used in segments")
     {
-        // Testdata: as specified in ../exampleFiles/box-continuous.poly
+        // Testdata: as specified in ../tppDataFiles/box-continuous.poly
         std::vector<Delaunay::Point> pslgDelaunayInput;
         std::vector<int> pslgSegmentEndpointIdx;
                 
@@ -693,7 +693,7 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
 
     SECTION("TEST 10.1: PSLG triangluation with duplicate points and duplicate segments")
     {
-        // Testdata: as specified in ../exampleFiles/hex-overlap.poly
+        // Testdata: as specified in ../tppDataFiles/hex-overlap.poly
         std::vector<Delaunay::Point> pslgDelaunayInput1;
         std::vector<int> pslgSegmentEndpointIdx1;
 

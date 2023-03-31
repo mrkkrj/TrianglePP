@@ -1,5 +1,5 @@
 /** 
-    @file  trpp_example.cpp
+    @file   trpp_example.cpp
     @brief  example usage of the Triangle++ wrapper
  */
 
