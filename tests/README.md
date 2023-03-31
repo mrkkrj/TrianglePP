@@ -21,6 +21,4 @@ These are the preliminary test cases for the Triangle++ package.
 <kbd><img src="./example_constr_segments-wth-holes-result.jpg" alt="example_constr_segments-wth-holes-result" width="520"></kbd>
 
 ## TODOs:
- - add file R/W tests
  - add a more tests for triangulations
-

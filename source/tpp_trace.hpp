@@ -10,12 +10,14 @@
  
 #ifdef TRIANGLE_DBG_TO_FILE
 #   include <cstdio>
+#   include <string>
 
 namespace tpp {
    extern FILE* g_debugFile;
+   extern std::string g_debugFileName;
 }
 
-// TR string
+    // TR string
 #   define TRACE(a) { if(tpp::g_debugFile) { fprintf(tpp::g_debugFile, "%s\n", a); fflush(tpp::g_debugFile); } }
     // TR string + integer 
 #   define TRACE2i(a,b) { if(tpp::g_debugFile) { fprintf(tpp::g_debugFile, "%s%d\n", a, b); fflush(tpp::g_debugFile); } }
@@ -24,9 +26,11 @@ namespace tpp {
     // TR string + boolean 
 #   define TRACE2b(a,b) { if(tpp::g_debugFile) { fprintf(tpp::g_debugFile, "%s%s\n", a, b ? "true " : "false"); fflush(tpp::g_debugFile); } }
 
-#   define INIT_TRACE(a) { tpp::g_debugFile = fopen(a, "w"); \
-                           if(!tpp::g_debugFile) std::cerr << "ERROR: Cannot open trace file: " << a << std::endl; }
-#   define END_TRACE() { if(tpp::g_debugFile) { fclose(tpp::g_debugFile); } }
+#   define INIT_TRACE(a) { if (!tpp::g_debugFile) {\
+                             tpp::g_debugFile = fopen(a, "w");\
+                             if(!tpp::g_debugFile) std::cerr << "ERROR: Cannot open trace file: " << a << std::endl;\
+                             else tpp::g_debugFileName = a; } }
+#   define END_TRACE(a) { if(tpp::g_debugFile && g_debugFileName == a) { fclose(tpp::g_debugFile); tpp::g_debugFile = nullptr; tpp::g_debugFileName = ""; } }
 #else
 #   define TRACE(a)
 #   define TRACE2i(a,b) 

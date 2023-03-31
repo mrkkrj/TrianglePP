@@ -6,15 +6,16 @@
 #ifndef TRPP_TRILIB_MACROS
 #define TRPP_TRILIB_MACROS
 
+
+// Macros to hide the most common casts from void*
+//  -- OPEN TODO:: remove, use typed pointers instead (needs a bigger refactoring!)
+
 #define TP_MESH_BEHAVIOR() \
     Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh); \
     Triwrap::__pbehavior* tpbehavior = static_cast<Triwrap::__pbehavior *>(m_pbehavior);
 
 #define TP_MESH() \
     Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh);
-
-#define TP_MESH_PTR() \
-    static_cast<Triwrap::__pmesh *>(m_pmesh)
 
 #define TP_MESH_BEHAVIOR_WRAP() \
     Triwrap::__pmesh* tpmesh = static_cast<Triwrap::__pmesh *>(m_pmesh); \
@@ -23,6 +24,15 @@
 
 #define TP_WRAP_PTR() \
     static_cast<Triwrap *>(m_triangleWrap);
+
+#define TP_MESH_PTR() \
+    static_cast<Triwrap::__pmesh *>(m_pmesh)
+
+#define TP_BEHAVIOR_PTR() \
+    static_cast<Triwrap::__pbehavior *>(m_pbehavior)
+
+#define TP_INPUT() \
+   triangulateio* pin = static_cast<triangulateio*>(m_in);
 
 #define TP_VOROUT() \
     triangulateio* tpvorout = static_cast<triangulateio*>(m_vorout);
@@ -50,4 +60,4 @@
 #define TP_PLOOP_ITER() \
     Triwrap::__otriangle* ploop = (Triwrap::__otriangle*)(&(this->floop));
 
-#endif 
+#endif // TRPP_TRILIB_MACROS

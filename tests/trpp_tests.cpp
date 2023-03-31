@@ -509,9 +509,14 @@ TEST_CASE("Reading files", "[trpp]")
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 15); // look inside the file
+
+        ioStatus = trReader.readPoints("../exampleFiles/dots.node", points);
+
+        REQUIRE(ioStatus == true);
+        REQUIRE(points.size() == 100); // look inside the file
     }
 
-    SECTION("TEST 7.2: reading a .poly file")
+    SECTION("TEST 7.3: reading .poly file")
     {
         std::vector<Delaunay::Point> points;
         std::vector<int> segments;
@@ -523,7 +528,21 @@ TEST_CASE("Reading files", "[trpp]")
         REQUIRE(points.size() == 26);       // look inside the file
         REQUIRE(segments.size()/2  == 22);  // look inside the file
         REQUIRE(holes.size() == 3);         // look inside the file
-    }  
+
+        ioStatus = trReader.readSegments("../exampleFiles/box.poly", points, segments, holes);
+
+        REQUIRE(ioStatus == true);
+        REQUIRE(points.size() == 8);        // look inside the file
+        REQUIRE(segments.size() / 2 == 5);  // look inside the file
+        REQUIRE(holes.size() == 1);         // look inside the file
+
+        ioStatus = trReader.readSegments("../exampleFiles/la.poly", points, segments, holes);
+
+        REQUIRE(ioStatus == true);
+        REQUIRE(points.size() == 141);        // look inside the file
+        REQUIRE(segments.size() / 2 == 148);  // look inside the file
+        REQUIRE(holes.size() == 0);           // look inside the file
+    }
 }
 
 
@@ -570,14 +589,12 @@ TEST_CASE("Writing files", "[trpp]")
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());
-        REQUIRE(segments.size() == pslgDelaunaySegments.size());
+        REQUIRE(segments.size() == pslgDelaunaySegments.size()); 
         REQUIRE(holes.size() == 0); // no holes!
     }
 
     SECTION("TEST 8.2: writing a .poly file containig segments & holes")
     {
-        // OPEN TODO::: not yet working!!!
-
         std::vector<Delaunay::Point> pslgHoles;
         pslgHoles.push_back(Delaunay::Point(1, 1));
         pslgHoles.push_back(Delaunay::Point(1, 2));
@@ -588,7 +605,9 @@ TEST_CASE("Writing files", "[trpp]")
         bool segmentsOK = trWriter.setSegmentConstraint(pslgDelaunaySegments);
         REQUIRE(segmentsOK);
 
-        ioStatus = trWriter.saveSegments("./test.poly");
+        // OPEN TODO::: not yet working on Windows!!!
+        //  -- only 3 segments saved!!!!!
+        ioStatus = trWriter.saveSegments("./test.poly"); 
         REQUIRE(ioStatus == true);
 
         // read it back
@@ -596,15 +615,11 @@ TEST_CASE("Writing files", "[trpp]")
         std::vector<int> segments;
         std::vector<Delaunay::Point> holes;
 
-        REQUIRE_NOTHROW(ioStatus = trReader.readSegments("./test.poly", points, segments, holes));
+        ioStatus = trReader.readSegments("./test.poly", points, segments, holes);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());
-
-        // TEST::: not yet working!!!
-        REQUIRE(segments.size() == pslgDelaunaySegments.size());
-        // TEST:::
-
+        REQUIRE(segments.size() == pslgDelaunaySegments.size());  
         REQUIRE(holes.size() == pslgHoles.size());
     }
 }
@@ -761,7 +776,7 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
     }
 
 }
-
+ 
 
 TEST_CASE("Usage of iterators", "[trpp]")
 {
@@ -1057,7 +1072,41 @@ TEST_CASE("Usage of iterators", "[trpp]")
       tpp::g_disableAsserts = tmp;
    }
 
-   // ... more to come...
+   SECTION("TEST 11.4: Face iterator - triangle's area")
+   {
+      // 4 points forming a 2x2 square
+      std::vector<Delaunay::Point> in;
+
+      in.push_back(Delaunay::Point(0, 0));
+      in.push_back(Delaunay::Point(0, 2));
+      in.push_back(Delaunay::Point(2, 0));
+      in.push_back(Delaunay::Point(2, 2));
+
+      Delaunay trGenerator(in);
+      trGenerator.Triangulate(dbgOutput);
+
+      // 1st triangle
+      auto iter = trGenerator.fbegin();
+      auto area = iter.area(); 
+
+      REQUIRE(area == 2); // == 0.5 * 4 !
+
+      // 2nd triangle
+      ++iter;
+      area = iter.area(); // OPEN TODO:: move to mesh???
+
+      REQUIRE(area == 2); // == 0.5 * 4 !
+
+      // no 3rd triangle!
+      ++iter;
+      REQUIRE(iter == trGenerator.fend());
+
+      // use postfix increment
+      auto second = trGenerator.fbegin()++;
+      area = (trGenerator.fbegin()++).area();
+      REQUIRE(area == 2); // == 0.5 * 4 !
+      REQUIRE(area == second.area());
+   }
 
 }
 
@@ -1122,25 +1171,29 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
       iter = mesh.Lnext(iterFirst);
       iter = mesh.Lprev(iter);
 
-      REQUIRE(iter == iterFirst);
+      REQUIRE(iter == iterFirst); // roundtrip!
 
       iter = mesh.Onext(iterFirst);
       iter = mesh.Oprev(iter);
       
-      REQUIRE(iter == iterFirst);
+      REQUIRE(iter == iterFirst); // roundtrip!
 
       iter = mesh.Sym(iterFirst);
 
       // OPEN TODO::      
       //REQUIRE(); ....
+
    }
 
    SECTION("TEST XX.XX: Locate vertex in a mesh")
    {
       iter = mesh.locate(iterFirst.Org());
-      REQUIRE(iter == iterFirst);
 
-      // OPEN TODO:: more tests for location!!!
+      REQUIRE(iter == iterFirst); // roundtrip!
+
+
+      // OPEN TODO:: more tests for location
+
    }
 
    SECTION("TEST XX.XX: Find triangles around vertex in a mesh")
@@ -1150,45 +1203,47 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
 
       REQUIRE(iterFirst.Org() == 0);
       REQUIRE(ivv.size() == 9);
+
+      // OPEN TODO:: more checks 
+
    }
 
-   SECTION("TEST XX.XX: Triangle's area")
-   {
-      // 4 points forming a 2x2 square
-      std::vector<Delaunay::Point> in;
+   // ... more to come...
 
-      in.push_back(Delaunay::Point(0, 0));
-      in.push_back(Delaunay::Point(0, 2));
-      in.push_back(Delaunay::Point(2, 0));
-      in.push_back(Delaunay::Point(2, 2));
-
-      Delaunay trGenerator(in);
-      trGenerator.Triangulate(dbgOutput);
-
-      // 1st triangle
-      iter = trGenerator.fbegin();
-      auto area = iter.area(); // OPEN TODO:: move to mesh???
-
-      REQUIRE(area == 2); // == 0.5 * 4 !
-
-      // 2nd triangle
-      ++iter;
-      area = iter.area(); // OPEN TODO:: move to mesh???
-
-      REQUIRE(area == 2); // == 0.5 * 4 !
-
-      // no 3rd!
-      ++iter;
-      REQUIRE(iter == trGenerator.fend());
+}
 
 
-      // OPEN TODO::: N.Y.I. !!!
-#if 0     
-      auto second = trGenerator.fbegin()++;
-      auto area = (trGenerator.fbegin()++).area(); 
-      REQUIRE(area == 2); // == 0.5 * 4 !
-#endif
-   }
+TEST_CASE("Different triangulation algorithms", "[trpp]")
+{
+   std::vector<Delaunay::Point> pslgDelaunayInput;
+   std::vector<Delaunay::Point> pslgDelaunaySegments;
+
+   preparePLSGTestData(pslgDelaunayInput, pslgDelaunaySegments);
+
+   Delaunay triGen(pslgDelaunayInput);
+
+   triGen.Triangulate();
+   auto triCountDefault = triGen.triangleCount();
+
+   REQUIRE(triCountDefault == 13);
+
+   triGen.setAlgorithm(DivideConquer);
+   triGen.Triangulate();
+   auto triCountDivideConquer = triGen.triangleCount();
+
+   REQUIRE(triCountDefault == triCountDivideConquer);
+
+   triGen.setAlgorithm(Incremental);
+   triGen.Triangulate();
+   auto triCountIncremental = triGen.triangleCount();
+
+   REQUIRE(triCountDefault == triCountIncremental);
+
+   triGen.setAlgorithm(Sweepline);
+   triGen.Triangulate();
+   auto triCountSweepline = triGen.triangleCount();
+
+   REQUIRE(triCountDefault == triCountSweepline);
 
 }
 

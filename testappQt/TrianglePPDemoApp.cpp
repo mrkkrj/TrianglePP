@@ -979,7 +979,8 @@ void TrianglePPDemoApp::readFromFile()
 
     drawPoints(dempAppPoints);
 
-    statusBar()->showMessage(tr("Read %1 points from %2").arg(points.size()).arg(fileName));
+    statusBar()->showMessage(tr("Read %1 points and %2 segments from %3")
+                                 .arg(points.size()).arg(segmentEndpoints.size()/2).arg(fileName));
 
     // ...and segments
     drawSegments(segmentEndpoints);

@@ -14241,6 +14241,7 @@ char *polyfilename;
 FILE **polyfile;
 #endif /* not ANSI_DECLARATORS */
 {
+  TRACE(" -> readnodes");
   FILE *infile;
   vertex vertexloop;
   char inputline[INPUTLINESIZE];
@@ -14527,6 +14528,7 @@ int *regions;
 #endif /* not ANSI_DECLARATORS */
 
 {
+  TRACE(" -> readholes");
   REAL *holelist;
   REAL *regionlist;
   char inputline[INPUTLINESIZE];
@@ -14833,6 +14835,7 @@ char** argv;
 #endif /* not TRILIBRARY */
 
 {
+    TRACE(" -> writenodes2file");
 #ifdef TRILIBRARY
     REAL* plist;
     REAL* palist;
@@ -15311,6 +15314,7 @@ char** argv;
 #endif /* not TRILIBRARY */
 
 {
+    TRACE(" -> writepoly2file");
 #ifdef TRILIBRARY
     int* slist;
     int* smlist;

@@ -39,11 +39,21 @@ For usage patterns see the examples in the *trpp_example.cpp* source file. The i
         int keypointIdx2 = fit.Dest();
         int keypointIdx3 = fit.Apex();
 
-        // access data
+        // access point's cooridinates: 
         double x1 = delaunayInput[keypointIdx1][0];
         double y1 = delaunayInput[keypointIdx1][1];
     }
 
+You can also use the *foreach()* style loop as shown below:
+
+    for (const auto& f : trGenerator.faces())
+    {
+        int keypointIdx1 = f.Org(); 
+        int keypointIdx2 = f.Dest();
+        int keypointIdx3 = f.Apex();
+
+        // etc...
+    }
 
 If compiled with *TRIANGLE_DBG_TO_FILE* define, debug traces will be written to the *./triangle.out.txt* file.
 
@@ -90,14 +100,12 @@ The original *Triangle* library documentation can be found at: http://www.cs.cmu
 Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 ## TODOs:
- - fix a bug in .poly file writing with holes (!!!)
- - fix a reading of .poly files with VisualStudio compiler (WTF???)
  - remove warnings
  - add support for regions and reading of region attributes from .poly file
+ - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (???)
+ - add support for refining of triangulations (?)
+ - add support for saving Voronoi meshes 
  - add CI support (Travis?)
- - extract iterator code to own file (possible???)
- - add convex hull demonstration to the Qt demo app
- - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (needed???)
  - Port the Qt demo app to Emscripten
-
+ - add convex hull demonstration to the Qt demo app (??)
 
