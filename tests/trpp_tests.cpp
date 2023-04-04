@@ -1209,7 +1209,6 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
    }
 
    // ... more to come...
-
 }
 
 

@@ -12,13 +12,13 @@ This code is released under LPGL licence.
 
 The code is now ported to x64 Windows. The project file was updated to Visual Studio 2015/2019, the x64 target was added, and the asserts & crashes when running the example program were fixed.
 
-*CMake* support for both the example program and the GUI demonstrator were added recently and they work on both Linux and Windows. Also some basic Catch2 tests were added.
+*CMake* support for both the example program and the GUI demonstrator were added later on and they work on both Linux and Windows. Also some basic Catch2 tests were added.
 
-Support for reading and writing of *Triangle*'s file formats was also added (**Caution:** not yet complete!).
+Support for reading and writing of *Triangle*'s file formats and input data sanitizarion were also added recently.
 
 ## Usage:
 
-For usage patterns see the examples in the *trpp_example.cpp* source file. The interface of the *trpp*-wrapper is defined in the *tpp_inteface.hpp* header file. Basic usage example is shown in the code snippet below:
+For usage patterns see the examples in the *trpp_example.cpp* source file. The interface of the *trpp*-wrapper is defined in the *tpp_inteface.hpp* header file. A (very) basic usage example is shown in the code snippet below:
 
     // prepare input
     std::vector<Delaunay::Point> delaunayInput;
@@ -35,27 +35,16 @@ For usage patterns see the examples in the *trpp_example.cpp* source file. The i
     // iterate over triangles
     for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-        int keypointIdx1 = fit.Org(); 
-        int keypointIdx2 = fit.Dest();
-        int keypointIdx3 = fit.Apex();
+        int vertexIdx1 = fit.Org(); 
+        int vertexIdx2 = fit.Dest();
+        int vertexIdx3 = fit.Apex();
 
         // access point's cooridinates: 
-        double x1 = delaunayInput[keypointIdx1][0];
-        double y1 = delaunayInput[keypointIdx1][1];
+        double x1 = delaunayInput[vertexIdx1][0];
+        double y1 = delaunayInput[vertexIdx1][1];
     }
 
-You can also use the *foreach()* style loop as shown below:
-
-    for (const auto& f : trGenerator.faces())
-    {
-        int keypointIdx1 = f.Org(); 
-        int keypointIdx2 = f.Dest();
-        int keypointIdx3 = f.Apex();
-
-        // etc...
-    }
-
-If compiled with *TRIANGLE_DBG_TO_FILE* define, debug traces will be written to the *./triangle.out.txt* file.
+For more examples consult the docs directory.
 
 ## Demo App:
 
@@ -87,17 +76,14 @@ You can also save and read your work:
 
 ![triangle-PP's File I/O](docs/pics/triangle-pp-testApp-File_IO.jpg)
 
-Note: still some problems when reading/writing files (see TODOs below), work uderway!
-
-## Theory:
+## Original Triangle package
 
 ![Triangle logo](T.gif) 
 
-For backgroud info on the original implementation see "*Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator*" by J.P. Shewchuk: http://www.cs.cmu.edu/~quake-papers/triangle.ps.
-
-The original *Triangle* library documentation can be found at: http://www.cs.cmu.edu/~quake/triangle.html. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
-
-Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
+This code is a wrapper for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
+For more information you can look at:
+ - http://www.cs.cmu.edu/~quake/triangle.html
+ - README in the docs directory
 
 ## TODOs:
  - remove warnings
@@ -108,4 +94,3 @@ Algorithm used for DCT construction: "*Fast segment insertion and incremental co
  - add CI support (Travis?)
  - Port the Qt demo app to Emscripten
  - add convex hull demonstration to the Qt demo app (??)
-
