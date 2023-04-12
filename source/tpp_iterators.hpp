@@ -34,6 +34,7 @@ namespace tpp
 
       bool empty() const;      
       bool isdummy() const;  // pointing to the dummy triangle?
+      bool hasSteinerPoints() const;
 
       /**
          @brief: Get the origin point of the triangle
@@ -74,6 +75,9 @@ namespace tpp
          void Org(Delaunay::Point& point, int& meshIndex)   const { m_iter->Org(point, meshIndex); }
          void Dest(Delaunay::Point& point, int& meshIndex)  const { m_iter->Dest(point, meshIndex); }
          void Apex(Delaunay::Point& point, int& meshIndex)  const { m_iter->Apex(point, meshIndex); }
+
+         // misc
+         double area() const { return m_iter->area(); }
 
       private:
          FaceIterator* m_iter;
@@ -136,6 +140,8 @@ namespace tpp
       VertexIterator() : vloop(nullptr), m_delaunay(nullptr) {}
 
       int vertexId() const;
+      double x() const;
+      double y() const;
 
       friend class Delaunay;
       friend bool operator==(VertexIterator const&, VertexIterator const&);
@@ -146,6 +152,34 @@ namespace tpp
 
       void* vloop;  // TriLib's internal data
       Delaunay* m_delaunay;   
+   };
+
+
+   /**
+      @brief: This class supports iteration over vertices in a foreach() loop
+    */
+   struct VertexList
+   {
+      VertexList(Delaunay* triangulator) : m_delaunay(triangulator) {}
+
+      struct VertexListIterator : public VertexIterator
+      {
+         VertexListIterator(VertexIterator vit) : VertexIterator(vit) {}
+
+         VertexListIterator operator++() {
+            return VertexIterator::operator++();
+         }
+
+         const VertexIterator& operator*() const {
+            return *this;
+         }         
+      };
+
+      VertexListIterator begin();
+      VertexListIterator end();
+
+   private:
+      Delaunay* m_delaunay;
    };
 
 

@@ -651,15 +651,6 @@ int Delaunay::voronoiEdgeCount() const
 
    return
       !tpvorout ? 0 : tpvorout->numberofedges;
-
-   //if (!tpvorout)
-   //{
-   //   return 0;
-   //}
-   //else
-   //{
-   //   return tpvorout->numberofedges;
-   //}
 }
 
 
@@ -669,15 +660,6 @@ int Delaunay::voronoiPointCount() const
 
    return
       !tpvorout ? 0 : tpvorout->numberofpoints;
-
-   //if (!tpvorout)
-   //{
-   //   return 0;
-   //}
-   //else
-   //{
-   //   return tpvorout->numberofpoints;
-   //}
 }
 
 
@@ -736,6 +718,24 @@ VertexIterator Delaunay::vend()
    VertexIterator vit;
    vit.vloop = ((Triwrap::vertex) nullptr);
    return vit;
+}
+
+
+VertexList Delaunay::vertices()
+{
+   return VertexList(this);
+};
+
+
+VertexList::VertexListIterator VertexList::begin()
+{
+   return m_delaunay->vbegin();
+}
+
+
+VertexList::VertexListIterator VertexList::end()
+{
+   return m_delaunay->vend();
 }
 
 
@@ -1394,22 +1394,6 @@ int Delaunay::GetFirstIndexNumber() const
 }
 
 
-double Delaunay::area(FaceIterator const& fit)
-{
-   Point torg = pointAtVertexId(fit.Org());
-   Point tdest = pointAtVertexId(fit.Dest());
-   Point tapex = pointAtVertexId(fit.Apex());
-
-   double dxod(torg[0] - tdest[0]);
-   double dyod(torg[1] - tdest[1]);
-   double dxda(tdest[0] - tapex[0]);
-   double dyda(tdest[1] - tapex[1]);
-
-   double area = 0.5 * (dxod * dyda - dyod * dxda);
-   return area;
-}
-
-
 //  Iterators and Mesh methods
 
 typedef Triwrap::vertex   vertex;
@@ -1474,6 +1458,15 @@ bool FaceIterator::isdummy() const
 bool FaceIterator::empty() const
 {
    return floop.tri == nullptr;
+}
+
+
+bool FaceIterator::hasSteinerPoints() const
+{
+   return
+      Org() == -1 ||
+      Dest() == -1 ||
+      Apex() == -1;
 }
 
 
@@ -1548,9 +1541,19 @@ void FaceIterator::Apex(Delaunay::Point& point, int& meshIndex) const
 
 double FaceIterator::area() const
 {
-   // OPEN TODO:: move impl. out of Delaunay class
+   Delaunay::Point torg, tdest, tapex;
 
-   return m_delaunay->area(*this);
+   (void)Org(&torg);
+   (void)Dest(&tdest);
+   (void)Apex(&tapex);
+
+   double dxod(torg[0] - tdest[0]);
+   double dyod(torg[1] - tdest[1]);
+   double dxda(tdest[0] - tapex[0]);
+   double dyda(tdest[1] - tapex[1]);
+
+   double area = 0.5 * (dxod * dyda - dyod * dxda);
+   return area;
 }
 
 
@@ -1681,6 +1684,18 @@ int VertexIterator::vertexId() const
 {
    TP_MESH_ITER();
    return ((int*)vloop)[tpmesh->vertexmarkindex];
+}
+
+
+double VertexIterator::x() const
+{
+   return ((Delaunay::Point*)vloop)->operator[](0);
+}
+
+
+double VertexIterator::y() const
+{
+   return ((Delaunay::Point*)vloop)->operator[](1);
 }
 
 

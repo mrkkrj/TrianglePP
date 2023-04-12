@@ -30,13 +30,13 @@ int main()
     // iterate over triangles
     for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-        int keypointIdx1 = fit.Org();
-        int keypointIdx2 = fit.Dest();
-        int keypointIdx3 = fit.Apex();
+        int vertexIdx1 = fit.Org();
+        int vertexIdx2 = fit.Dest();
+        int vertexIdx3 = fit.Apex();
 
         // access data
-        double x1 = delaunayInput[keypointIdx1][0];
-        double y1 = delaunayInput[keypointIdx1][1];
+        double x1 = delaunayInput[vertexIdx1][0];
+        double y1 = delaunayInput[vertexIdx1][1];
     }
     
     std::cout << " Example: 1";
@@ -57,13 +57,13 @@ int main()
        // potential Steiner points:
        Point sp1, sp2, sp3;
 
-       int keypointIdx1 = fit.Org(&sp1);
-       int keypointIdx2 = fit.Dest(&sp2);
-       int keypointIdx3 = fit.Apex(&sp3);
+       int vertexIdx1 = fit.Org(&sp1);
+       int vertexIdx2 = fit.Dest(&sp2);
+       int vertexIdx3 = fit.Apex(&sp3);
 
        // new vertices might have been added to enforce constraints!
        //  (i.e. Steiner points)
-       if (keypointIdx1 == -1)
+       if (vertexIdx1 == -1)
        {
           double x1 = sp1[0]; // an added vertex, it's data copied to sp1
           double y1 = sp1[1];
@@ -71,8 +71,8 @@ int main()
        else
        {
           // a point from original data
-          double x1 = delaunayInput[keypointIdx1][0];
-          double y1 = delaunayInput[keypointIdx1][1];
+          double x1 = delaunayInput[vertexIdx1][0];
+          double y1 = delaunayInput[vertexIdx1][1];
 
           // but that will work too!
           x1 = sp1[0];
@@ -142,13 +142,13 @@ int main()
     // iterate over triangles
     for (FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
-       int keypointIdx1 = fit.Org();
-       int keypointIdx2 = fit.Dest();
-       int keypointIdx3 = fit.Apex();
+       int vertexIdx1 = fit.Org();
+       int vertexIdx2 = fit.Dest();
+       int vertexIdx3 = fit.Apex();
 
        // access data
-       double x1 = delaunayInput[keypointIdx1][0];
-       double y1 = delaunayInput[keypointIdx1][1];
+       double x1 = delaunayInput[vertexIdx1][0];
+       double y1 = delaunayInput[vertexIdx1][1];
     }
 
     std::cout << ", 4 --> OK! \n";

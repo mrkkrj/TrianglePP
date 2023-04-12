@@ -977,11 +977,14 @@ TEST_CASE("Usage of iterators", "[trpp]")
          mesh_Vi.vertices.push_back(ToVert(pt));
       }
 
-      std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
-      std::cout << " ### vertices_Viter =" << mesh_Vi.vertices.size() << std::endl;
+      if (dbgOutput != tpp::None)
+      {
+         std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
+         std::cout << " ### vertices_Viter =" << mesh_Vi.vertices.size() << std::endl;
 
-      std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
-      std::cout << " ### indexes_Viter =" << mesh_Vi.indices.size() << std::endl;
+         std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
+         std::cout << " ### indexes_Viter =" << mesh_Vi.indices.size() << std::endl;
+      }
 
       // checks
       REQUIRE(mesh.indices.size() != mesh_Vi.indices.size()); // not equal!
@@ -1012,11 +1015,14 @@ TEST_CASE("Usage of iterators", "[trpp]")
          REQUIRE(meshIdx0 >= 0); REQUIRE(meshIdx1 >= 0); REQUIRE(meshIdx2 >= 0);
       }
 
-      std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
-      std::cout << " ### vertices_MeshIter =" << mesh_meFi.vertices.size() << std::endl;
+      if (dbgOutput != tpp::None)
+      {
+         std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
+         std::cout << " ### vertices_MeshIter =" << mesh_meFi.vertices.size() << std::endl;
 
-      std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
-      std::cout << " ### indexes_MeshIter =" << mesh_meFi.indices.size() << std::endl;
+         std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
+         std::cout << " ### indexes_MeshIter =" << mesh_meFi.indices.size() << std::endl;
+      }
 
       // checks
       REQUIRE(mesh.indices.size() == mesh_meFi.indices.size());
@@ -1072,7 +1078,41 @@ TEST_CASE("Usage of iterators", "[trpp]")
       tpp::g_disableAsserts = tmp;
    }
 
-   SECTION("TEST 11.4: Face iterator - triangle's area")
+   SECTION("TEST 11.5: Delaunay::vertices() with a foreach loop")
+   {
+      Mesh mesh_meVi;
+
+      for (const auto& v : gen.vertices())
+      {
+         auto vertexId = v.vertexId();
+         auto x = v.x();
+         auto y = v.y();
+         auto& pt = *v;
+
+         mesh_meVi.indices.push_back(vertexId);
+         mesh_meVi.vertices.push_back(ToVert(pt));
+      }
+
+      if (dbgOutput != tpp::None)
+      {
+         std::cout << " ### vertices =" << mesh.vertices.size() << std::endl;
+         std::cout << " ### vertices_Viter =" << mesh_meVi.vertices.size() << std::endl;
+
+         std::cout << " ### indexes =" << mesh.indices.size() << std::endl;
+         std::cout << " ### indexes_Viter =" << mesh_meVi.indices.size() << std::endl;
+      }
+
+      // checks
+      REQUIRE(mesh.indices.size() != mesh_meVi.indices.size()); // not equal!
+      REQUIRE(mesh.vertices.size() == mesh_meVi.vertices.size());
+   }
+
+}
+
+
+TEST_CASE("Triangle's area", "[trpp]")
+{
+   SECTION("TEST 12.1: area() in standard triangulation")
    {
       // 4 points forming a 2x2 square
       std::vector<Delaunay::Point> in;
@@ -1087,7 +1127,7 @@ TEST_CASE("Usage of iterators", "[trpp]")
 
       // 1st triangle
       auto iter = trGenerator.fbegin();
-      auto area = iter.area(); 
+      auto area = iter.area();
 
       REQUIRE(area == 2); // == 0.5 * 4 !
 
@@ -1106,6 +1146,51 @@ TEST_CASE("Usage of iterators", "[trpp]")
       area = (trGenerator.fbegin()++).area();
       REQUIRE(area == 2); // == 0.5 * 4 !
       REQUIRE(area == second.area());
+   }
+
+   SECTION("TEST 12.2: area() in quality triangulation")
+   {
+      std::vector<Delaunay::Point> in;
+
+      in.push_back(Delaunay::Point(10, 10));
+      in.push_back(Delaunay::Point(10, 200));
+      in.push_back(Delaunay::Point(200, 10));
+      in.push_back(Delaunay::Point(200, 200));
+      in.push_back(Delaunay::Point(250, 250));
+      in.push_back(Delaunay::Point(350, 350));
+
+      Delaunay trGenerator(in);
+      bool quality = true;
+      bool hasSteinerPts = false;
+
+      trGenerator.Triangulate(quality, dbgOutput);
+
+      // 1. iterator
+      for (tpp::FaceIterator it = trGenerator.fbegin(); it != trGenerator.fend(); ++it)
+      {
+         if (it.hasSteinerPoints())
+         {
+            if (dbgOutput != tpp::None)
+               std::cout << " ### area => Steiner!!!" << std::endl;
+
+            hasSteinerPts = true;
+         }
+
+         auto area = it.area();
+         REQUIRE(area > 0.0);
+
+         if (dbgOutput != tpp::None)
+            std::cout << " ### area =" << area << std::endl;        
+      }
+
+      REQUIRE(hasSteinerPts == true);
+
+      // 2. foreach()
+      for (const auto& f : trGenerator.faces())
+      {
+         auto area = f.area();
+         REQUIRE(area > 0.0);
+      }
    }
 
 }
@@ -1135,7 +1220,7 @@ TEST_CASE("Usage of Points", "[trpp]")
    REQUIRE(std::is_sorted(pslgExamplePoints.begin(), pslgExamplePoints.end(), Delaunay::OrderPoints()));
 
    
-   // OPEN TODO:: hashing support
+   // OPEN TODO:: test hashing support
 
    // ...
 
@@ -1166,7 +1251,7 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
    auto iterFirst = trGenerator.fbegin();
    auto iter = trGenerator.fend(); 
    
-   SECTION("TEST XX.XX: Walk over triangles in the mesh")
+   SECTION("TEST 13.1: Walk over triangles in the mesh")
    {
       iter = mesh.Lnext(iterFirst);
       iter = mesh.Lprev(iter);
@@ -1185,7 +1270,7 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
 
    }
 
-   SECTION("TEST XX.XX: Locate vertex in a mesh")
+   SECTION("TEST 13.2: Locate vertex in a mesh")
    {
       iter = mesh.locate(iterFirst.Org());
 
@@ -1196,7 +1281,7 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
 
    }
 
-   SECTION("TEST XX.XX: Find triangles around vertex in a mesh")
+   SECTION("TEST 13.3: Find triangles around vertex in a mesh")
    {
       std::vector<int> ivv;     
       mesh.trianglesAroundVertex(iterFirst.Org(), ivv);

@@ -29,6 +29,7 @@ namespace tpp
 
    class TriangulationMesh;
    struct FacesList;
+   struct VertexList;
 
    enum DebugOutputLevel // OPEN TODO:: forward-decl.
    {
@@ -258,9 +259,11 @@ namespace tpp
        */
       FaceIterator fbegin();
       FaceIterator fend();
-      FacesList faces();
       VertexIterator vbegin();
       VertexIterator vend();
+
+      FacesList faces();
+      VertexList vertices();
 
       /**
         @brief: Tesselation results, counts of entities:
@@ -326,7 +329,7 @@ namespace tpp
 
         @param filePath: directory and the name of file to be read
         @param points: vertices read from the file
-        @param segmentEndpoints:  ------ OPEN TODO::: comment!!!!!
+        @param segmentEndpoints:  ------>> OPEN TODO::: comment!!!!!
         @param holeMarkers: coordinates of hole marker points
         @return: true if file read, false otherwise
        */
@@ -366,7 +369,6 @@ namespace tpp
       bool readSegmentsFromFile(char* polyfileName, FILE* polyfile, std::vector<int>& segmentEndpoints);
       std::unordered_map<int, int> checkForDuplicatePoints() const;   
       int GetFirstIndexNumber() const;
-      double area(FaceIterator const& fit); // OPEN TODO:: move to FaceIterator...
 
       friend class VertexIterator;
       friend class FaceIterator;
