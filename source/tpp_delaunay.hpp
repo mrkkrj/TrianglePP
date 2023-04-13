@@ -363,10 +363,11 @@ namespace tpp
       void initTriangleDataForPoints();
       void initTriangleInputData(triangulateio* pin, const std::vector<Point>& points);
       void readPointsFromMesh(std::vector<Point>& points) const;
-      void readSegmentsFromMesh(std::vector<int>& segmentEndpoints) const;
+      void readSegmentsFromMesh(std::vector<int>& segmentEndpoints) const;      
       void static SetPoint(Point& point, /*Triwrap::vertex*/ double* vertexptr);
 
       bool readSegmentsFromFile(char* polyfileName, FILE* polyfile, std::vector<int>& segmentEndpoints);
+      void readHolesFromFile(char* polyfileName, FILE* polyfile, std::vector<Point>& holeMarkers) const;
       std::unordered_map<int, int> checkForDuplicatePoints() const;   
       int GetFirstIndexNumber() const;
 

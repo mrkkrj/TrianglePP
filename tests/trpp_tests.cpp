@@ -1328,7 +1328,6 @@ TEST_CASE("Different triangulation algorithms", "[trpp]")
    auto triCountSweepline = triGen.triangleCount();
 
    REQUIRE(triCountDefault == triCountSweepline);
-
 }
 
 

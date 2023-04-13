@@ -250,7 +250,7 @@ bool Delaunay::setSegmentConstraint(const std::vector<Point>& segments)
    }
 
    // OPEN TODO::: check for intersections ???
-   //  - seems to be not needed, re-read what the documentiation of Trilibrary says!!!!
+   //  - seems to be not needed, re-read what the documentiation of TriLibrary says!!!!
 
    // OPEN TODO:::   sanitize inputs!!!!
    //  -- needed??? --> First of the points will be found when determining the point index
@@ -280,7 +280,7 @@ bool Delaunay::setSegmentConstraint(const std::vector<int>& segmentPointIndexes,
    }
 
    // OPEN TODO::: check for intersections ???
-   //  - seems to be not needed (???), re-read what the documentiation of Trilibrary says!!!!
+   //  - seems to be not needed (???), re-read what the documentiation of TriLibrary says!!!!
 
    // sanitize inputs
    std::unordered_map<int, int> duplicates = checkForDuplicatePoints();
@@ -524,7 +524,7 @@ bool Delaunay::readSegments(
     }
     else
     {
-#if 0 // OPEN TODO::: not working here, mysterious file reading problems!!! :-O
+#if 0 // OPEN TODO::: not working here (Windows), mysterious file reading problems!!! :-O
         // triangulate to ensure formskeleton() will read segments!
         tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);
 
@@ -565,30 +565,8 @@ bool Delaunay::readSegments(
     }
 
     // get hole marker points
-    REAL *holearray = nullptr;
-    REAL *regionarray = nullptr;
-    m_holesList.clear();
-
-    pTriangleWrap->readholes(tpmesh, tpbehavior, polyfile, polyfileName,
-                             &holearray, &tpmesh->holes, &regionarray, &tpmesh->regions);
-
-    for (int i = 0; i < 2 * tpmesh->holes; i += 2)
-    {
-        m_holesList.emplace_back(holearray[i], holearray[i + 1]);
-    }
-
+    readHolesFromFile(polyfileName, polyfile, m_holesList);
     holeMarkers = m_holesList; // OPEN TODO::: make it optional param????
-
-    if (tpmesh->holes > 0)
-    {
-      pTriangleWrap->trifree((VOID *) holearray);
-    }
-
-    // regions not yet supported!
-    if (tpmesh->regions > 0)
-    {
-      pTriangleWrap->trifree((VOID *) regionarray);
-    }
 
     // ready
     fclose(polyfile);
@@ -1244,6 +1222,37 @@ void Delaunay::readSegmentsFromMesh(std::vector<int>& segmentEndpoints) const
         subsegloop.ss = pTriangleWrap->subsegtraverse(tpmesh);
         subsegnumber++;
     }
+}
+
+
+void Delaunay::readHolesFromFile(char* polyfileName, FILE* polyfile, std::vector<Point>& holeMarkers) const
+{
+   TP_MESH_BEHAVIOR_WRAP();
+
+   REAL* holearray = nullptr;
+   REAL* regionarray = nullptr;
+
+   holeMarkers.clear();
+
+   pTriangleWrap->readholes(tpmesh, tpbehavior, polyfile, polyfileName,
+                            &holearray, &tpmesh->holes, &regionarray, &tpmesh->regions);
+
+   for (int i = 0; i < 2 * tpmesh->holes; i += 2)
+   {
+      holeMarkers.emplace_back(holearray[i], holearray[i + 1]);
+   }
+
+   if (tpmesh->holes > 0)
+   {
+      pTriangleWrap->trifree((VOID*)holearray);
+   }
+
+   // OPEN TODO:::
+   // regions not yet supported!
+   if (tpmesh->regions > 0)
+   {
+      pTriangleWrap->trifree((VOID*)regionarray);
+   }
 }
 
 

@@ -1,7 +1,11 @@
-## Usage Example:
+## Generating triangulations:
 
 For usage patterns see the examples in the *trpp_example.cpp* source file. The interface of the *Tpp*-wrapper is defined in the *tpp_inteface.hpp* header file. 
 Basic usage example is shown in the code snippet below:
+
+    #include <tpp_interface.hpp>
+
+    using namespace tpp;
 
     // prepare input
     std::vector<Delaunay::Point> delaunayInput = { ... };       
@@ -58,12 +62,12 @@ Thus in case of Steiner points (i.e. points which were added by the algorithm) t
 
 To avoid that we can generate a continuous indexing for all the points of the triangulation, as shown below:
 
-    tpp::Delaunay generator(inputPoints);
+    Delaunay generator(inputPoints);
     generator.enableMeshIndexGeneration(); // must be enabled!
 
     generator.Triangulate(true);
 
-    tpp::Delaunay::Point p0, p1, p2;
+    Delaunay::Point p0, p1, p2;
     int meshIdx0 = -1, meshIdx1 = -1, meshIdx2 = -1;
 
     for (auto fit = gen.fbegin(); fit != gen.fend(); ++fit)
@@ -94,12 +98,14 @@ t.b.c. ...
 
 t.b.c. ...
 
-### Voronoi diagrams
+## Generating Voronoi diagrams
 
 To iterate over results of Voronoi tesselation two iterator classes are provided:
 
  - *VoronoiVertexIterator* which enumerates the Voronoi points, and 
  - *VoronoiEdgeIterator* which shows how these points are connected.
+
+### Iterating over results
 
  **Example:**
 
@@ -156,15 +162,25 @@ t.b.c. ...
 
 ## File I/O
 
+You can write and read ASCII files containing point and segement definitions using Triangle++ methods. Some examples are stored in the *tppDataFiles* directory. 
+Documentation for the used formats:
+
+t.b.c. ...
+
+
+### .node and .poly files
+
+t.b.c. ...
+
+
+### Input files sanitization
+
 t.b.c. ...
 
 
 ### Example TrPP data files
 
-You can write and read ASCII files containing point and segement definitions using Triangle++ methods. Some examples are stored in the *tppDataFiles* directory. 
-Documentation for the used formats:
-
-t.b.c. ...
+examples in this directory are....
 
 
 ## Theory:
@@ -179,7 +195,7 @@ For backgroud info on the original implementation see "*Triangle: Engineering a 
 Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 
-## Extra Local Files:
+### Local TriLib documantation files:
  
 1. **triangle.pdf** - J.R. Shevchuk, *"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator"*, copy of: 'http://www.cs.cmu.edu/~quake-papers/triangle.ps'
 
