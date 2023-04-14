@@ -1,11 +1,11 @@
 # Triangle++
 [comment]: # " ![triangle-PP's logo](triangle-PP-sm.jpg) "
-<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original 2005 J.P. Shevchuk's *Triangle* package written in old plain C.
+<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original 2005 J.P. Shevchuk's *Triangle* package, which was written in C.
 
 It can create standard **Delaunay** triangulations, **quality Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
 
-It started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) *Triangle* package and I first have ported the original wrapper to Visual C++ (VisualStudio 2008/Win32). 
-Then I did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams and file. 
+I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original *Triangle* code, ported the it to Visual C++ 
+(VisualStudio 2008/Win32), did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
 
 This code is released under LPGL licence.
 
@@ -15,7 +15,7 @@ The code is now ported to x64 Windows. The project file was updated to Visual St
 
 *CMake* support for both the example program and the GUI demonstrator were added later on and they work on both Linux and Windows. Also some basic Catch2 tests were added.
 
-Support for reading and writing of *Triangle*'s file formats and input data sanitizarion were also added recently.
+Support for reading and writing of *Triangle*'s file formats and input data sanitization were also added recently.
 
 ## Usage:
 
