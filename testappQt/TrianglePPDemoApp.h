@@ -54,7 +54,7 @@ private:
    void writeToFile();
    void readFromFile();
 
-   struct Point   {
+   struct Point {
        float x; float y;
        Point(float x_, float y_) : x(x_), y(y_) {}
        bool operator==(const Point& other) const { return x == other.x && y == other.y; }

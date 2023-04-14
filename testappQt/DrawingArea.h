@@ -22,7 +22,7 @@ public:
     ~DrawingArea();
 
     enum DrawMode {
-       DrawPoints, DrawLines
+       DrawPoints, DrawLines, DrawHoleMarker
     };
     
     void setDrawMode(DrawMode mode);

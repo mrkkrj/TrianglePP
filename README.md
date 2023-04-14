@@ -1,10 +1,11 @@
 # Triangle++
 [comment]: # " ![triangle-PP's logo](triangle-PP-sm.jpg) "
-<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is an updated version of Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C.
+<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original 2005 J.P. Shevchuk's *Triangle* package written in old plain C.
 
 It can create standard **Delaunay** triangulations, **quality Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
 
-I have ported the original wrapper to Visual C++ (VisualStudio 2008/Win32), done some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
+It started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) *Triangle* package and I first have ported the original wrapper to Visual C++ (VisualStudio 2008/Win32). 
+Then I did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams and file. 
 
 This code is released under LPGL licence.
 
@@ -44,7 +45,7 @@ For usage patterns see the examples in the *trpp_example.cpp* source file. The i
         double y1 = delaunayInput[vertexIdx1][1];
     }
 
-For more examples consult the docs directory.
+For more examples consult the *docs* directory.
 
 ## Demo App:
 

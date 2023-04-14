@@ -61,6 +61,18 @@ namespace {
       return QPoint(x, y);
    }
 
+   std::vector<Delaunay::Point> toTppPointVector(const QVector<QPoint>& qPoints)
+   {
+      std::vector<Delaunay::Point> tppPoints;
+
+      for (auto& point : qPoints)
+      {
+         tppPoints.push_back(Delaunay::Point(point.x(), point.y()));
+      }
+
+      return tppPoints;
+   }
+
 }
 
 
@@ -81,10 +93,9 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    ui.setupUi(this);
   
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
-   ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)
-
-   setGenerateButtonText();
-
+   ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)     
+   ui.pointModeComboBox->setCurrentIndex(AutomaticMode);
+     
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
    connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPDemoApp::onSegmentEndpointsSelected);
@@ -292,6 +303,10 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
    if (holePoints_.contains(pos))
    {
       holePoints_.removeOne(pos);
+
+      // OPEN TODO:::
+      //Q_ASSERT()
+
    }
 
    if (!triangulated_)
@@ -732,14 +747,7 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
       QMessageBox::critical(this, tr("Triangle++"), tr("Incorrect segment constraints, ignoring!"));
    }
 
-   std::vector<Delaunay::Point> constrDelaunayHoles;
-
-   for (auto& point : holePoints_)
-   {
-      constrDelaunayHoles.push_back(Delaunay::Point(point.x(), point.y()));
-   }
-
-   trGenerator.setHolesConstraint(constrDelaunayHoles);
+   trGenerator.setHolesConstraint(toTppPointVector(holePoints_));   
 }
 
 
@@ -751,12 +759,17 @@ bool TrianglePPDemoApp::isHoleMarker(const QPoint& point) const
 
 void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos)
 {
+   auto currMode = ui.drawAreaWidget->getDrawMode();
+
    ui.drawAreaWidget->setDrawColor(c_SegmentColor);
    QFont f;
    f.setPixelSize(22);
 
    ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
+      
+   ui.drawAreaWidget->setDrawMode(DrawingArea::DrawHoleMarker);
    ui.drawAreaWidget->drawPoint(pos);
+   ui.drawAreaWidget->setDrawMode(currMode);
 }
 
 
@@ -813,7 +826,7 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
         // OPEN TODO:: after rescaling a slightly off-zero coordinates possible!!!!
         //  - correct floating point arithmetic there!
 #if 1
-        if(pt.x >= 0 && pt.y >= 0)
+        if (pt.x >= 0 && pt.y >= 0)
             ;
         else
         {
@@ -824,12 +837,12 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
         Q_ASSERT(pt.x >= 0 && pt.y >= 0);
 #endif
 
-        if(pt.y < minY)
+        if (pt.y < minY)
         {
             minY = pt.y;
         }
 
-        if(pt.y > maxY)
+        if (pt.y > maxY)
         {
             maxY = pt.y;
         }
@@ -890,12 +903,7 @@ void TrianglePPDemoApp::writeToFile()
 
        if (!holePoints_.empty())
        {
-           QMessageBox::warning(this, tr("Triangle++"), tr("Exporting of holes not yet working!!!\n\nIgnoring the hole markers..."));
-
-           // OPEN TODO:::
-
-           //trGenerator.setHolesConstraint(holePoints_.toTrppPoint());
-           // .....
+           trGenerator.setHolesConstraint(toTppPointVector(holePoints_));
        }
 
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),

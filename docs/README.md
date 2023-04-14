@@ -14,7 +14,7 @@ Basic usage example is shown in the code snippet below:
     Delaunay trGenerator(delaunayInput);
     trGenerator.Triangulate();
 
-That's all! Now let have a look at the generated triangulation.
+That's all! Now let's have a look at the generated triangulation.
 
 ### Iterating over results
 
@@ -36,6 +36,7 @@ In that case you can access Steiner points coordinates using an optional paramet
         int vertexIdx1 = fit.Org(); 
         if (vertexIdx1 < 0)
         {
+            // Steiner point!
             Delaunay::Point sp;
             f.Org(&sp);
         }
@@ -98,16 +99,44 @@ t.b.c. ...
 
 t.b.c. ...
 
+### The Point class
+
+Currently the dpoint class by Piyush Kumar is used: a d-dimensional *reviver::dpoint* class with d=2. 
+If you want to use your own point class, you might have to work hard... 
+
+ **OPEN TODO:**
+  - decouple Delaunay::Point and Delaunay classes
+  - templatize Delaunay class on the used Point type: Delaunay<class Point> { ... }
+
+
+t.b.c. ...
+
+
 ## Generating Voronoi diagrams
+
+Basic usage example for Voronoi diagrams is shown in the code snippet below:
+
+    #include <tpp_interface.hpp>
+
+    using namespace tpp;
+
+    // prepare input
+    std::vector<Delaunay::Point> delaunayInput = { ... };       
+
+    // tesselate
+    Delaunay trGenerator(delaunayInput);
+    trGenerator.Tesselate();
+
+That's all! Now let's have a look at the generated tesselation.
+
+### Iterating over results
 
 To iterate over results of Voronoi tesselation two iterator classes are provided:
 
  - *VoronoiVertexIterator* which enumerates the Voronoi points, and 
  - *VoronoiEdgeIterator* which shows how these points are connected.
 
-### Iterating over results
-
- **Example:**
+ We can use them like this:
 
     // get points:
     for (auto yiter = trGenerator.vvbegin(); yiter != trGenerator.vvend(); ++yiter)
