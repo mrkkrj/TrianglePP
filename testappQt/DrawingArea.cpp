@@ -242,7 +242,9 @@ void DrawingArea::clearImage()
       holeMarkerPoints_.clear();
    }
 
+   lineStartPointIdx_ = -1;
    imgDirty_ = true;
+
    update();
 }
 
@@ -527,23 +529,24 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
    ctxtMenu.addAction(&action2);
 #endif
 
+   // OPEN TODO:: not in the general-purpsose drawing widget ?????? 
 
-   // OPEN TODO:: not in the general-purpsose drawing widget!!!!
+   bool isHoleMarker = holeMarkerPoints_.contains(startPos_);
 
    QAction action3("Start Segment", this);
    connect(&action3, &QAction::triggered, this, &DrawingArea::selectLineStartPoint);
    ctxtMenu.addAction(&action3);
-   action3.setEnabled(lineStartPointIdx_ == -1);
+   action3.setEnabled(lineStartPointIdx_ == -1 && !isHoleMarker);
 
    QAction action4("End Segment", this);
    connect(&action4, &QAction::triggered, this, &DrawingArea::selectLineEndPoint);
    ctxtMenu.addAction(&action4);
-   action4.setEnabled(lineStartPointIdx_ != -1);
+   action4.setEnabled(lineStartPointIdx_ != -1 && !isHoleMarker);
 
    QAction action5("Change to Hole Marker", this);
    connect(&action5, &QAction::triggered, this, &DrawingArea::changePointToHoleMarker);
    ctxtMenu.addAction(&action5);
-   action5.setEnabled(lineStartPointIdx_ == -1);
+   action5.setEnabled(lineStartPointIdx_ == -1 && !isHoleMarker);
 
    ctxtMenu.exec(mapToGlobal(startPos_));
 }

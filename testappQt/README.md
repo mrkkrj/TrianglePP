@@ -10,7 +10,6 @@ A small demonstrator/tester for the library.
 
 ## TODOs:
  - add support for moving points
- - remember last directory when R/W files
 
  - BUG - out of memory error with: Example2 + holes + remove concavities + quality (!!!)
  - BUG - reading files with holes: hole positions off!!! (tppDataFiles/hex-overlap.poly)

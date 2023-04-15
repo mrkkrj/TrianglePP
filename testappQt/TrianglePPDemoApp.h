@@ -28,6 +28,7 @@ public slots:
    void on_tesselatePointsPushButton_clicked();
    void on_pointModeComboBox_currentIndexChanged(int index);
    void on_useConstraintsCheckBox_toggled(bool checked);
+   void on_hideHolesCheckBox_toggled(bool checked);
    void on_optionsToolButton_clicked();
 
 private slots:
@@ -48,7 +49,7 @@ private:
    void drawVoronoiTesselation(tpp::Delaunay& trGenerator);
    void configDelaunay(tpp::Delaunay& trGenerator);
    bool isHoleMarker(const QPoint& point) const;
-   void drawHoleMarker(const QPoint& pos);
+   void drawHoleMarker(const QPoint& pos, const QColor& color);
    void findScalingForDrawArea(const tpp::Delaunay& trGenerator, double& offsetX, double& offsetY, double& scaleFactor) const;
 
    void writeToFile();
@@ -82,6 +83,8 @@ private:
     int maxPoints_;
     bool useConformingDelaunay_;
     bool includeConvexHull_;
+
+    QString lastFileDir_;
 
     QVector<QPoint> voronoiPoints_;
     QVector<int> segmentEndpointIndexes_;

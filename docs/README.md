@@ -99,6 +99,11 @@ t.b.c. ...
 
 t.b.c. ...
 
+### Conforming triangulations
+
+t.b.c. ...
+
+
 ### The Point class
 
 Currently the dpoint class by Piyush Kumar is used: a d-dimensional *reviver::dpoint* class with d=2. 

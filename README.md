@@ -1,21 +1,14 @@
 # Triangle++
 [comment]: # " ![triangle-PP's logo](triangle-PP-sm.jpg) "
-<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original 2005 J.P. Shevchuk's *Triangle* package, which was written in C.
+<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original J.P. Shevchuk's 2005 C-language *Triangle* package.
 
 It can create standard **Delaunay** triangulations, **quality Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
 
-I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original *Triangle* code, ported the it to Visual C++ 
-(VisualStudio 2008/Win32), did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
+I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original *Triangle* code, ported the it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
+Then the code was ported to x64 Windows and Linux, *CMake* support for both the example program and the GUI demonstrator was added as well as Catch2 unit tests for the code. 
+Recently, support for reading and writing of *Triangle*'s file formats and input data sanitization were also added.
 
 This code is released under LPGL licence.
-
-## Update:
-
-The code is now ported to x64 Windows. The project file was updated to Visual Studio 2015/2019, the x64 target was added, and the asserts & crashes when running the example program were fixed.
-
-*CMake* support for both the example program and the GUI demonstrator were added later on and they work on both Linux and Windows. Also some basic Catch2 tests were added.
-
-Support for reading and writing of *Triangle*'s file formats and input data sanitization were also added recently.
 
 ## Usage:
 

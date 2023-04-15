@@ -88,13 +88,16 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
       minPoints_(-1),
       maxPoints_(-1),
       useConformingDelaunay_(false),
-      includeConvexHull_(true)
+      includeConvexHull_(true),
+      lastFileDir_(".")
 {
    ui.setupUi(this);
   
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawPoints);
    ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)     
+   
    ui.pointModeComboBox->setCurrentIndex(AutomaticMode);
+   ui.hideHolesCheckBox->hide();
      
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
@@ -272,6 +275,20 @@ void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 }
 
 
+void TrianglePPDemoApp::on_hideHolesCheckBox_toggled(bool checked)
+{
+   // repaint all holes
+   QColor holeColor = checked ? Qt::white : c_SegmentColor;
+
+   for (auto& hole : holePoints_)
+   {
+      drawHoleMarker(hole, holeColor);
+   }
+
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+}
+
+
 void TrianglePPDemoApp::on_optionsToolButton_clicked()
 {
    QMenu ctxtMenu(tr(""), this);
@@ -304,9 +321,10 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
    {
       holePoints_.removeOne(pos);
 
-      // OPEN TODO:::
-      //Q_ASSERT()
-
+      if (holePoints_.empty())
+      {
+         ui.hideHolesCheckBox->hide();
+      }
    }
 
    if (!triangulated_)
@@ -339,11 +357,13 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 
 void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 {
-   drawHoleMarker(pos);
+   drawHoleMarker(pos, c_SegmentColor);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    holePointIndexes_ << pointIdx;
    holePoints_ << pos;
+
+   ui.hideHolesCheckBox->show();
 }
 
 
@@ -646,9 +666,11 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
     }
 
     // ... and hole markers
+    QColor holeColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : c_SegmentColor;
+
     for (auto& point : holePoints_)
     {
-       drawHoleMarker(point);
+       drawHoleMarker(point, holeColor);
     }
 
     ui.drawAreaWidget->setDrawColor(c_TriangleColor);
@@ -757,11 +779,11 @@ bool TrianglePPDemoApp::isHoleMarker(const QPoint& point) const
 }
 
 
-void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos)
+void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos, const QColor& color)
 {
    auto currMode = ui.drawAreaWidget->getDrawMode();
 
-   ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+   ui.drawAreaWidget->setDrawColor(color);
    QFont f;
    f.setPixelSize(22);
 
@@ -906,15 +928,20 @@ void TrianglePPDemoApp::writeToFile()
            trGenerator.setHolesConstraint(toTppPointVector(holePoints_));
        }
 
+       // OPEN TODO:::
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                       "./Trpp_Segments.poly", tr("Segment File (*.poly)"));
+                                                       lastFileDir_ + "/Trpp_Segments.poly", 
+                                                       tr("Segment File (*.poly)"));
+       lastFileDir_ = QFileInfo(fileName).absolutePath();
 
        ok = trGenerator.saveSegments(fileName.toStdString());
     }
     else
     {
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                       "./Trpp_Points.node", tr("Vertex File (*.node)"));
+                                                       lastFileDir_ + "/Trpp_Points.node", 
+                                                       tr("Vertex File (*.node)"));
+       lastFileDir_ = QFileInfo(fileName).absolutePath();
 
        ok = trGenerator.savePoints(fileName.toStdString());
     }
@@ -928,8 +955,11 @@ void TrianglePPDemoApp::writeToFile()
 
 void TrianglePPDemoApp::readFromFile()
 {
-   QString fileName = QFileDialog::getOpenFileName(this, tr("Read File"),
-                                                   "./", tr("Triangle Files (*.node *.poly)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Read File"),
+                                                    lastFileDir_, 
+                                                    tr("Triangle Files (*.node *.poly)"));
+    lastFileDir_ = QFileInfo(fileName).absolutePath();
+
     std::vector<Delaunay::Point> points;
     std::vector<int> segmentEndpoints;
     std::vector<Delaunay::Point> holeMarkers;

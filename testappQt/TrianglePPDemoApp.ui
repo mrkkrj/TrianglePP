@@ -93,11 +93,25 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="useConstraintsCheckBox">
-        <property name="text">
-         <string>Quality constraints</string>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>2</number>
         </property>
-       </widget>
+        <item>
+         <widget class="QCheckBox" name="useConstraintsCheckBox">
+          <property name="text">
+           <string>Quality constraints</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="hideHolesCheckBox">
+          <property name="text">
+           <string>Hide hole markers</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <spacer name="horizontalSpacer_3">
@@ -174,7 +188,7 @@
      <x>0</x>
      <y>0</y>
      <width>857</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
