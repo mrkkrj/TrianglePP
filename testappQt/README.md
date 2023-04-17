@@ -11,18 +11,16 @@ A small demonstrator/tester for the library.
 ## TODOs:
  - add support for moving points
 
- - BUG - out of memory error with: Example2 + holes + remove concavities + quality (!!!)
  - BUG - reading files with holes: hole positions off!!! (tppDataFiles/hex-overlap.poly)
+ - BUG - out of memory error with: Example2 + holes + remove concavities + quality (!!!)
 
  - remove warnings
- - correct rescaling so that points on the border of frame will be entirely visible
+ - correct rescaling so that points on the border of frame will be entirely visible (???)
  - rescale the inputs only on explicit request (and back...)
- - OR... add zooming (???)
+   - OR... add zooming (???)
  
- - add Option to show/hide hole points 
- - add Option for special/normal color for segments 
-
  - add JPG export/screenshot
  - add convex hull demonstration (???)
+
  - port to Qt 6
  - port demo app to Emscripten

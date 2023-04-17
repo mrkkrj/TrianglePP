@@ -67,6 +67,8 @@ private:
    void flipPoints(std::vector<Point>& points) const;
    void rescalePoints(std::vector<Point>& points, double offsetX, double offsetY, double scaleFactor) const;
 
+   QColor segmentColor() const;
+
 private:
     Ui::TrianglePPDemoAppClass ui;
 
@@ -83,6 +85,7 @@ private:
     int maxPoints_;
     bool useConformingDelaunay_;
     bool includeConvexHull_;
+    bool seperateSegmentColor_;
 
     QString lastFileDir_;
 

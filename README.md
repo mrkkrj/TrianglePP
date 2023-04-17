@@ -4,7 +4,7 @@
 
 It can create standard **Delaunay** triangulations, **quality Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
 
-I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original *Triangle* code, ported the it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
+I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
 Then the code was ported to x64 Windows and Linux, *CMake* support for both the example program and the GUI demonstrator was added as well as Catch2 unit tests for the code. 
 Recently, support for reading and writing of *Triangle*'s file formats and input data sanitization were also added.
 
@@ -81,10 +81,12 @@ For more information you can look at:
 
 ## TODOs:
  - remove warnings
+
  - add support for regions and reading of region attributes from .poly file
  - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (???)
  - add support for refining of triangulations (?)
- - add support for saving Voronoi meshes 
+ - add support for saving Voronoi meshes in 
+ - add convex hull demonstration to the Qt demo app (??)
+ 
  - add CI support (Travis?)
  - Port the Qt demo app to Emscripten
- - add convex hull demonstration to the Qt demo app (??)

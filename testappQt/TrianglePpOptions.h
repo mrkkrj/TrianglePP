@@ -20,12 +20,15 @@ public:
     int getMaxArea() const;
     int getMinPointCount() const;
     int getMaxPointCount() const;
+    
     bool useConformingDelaunay() const;
     bool includeConvexHull() const;
+    bool seperateSegmentColor() const;
+
     QVector<int> getSegmentPointIndexes() const;
 
     void fillContents(int minAngle, int maxArea = -1, int minPoints = -1, int maxPoints = -1, 
-                      bool confDelaunay = false, bool convexHull = false);
+                      bool confDelaunay = false, bool convexHull = false, bool diffColorForSegments = true);
 
     void setMinAngleBoundaries(float maxOk, float maxWarning);
     void setSegmentPointIndexes(const QVector<int>& segmentEndpoints);
@@ -37,6 +40,7 @@ private slots:
    void on_minAngleLineEdit_editingFinished();
    void on_segmentPointsLineEdit_editingFinished();
    void on_removeConcavitiesCheckBox_clicked(bool checked);
+   void on_seperateSegmentColorCheckBox_clicked(bool checked);
 
 
 private:

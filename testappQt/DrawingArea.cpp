@@ -100,29 +100,38 @@ void DrawingArea::drawPoint(const QPoint& pos)
    {
       points_.append(pos);
    }
+   else if (mode_ == DrawHoleMarker)
+   {
+      holeMarkerPoints_.append(pos);
+   }
 }
 
 
 void DrawingArea::clearPoint(const QPoint& pos)
 {
-   int idx = points_.indexOf(pos);
-
-   if (idx != -1)
+   if (removePoint(pos, points_))
    {
-      points_.remove(idx);
-
-      // overpaint
-      auto pointColor = penColor_;
-      penColor_ = Qt::white;
-
-      drawPointAt(pos);
-
-      // restore color
-      penColor_ = pointColor;
-
-      imgDirty_ = true;
       emit pointDeleted(pos);
    }
+
+   //int idx = points_.indexOf(pos);
+
+   //if (idx != -1)
+   //{
+   //   points_.remove(idx);
+
+   //   // overpaint
+   //   auto pointColor = penColor_;
+   //   penColor_ = Qt::white;
+
+   //   drawPointAt(pos);
+
+   //   // restore color
+   //   penColor_ = pointColor;
+
+   //   imgDirty_ = true;
+   //   emit pointDeleted(pos);
+   //}
 }
 
 
@@ -346,27 +355,13 @@ void DrawingArea::deletPointAtLastPos()
 
 void DrawingArea::deleteHoleMarkerAtLastPos()
 {
-    // OPEN TODO::: here or outside the class???
-    // OPEN TODO::: repetitive code!!!
+   // OPEN TODO::: here or outside the class???
+   //  --> treat hole points as normal points with diffrent color???
 
-    int idx = holeMarkerPoints_.indexOf(startPos_);
-
-    if (idx != -1)
-    {
-       holeMarkerPoints_.remove(idx);
-
-       // overpaint
-       auto pointColor = penColor_;
-       penColor_ = Qt::white;
-
-       drawPointAt(startPos_);
-
-       // restore color
-       penColor_ = pointColor;
-
-       imgDirty_ = true;
-       emit holeMarkerDeleted(startPos_);
-    }
+   if (removePoint(startPos_, holeMarkerPoints_))
+   {
+      emit holeMarkerDeleted(startPos_);
+   }
 }
 
 
@@ -469,6 +464,31 @@ void DrawingArea::drawPointAt(const QPoint& pos)
 }
 
 
+bool DrawingArea::removePoint(const QPoint& pos, QVector<QPoint>& pointsList)
+{
+   int idx = pointsList.indexOf(pos);
+
+   if (idx == -1)
+   {
+      return false;
+   }
+
+   pointsList.remove(idx);
+
+   // overpaint
+   auto pointColor = penColor_;
+   penColor_ = Qt::white;
+
+   drawPointAt(pos);
+
+   // restore color
+   penColor_ = pointColor;
+
+   imgDirty_ = true;
+   return true;      
+}
+
+
 void DrawingArea::resizeImage(QImage& img, const QSize& newSize)
 {
    if (img.size() == newSize)
@@ -506,18 +526,9 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
 {
    QMenu ctxtMenu(tr(""), this);
 
-   // OPEN TODO:: next --> can only be done in the event handler !!!!
-#if 0
-   bool isHoleMarker = holeMarkerPoints_.contains(pos);
+   bool isHoleMarker = holeMarkerPoints_.contains(startPos_);
 
    QAction action1(isHoleMarker ? "Delete HoleMarker" : "Delete Point", this);
-   if (isHoleMarker)
-       connect(&action1, &QAction::triggered, this, &DrawingArea::deleteHoleMarkerAtLastPos); // ????
-   else
-      connect(&action1, &QAction::triggered, this, &DrawingArea::deletPointAtLastPos);
-#endif
-
-   QAction action1("Delete Point", this);
    connect(&action1, &QAction::triggered, this, &DrawingArea::deletPointAtLastPos);
 
    ctxtMenu.addAction(&action1);
@@ -530,8 +541,6 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
 #endif
 
    // OPEN TODO:: not in the general-purpsose drawing widget ?????? 
-
-   bool isHoleMarker = holeMarkerPoints_.contains(startPos_);
 
    QAction action3("Start Segment", this);
    connect(&action3, &QAction::triggered, this, &DrawingArea::selectLineStartPoint);

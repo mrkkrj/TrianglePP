@@ -69,6 +69,12 @@ bool TrianglePpOptions::includeConvexHull() const
 }
 
 
+bool TrianglePpOptions::seperateSegmentColor() const
+{
+   return ui.seperateSegmentColorCheckBox->isChecked();
+}
+
+
 QVector<int> TrianglePpOptions::getSegmentPointIndexes() const
 {
    if (ui.segmentPointsLineEdit->text().isEmpty())
@@ -89,7 +95,8 @@ QVector<int> TrianglePpOptions::getSegmentPointIndexes() const
 
 
 void TrianglePpOptions::fillContents(
-    int minAngle, int maxArea, int minPoints, int maxPoints, bool confDelaunay, bool convexHull)
+    int minAngle, int maxArea, int minPoints, int maxPoints, 
+    bool confDelaunay, bool convexHull, bool diffColorForSegments)
 {
    ui.minAngleLineEdit->setText(minAngle >= 0 ? QString::number(minAngle) : "");
    ui.maxAreaLineEdit->setText(maxArea >= 0 ? QString::number(maxArea) : "");
@@ -101,6 +108,7 @@ void TrianglePpOptions::fillContents(
    enableMinMaxAngle(!confDelaunay);
 
    ui.removeConcavitiesCheckBox->setChecked(!convexHull);
+   ui.seperateSegmentColorCheckBox->setChecked(diffColorForSegments);
 }
 
 
@@ -210,6 +218,12 @@ void TrianglePpOptions::on_segmentPointsLineEdit_editingFinished()
 void TrianglePpOptions::on_removeConcavitiesCheckBox_clicked(bool checked) 
 {
    ui.removeConcavitiesCheckBox->setChecked(checked);
+}
+
+
+void TrianglePpOptions::on_seperateSegmentColorCheckBox_clicked(bool checked)
+{
+   ui.seperateSegmentColorCheckBox->setChecked(checked);
 }
 
 

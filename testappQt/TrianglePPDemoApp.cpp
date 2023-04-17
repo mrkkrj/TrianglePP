@@ -89,6 +89,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
       maxPoints_(-1),
       useConformingDelaunay_(false),
       includeConvexHull_(true),
+      seperateSegmentColor_(true),
       lastFileDir_(".")
 {
    ui.setupUi(this);
@@ -278,7 +279,7 @@ void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 void TrianglePPDemoApp::on_hideHolesCheckBox_toggled(bool checked)
 {
    // repaint all holes
-   QColor holeColor = checked ? Qt::white : c_SegmentColor;
+   QColor holeColor = checked ? Qt::white : segmentColor();
 
    for (auto& hole : holePoints_)
    {
@@ -325,6 +326,12 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
       {
          ui.hideHolesCheckBox->hide();
       }
+
+      if (!triangulated_)
+      {
+         // overpaint "H" with white!
+         drawHoleMarker(pos, Qt::white);
+      }
    }
 
    if (!triangulated_)
@@ -341,7 +348,7 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
 
 void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPointIdx)
 {
-   ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+   ui.drawAreaWidget->setDrawColor(segmentColor());
 
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
    ui.drawAreaWidget->drawLine(drawnPoints[startPointIdx], drawnPoints[endPointIdx]);
@@ -357,7 +364,7 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 
 void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 {
-   drawHoleMarker(pos, c_SegmentColor);
+   drawHoleMarker(pos, segmentColor());
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    holePointIndexes_ << pointIdx;
@@ -533,7 +540,8 @@ void TrianglePPDemoApp::showTrianguationOptions()
          minPoints_ > 0 ? minPoints_ : c_defaultMinPoints,
          maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints,
          useConformingDelaunay_,
-         includeConvexHull_);
+         includeConvexHull_,
+         seperateSegmentColor_);
 
    float guaranteed = 0, possible = 0;
    Delaunay::getMinAngleBoundaries(guaranteed, possible);
@@ -558,6 +566,7 @@ void TrianglePPDemoApp::showTrianguationOptions()
 
       segmentEndpointIndexes_ = dlg.getSegmentPointIndexes();
       includeConvexHull_ = dlg.includeConvexHull();
+      seperateSegmentColor_ = dlg.seperateSegmentColor();
    }
 }
 
@@ -656,7 +665,7 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
     }
 
     // draw used constraint segments
-    ui.drawAreaWidget->setDrawColor(c_SegmentColor);
+    ui.drawAreaWidget->setDrawColor(segmentColor());
 
     for (int i = 0; i < segmentEndpointIndexes_.size(); ++i)
     {
@@ -666,7 +675,7 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
     }
 
     // ... and hole markers
-    QColor holeColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : c_SegmentColor;
+    QColor holeColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : segmentColor();
 
     for (auto& point : holePoints_)
     {
@@ -894,6 +903,13 @@ void TrianglePPDemoApp::rescalePoints(std::vector<Point>& points, double offsetX
         pt.y = (pt.y + offsetY) * scaleFactor;
     }
 }
+
+
+QColor TrianglePPDemoApp::segmentColor() const
+{         
+   return seperateSegmentColor_ ? c_SegmentColor : c_TriangleColor;
+}
+
 
 void TrianglePPDemoApp::writeToFile()
 {

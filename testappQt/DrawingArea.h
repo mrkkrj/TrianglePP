@@ -77,9 +77,10 @@ private slots:
 private:
    void drawLineTo(const QPoint& endPos);
    void drawPointAt(const QPoint& pos);
+   bool removePoint(const QPoint& pos, QVector<QPoint>& points);
    void resizeImage(QImage& img, const QSize& newSz); 
    bool pointClicked(const QPoint& clickPos, int& pointIndex) const;
-   void showPointCtxMenu(const QPoint& pos);
+   void showPointCtxMenu(const QPoint& pos);   
 
    DrawMode mode_;
    int penWidth_;
