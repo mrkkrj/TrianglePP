@@ -114,24 +114,6 @@ void DrawingArea::clearPoint(const QPoint& pos)
       emit pointDeleted(pos);
    }
 
-   //int idx = points_.indexOf(pos);
-
-   //if (idx != -1)
-   //{
-   //   points_.remove(idx);
-
-   //   // overpaint
-   //   auto pointColor = penColor_;
-   //   penColor_ = Qt::white;
-
-   //   drawPointAt(pos);
-
-   //   // restore color
-   //   penColor_ = pointColor;
-
-   //   imgDirty_ = true;
-   //   emit pointDeleted(pos);
-   //}
 }
 
 
