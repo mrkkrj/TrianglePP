@@ -9,7 +9,6 @@ A small demonstrator/tester for the library.
 **Note:** On Windows it is compiled with *TRIANGLE_DBG_TO_FILE* define, so the debug traces will be written to the *./triangle.out.txt* file.
 
 ## TODOs:
- - add support for moving points
 
  - BUG - reading files with holes: hole positions off!!! (tppDataFiles/hex-overlap.poly)
  - BUG - out of memory error with: Example2 + holes + remove concavities + quality (!!!)
