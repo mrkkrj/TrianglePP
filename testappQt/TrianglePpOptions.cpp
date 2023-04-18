@@ -1,7 +1,9 @@
+/**
+  @file  TrianglePpOptions.cpp
+  @brief Implementation of the TrianglePpOptions class
 
-
-// OPEN TODO:: file header
-
+  @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
+*/
 
 #include "TrianglePpOptions.h"
 

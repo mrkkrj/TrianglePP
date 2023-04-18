@@ -1,6 +1,9 @@
+/**
+  @file  TrianglePPDemoApp.cpp
+  @brief Declaration of the TrianglePPDemoApp class
 
-// OPEN TODO:: file header
-
+  @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
+*/
 
 #pragma once
 
@@ -13,8 +16,9 @@ namespace tpp {
 }
 
 
-// OPEN TODO::: class header ...
-
+/**
+   @brief: Class for creating, drawing and displaying triangulations in a Qt window application
+ */
 class TrianglePPDemoApp : public QMainWindow
 {
     Q_OBJECT
@@ -35,6 +39,7 @@ private slots:
    void onTriangulationPointDeleted(const QPoint& pos);
    void onSegmentEndpointsSelected(int startPointIdx, int endPointIdx);
    void onPointChangedToHoleMarker(int pointIdx, const QPoint& pos);
+   void onTriangulationPointMoved(const QPoint& pos1, const QPoint& pos2);
 
 private:
    void setGenerateButtonText();

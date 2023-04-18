@@ -1,7 +1,9 @@
+/**
+  @file  TrianglePPDemoApp.cpp
+  @brief Implementation of the TrianglePPDemoApp class
 
-
-// OPEN TODO:: file header
-
+  @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
+*/
 
 #include "TrianglePPDemoApp.h"
 #include "TrianglePpOptions.h"
@@ -104,6 +106,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
    connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPDemoApp::onSegmentEndpointsSelected);
    connect(ui.drawAreaWidget, &DrawingArea::pointChangedToHoleMarker, this, &TrianglePPDemoApp::onPointChangedToHoleMarker);
+   connect(ui.drawAreaWidget, &DrawingArea::pointMoved, this, &TrianglePPDemoApp::onTriangulationPointMoved);
 }
 
 
@@ -242,22 +245,25 @@ void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
    // some immediate action needed?
    switch (mode_)
    {
-   case FromImageMode:
-      // just say that's not implemented
-      on_generatePointsPushButton_clicked();
+   case FromImageMode:      
+      on_generatePointsPushButton_clicked(); // will just say that's not implemented
       break;
+
    case FromFileMode:
       clearDisplay();
       readFromFile();
       break;
+
    case Example1Mode:
        clearDisplay();
        showExample1();
        break;
+
    case Example2Mode:
        clearDisplay();
        showExample2();
        break;
+
    default:
        break;
    }
@@ -268,11 +274,10 @@ void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 {
    useConstraints_ = checked;
 
-   // ??? good idea?
-#if 0
-   // re-triangulate!
-   on_triangualtePointsPushButton_clicked();
-#endif
+   if (triangulated_)
+   {
+      on_triangualtePointsPushButton_clicked();
+   }
 }
 
 
@@ -371,6 +376,18 @@ void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& p
    holePoints_ << pos;
 
    ui.hideHolesCheckBox->show();
+}
+
+
+void TrianglePPDemoApp::onTriangulationPointMoved(const QPoint& pos1, const QPoint& pos2)
+{
+   Q_UNUSED(pos1);
+   Q_UNUSED(pos2);
+
+   if (triangulated_)
+   {
+      on_triangualtePointsPushButton_clicked();
+   }
 }
 
 

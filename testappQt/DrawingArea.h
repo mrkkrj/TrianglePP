@@ -1,6 +1,9 @@
+/**
+  @file  DrawingArea.h
+  @brief Declaration of the DrawingArea class
 
-// OPEN TODO::: file header ...
-
+  @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
+*/
 
 #pragma once
 
@@ -10,9 +13,12 @@
 #include <QPoint>
 #include <QVector>
 
+/**
+   @brief: Class for drawing points and lines in a Qt widget
 
-// OPEN TODO::: class header ...
-
+     OPEN TODO::: remove distinction between normal points and hole markers????
+     OPEN TODO::: showing ctx menu here is a good thing????
+ */
 class DrawingArea : public QWidget
 {
    Q_OBJECT
@@ -22,7 +28,7 @@ public:
     ~DrawingArea();
 
     enum DrawMode {
-       DrawPoints, DrawLines, DrawHoleMarker
+       DrawPoints, DrawLines, DrawHoleMarker, MovePoint
     };
     
     void setDrawMode(DrawMode mode);
@@ -57,7 +63,9 @@ signals:
    void lineDeleted(const QPoint& start, const QPoint& end);
    void linePointsSelected(int startIdx, int endIdx);
    void pointChangedToHoleMarker(int pointIdx, const QPoint& pos);
-
+   void pointMoved(const QPoint& pos1, const QPoint& pos2);
+   void pointPositionChanged(const QPoint& originalPos, const QPoint& currentPos);
+   
 protected:
    void paintEvent(QPaintEvent* ev) override;
    void resizeEvent(QResizeEvent* ev) override;
@@ -89,6 +97,8 @@ private:
 
    bool lineStarted_;
    QPoint startPos_;
+   QPoint lastMovingPos_;
+   int startPosIndex_;
    QVector<QPoint> points_;
    QVector<QPoint> holeMarkerPoints_;
 

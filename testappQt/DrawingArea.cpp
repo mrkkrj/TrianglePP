@@ -1,6 +1,9 @@
+/**
+  @file  DrawingArea.cpp
+  @brief Implementation of the DrawingArea class
 
-// OPEN TODO::: file header ...
-
+  @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
+*/
 
 #include "DrawingArea.h"
 
@@ -251,6 +254,20 @@ void DrawingArea::mousePressEvent(QMouseEvent* ev)
       {
          lineStarted_ = true;
       }
+      else
+      {
+         int idx = -1;
+
+         if (pointClicked(ev->pos(), idx))
+         {
+            startPos_ = points_[idx];
+            lastMovingPos_ = startPos_;
+            startPosIndex_ = idx;
+
+            mode_ = MovePoint;
+            return;
+         }
+      }
    }
    else if (ev->button() == Qt::RightButton)
    {
@@ -276,6 +293,27 @@ void DrawingArea::mouseMoveEvent(QMouseEvent* ev)
    {
       drawLineTo(ev->pos());
    }
+   else if ((ev->buttons() & Qt::LeftButton) &&
+            mode_ == MovePoint)
+   {
+      // OPEN TODO::: --> ???? but not over points!!!!!
+      //   - restore points and lines....
+
+      // overpaint        
+      auto pointColor = penColor_;
+      penColor_ = Qt::white;
+      drawPointAt(lastMovingPos_);
+      penColor_ = pointColor; // OPEN TODO::: ---> to a method???
+
+      drawPointAt(ev->pos());
+
+      Q_ASSERT(startPosIndex_ >= 0);
+      points_[startPosIndex_] = ev->pos();
+
+      emit pointMoved(lastMovingPos_, ev->pos());
+
+      lastMovingPos_ = ev->pos();
+   }
 }
 
 
@@ -292,6 +330,16 @@ void DrawingArea::mouseReleaseEvent(QMouseEvent* ev)
       {
          drawPointAt(ev->pos());
          points_.append(ev->pos());
+      }
+      else if (mode_ == MovePoint)
+      {
+         Q_ASSERT(startPosIndex_ >= 0);
+         points_[startPosIndex_] = ev->pos();
+
+         mode_ = DrawPoints;
+         startPosIndex_ = -1;
+
+         emit pointPositionChanged(startPos_, ev->pos());
       }
    }
 }

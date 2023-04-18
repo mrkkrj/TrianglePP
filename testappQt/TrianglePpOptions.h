@@ -1,14 +1,17 @@
+/**
+  @file  TrianglePpOptions.cpp
+  @brief Declaration of the TrianglePpOptions class
 
-
-// OPEN TODO:: file header
+  @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
+*/
 
 #pragma once
 
 #include "ui_TrianglePpOptions.h"
 
-
-// OPEN TODO::: class header ...
-
+/**
+   @brief: Class for displaying and changing triangulation options
+ */
 class TrianglePpOptions : public QDialog
 {
     Q_OBJECT
@@ -41,7 +44,6 @@ private slots:
    void on_segmentPointsLineEdit_editingFinished();
    void on_removeConcavitiesCheckBox_clicked(bool checked);
    void on_seperateSegmentColorCheckBox_clicked(bool checked);
-
 
 private:
    void enableMinMaxAngle(bool enable);
