@@ -4,8 +4,8 @@
 
 It can create standard **Delaunay** triangulations, **quality Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
 
-I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) for the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended it for constrainied triangulations and Voronoi diagrams. 
-Then the code was ported to x64 Windows and Linux, *CMake* support for both the example program and the GUI demonstrator was added as well as Catch2 unit tests for the code. 
+I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) of the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended the wrapper for constrainied triangulations and Voronoi diagrams. 
+Then the code was ported to x64 Windows and Linux, *CMake* support (for both the example program and the GUI demonstrator) was added, as well as Catch2 unit test suite. 
 Recently, support for reading and writing of *Triangle*'s file formats and input data sanitization were also added.
 
 This code is released under LPGL licence.
@@ -69,6 +69,11 @@ and with tesselations:
 You can also save and read your work:
 
 ![triangle-PP's File I/O](docs/pics/triangle-pp-testApp-File_IO.jpg)
+
+and... move the points around!
+
+![DemoApp moving points](docs/pics/moving-the-points.gif)
+
 
 ## Original Triangle package
 
