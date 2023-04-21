@@ -33,13 +33,13 @@ namespace {
 
     // impl. helpers
 
-    void getTriangulationPoint(int keypointIdx, const Delaunay::Point& steinerPt, 
+    void getTriangulationPoint(int vertexIdx, const Delaunay::Point& steinerPt, 
                                double& x, double& y, const std::vector<Delaunay::Point>& triPoints)
     {
         if (dbgOutput != tpp::None)
-           std::cout << " --- keypointIdx= " << keypointIdx << "\n";
+           std::cout << " --- vertexIdx= " << vertexIdx << "\n";
 
-        if (keypointIdx == -1)
+        if (vertexIdx == -1)
         {
             x = steinerPt[0]; // added Steiner point!
             y = steinerPt[1];
@@ -47,10 +47,10 @@ namespace {
         else
         {
             // point from original data
-            assert(keypointIdx >= 0);
+            assert(vertexIdx >= 0);
 
-            x = triPoints[static_cast<unsigned>(keypointIdx)][0];
-            y = triPoints[static_cast<unsigned>(keypointIdx)][1];
+            x = triPoints[static_cast<unsigned>(vertexIdx)][0];
+            y = triPoints[static_cast<unsigned>(vertexIdx)][1];
         }
     }
         
@@ -70,9 +70,9 @@ namespace {
             Delaunay::Point sp2;
             Delaunay::Point sp3;
 
-            int keypointIdx1 = fit.Org(&sp1);
-            int keypointIdx2 = fit.Dest(&sp2);
-            int keypointIdx3 = fit.Apex(&sp3);
+            int vertexIdx1 = fit.Org(&sp1);
+            int vertexIdx2 = fit.Dest(&sp2);
+            int vertexIdx3 = fit.Apex(&sp3);
 
             double x1 = -1;
             double y1 = -1;
@@ -81,9 +81,9 @@ namespace {
             double x3 = -1;
             double y3 = -1;
 
-            getTriangulationPoint(keypointIdx1, sp1, x1, y1, triPoints);
-            getTriangulationPoint(keypointIdx2, sp2, x2, y2, triPoints);
-            getTriangulationPoint(keypointIdx3, sp3, x3, y3, triPoints);
+            getTriangulationPoint(vertexIdx1, sp1, x1, y1, triPoints);
+            getTriangulationPoint(vertexIdx2, sp2, x2, y2, triPoints);
+            getTriangulationPoint(vertexIdx3, sp3, x3, y3, triPoints);
 
             std::cout << " -- Triangle points: "
                 << "{" << x1 << ", " << y1 << "}, "
@@ -1265,8 +1265,9 @@ TEST_CASE("Usage of Triangulation Mesh", "[trpp]")
 
       iter = mesh.Sym(iterFirst);
 
-      // OPEN TODO::      
-      //REQUIRE(); ....
+      // OPEN TODO:: 
+           
+      //  more tests ....
 
    }
 

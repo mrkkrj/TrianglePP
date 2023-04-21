@@ -102,11 +102,18 @@ t.b.c. ...
 
 As stated in http://www.cs.cmu.edu/~quake/triangle.defs.html : 
 
-"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. Segments are edges whose endpoints are vertices in the PSLG, and whose presence in any mesh generated from the PSLG is enforced."
+**"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. Segments are edges whose endpoints are vertices in the PSLG, and whose presence in any mesh generated from the PSLG is enforced."**
 
 and:
 
-"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but each PSLG segment is present as a single edge in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles might not be Delaunay, but they are all constrained Delaunay."
+**"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but each PSLG segment is present as a single edge in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles might not be Delaunay, but they are all constrained Delaunay."**
+
+
+ - Doc:
+         If segment constraints are set, this method creates a constrained Delaunay triangulation where
+         each PSLG segment is present as a single edge in the triangulation. Note that some of the resulting
+         triangles might *not be Delaunay*! In quality triangulation *additional* vertices called Steiner 
+         points may be created.
 
 
 t.b.c. ...
@@ -116,11 +123,17 @@ t.b.c. ...
 
 As stated in http://www.cs.cmu.edu/~quake/triangle.defs.html : 
 
-"A conforming Delaunay triangulation (CDT) of a PSLG is a true Delaunay triangulation in which each PSLG segment may have been subdivided into several edges by the insertion of additional vertices, called Steiner points. Steiner points are necessary to allow the segments to exist in the mesh while maintaining the Delaunay property. Steiner points are also inserted to meet constraints on the minimum angle and maximum triangle area."
+**"A conforming Delaunay triangulation (CDT) of a PSLG is a true Delaunay triangulation in which each PSLG segment may have been subdivided into several edges by the insertion of additional vertices, called Steiner points. Steiner points are necessary to allow the segments to exist in the mesh while maintaining the Delaunay property. Steiner points are also inserted to meet constraints on the minimum angle and maximum triangle area."**
 
 and:
 
-"A constrained conforming Delaunay triangulation (CCDT) of a PSLG is a constrained Delaunay triangulation that includes Steiner points. It usually takes fewer vertices to make a good-quality CCDT than a good-quality CDT, because the triangles do not need to be Delaunay (although they still must be constrained Delaunay)."
+**"A constrained conforming Delaunay triangulation (CCDT) of a PSLG is a constrained Delaunay triangulation that includes Steiner points. It usually takes fewer vertices to make a good-quality CCDT than a good-quality CDT, because the triangles do not need to be Delaunay (although they still must be constrained Delaunay)."**
+
+
+ - Doc:
+          A conforming Delaunay triangulation is a *true Delaunay* triangulation in which each constraining 
+          segment may have been *subdivided* into several edges by the insertion of *additional* vertices, called 
+          Steiner points (@see: http://www.cs.cmu.edu/~quake/triangle.defs.html)
 
 
 t.b.c. ...

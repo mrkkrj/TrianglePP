@@ -27,14 +27,12 @@ bool MyAssertFunction( bool b, const char* desc, int line, const char* file)
     std::cerr << "  Filename    : " << file << std::endl;
     std::cerr << "  Line No     : " << line << std::endl;
 
-    // changed mrkkrj --
 #if _WINDOWS
     std::cerr << "  Calling WinAssert()... \n";
     assert(b); // use integration with Visual Studio!
     (void)b;
     return true;
 #else
-    // Original:
     exit(1);
 #endif
 }

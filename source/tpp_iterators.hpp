@@ -14,12 +14,13 @@
  // OPEN TODO:: decouple Point class from Delaunay, then use forward declarations only!!!
 #include "tpp_delaunay.hpp" // for Delaunay::Point
 
+
 namespace tpp
 {
    /**
       @brief: The face iterator for a Delaunay triangulation
 
-        Implements access to the resulting oriented triangles.
+        Implements access to the resulting oriented triangles (aka faces).
 
         A triangle abc has an origin (Org) a, a destination (Dest) b, and apex (Apex) c.
         These vertices occur in counterclockwise order about the triangle.
@@ -130,6 +131,8 @@ namespace tpp
 
    /**
       @brief: The vertex iterator for a Delaunay triangulation
+
+        Implements access to the resulting vertices of the triangulation
     */
    class VertexIterator
    {
@@ -139,7 +142,7 @@ namespace tpp
 
       VertexIterator() : vloop(nullptr), m_delaunay(nullptr) {}
 
-      int vertexId() const;
+      int vertexId() const; // standard internal numbering! ---> OPEN TODO::: mesh numbering, -1 for Steiner points ???!!!
       double x() const;
       double y() const;
 
@@ -185,6 +188,8 @@ namespace tpp
 
    /**
       @brief: The vertex iterator for a Voronoi tesselation
+
+        Implements access to the resulting Voronoi points
     */
    class VoronoiVertexIterator 
    {
@@ -212,6 +217,8 @@ namespace tpp
 
    /**
       @brief: The edges iterator for a Voronoi tesselation
+
+        Implements access to the resulting connections between Voronoi points
     */
    class VoronoiEdgeIterator 
    {

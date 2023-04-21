@@ -85,6 +85,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
       mode_(ManualMode),
       useConstraints_(false),
       triangulated_(false),
+      tesselated_(false),
       minAngle_(-1),
       maxArea_(-1),
       minPoints_(-1),
@@ -207,10 +208,7 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
 void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
 {
    clearVoronoiPoints();
-
-   // OPEN TODO::: 
-   //  -- clear Voronoi lines / ALL lines ???
-
+   
    // get the original points
    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
 
@@ -230,7 +228,23 @@ void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
    tpp::Delaunay trGenerator(delaunayInput);
    trGenerator.Tesselate(useConformingDelaunay_);
 
+   tesselated_ = true;
+
    // draw
+   if (!triangulated_)
+   {
+      // reset Voronoi lines
+      ui.drawAreaWidget->clearImage();
+
+      // ...but retain the points!
+      ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+
+      for (auto& point : drawnPoints)
+      {
+         ui.drawAreaWidget->drawPoint(point);
+      }
+   }
+
    drawVoronoiTesselation(trGenerator);
 }
 
@@ -387,6 +401,11 @@ void TrianglePPDemoApp::onTriangulationPointMoved(const QPoint& pos1, const QPoi
    if (triangulated_)
    {
       on_triangualtePointsPushButton_clicked();
+   }
+
+   if (tesselated_)
+   {
+      on_tesselatePointsPushButton_clicked();
    }
 }
 
@@ -638,6 +657,8 @@ void TrianglePPDemoApp::clearDisplay()
    holePoints_.clear();
 
    triangulated_ = false;
+   tesselated_ = false;
+
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 }
 

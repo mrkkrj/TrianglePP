@@ -83,6 +83,7 @@ private:
 
     bool useConstraints_;
     bool triangulated_;
+    bool tesselated_;
 
     int minAngle_;
     int maxArea_;

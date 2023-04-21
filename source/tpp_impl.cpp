@@ -524,7 +524,7 @@ bool Delaunay::readSegments(
     }
     else
     {
-#if 0 // OPEN TODO::: not working here (Windows), mysterious file reading problems!!! :-O
+#if 0 // OPEN TODO::: not working (on Windows!), mysterious file reading problems!!! :-O
         // triangulate to ensure formskeleton() will read segments!
         tpmesh->hullsize = pTriangleWrap->delaunay(tpmesh, tpbehavior);
 
@@ -586,6 +586,7 @@ void Delaunay::enableFileIOTrace(bool enable)
       END_TRACE("tpp_fileIO.out.txt");
    }
 }
+
 
 int Delaunay::edgeCount() const
 {
