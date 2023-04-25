@@ -81,6 +81,7 @@ To avoid that we can generate a continuous indexing for all the points of the tr
     }
 
 In this case, the veratex coordinates will be always copied to the *point* parameter of the corresponding iterator's method.
+
 t.b.c. ...
 
 ### Other iterators
@@ -102,14 +103,14 @@ t.b.c. ...
 
 As stated in http://www.cs.cmu.edu/~quake/triangle.defs.html : 
 
-**"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. Segments are edges whose endpoints are vertices in the PSLG, and whose presence in any mesh generated from the PSLG is enforced."**
+*"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. Segments are edges whose endpoints are vertices in the PSLG, and whose presence in any mesh generated from the PSLG is enforced."*
 
 and:
 
-**"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but each PSLG segment is present as a single edge in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles might not be Delaunay, but they are all constrained Delaunay."**
+*"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but each PSLG segment is present as a single edge in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles might not be Delaunay, but they are all constrained Delaunay."*
 
 
- - Doc:
+ - Docs:
          If segment constraints are set, this method creates a constrained Delaunay triangulation where
          each PSLG segment is present as a single edge in the triangulation. Note that some of the resulting
          triangles might *not be Delaunay*! In quality triangulation *additional* vertices called Steiner 
@@ -123,14 +124,14 @@ t.b.c. ...
 
 As stated in http://www.cs.cmu.edu/~quake/triangle.defs.html : 
 
-**"A conforming Delaunay triangulation (CDT) of a PSLG is a true Delaunay triangulation in which each PSLG segment may have been subdivided into several edges by the insertion of additional vertices, called Steiner points. Steiner points are necessary to allow the segments to exist in the mesh while maintaining the Delaunay property. Steiner points are also inserted to meet constraints on the minimum angle and maximum triangle area."**
+*"A conforming Delaunay triangulation (CDT) of a PSLG is a true Delaunay triangulation in which each PSLG segment may have been subdivided into several edges by the insertion of additional vertices, called Steiner points. Steiner points are necessary to allow the segments to exist in the mesh while maintaining the Delaunay property. Steiner points are also inserted to meet constraints on the minimum angle and maximum triangle area."*
 
 and:
 
-**"A constrained conforming Delaunay triangulation (CCDT) of a PSLG is a constrained Delaunay triangulation that includes Steiner points. It usually takes fewer vertices to make a good-quality CCDT than a good-quality CDT, because the triangles do not need to be Delaunay (although they still must be constrained Delaunay)."**
+*"A constrained conforming Delaunay triangulation (CCDT) of a PSLG is a constrained Delaunay triangulation that includes Steiner points. It usually takes fewer vertices to make a good-quality CCDT than a good-quality CDT, because the triangles do not need to be Delaunay (although they still must be constrained Delaunay)."*
 
 
- - Doc:
+ - Docs:
           A conforming Delaunay triangulation is a *true Delaunay* triangulation in which each constraining 
           segment may have been *subdivided* into several edges by the insertion of *additional* vertices, called 
           Steiner points (@see: http://www.cs.cmu.edu/~quake/triangle.defs.html)
@@ -161,10 +162,10 @@ Basic usage example for Voronoi diagrams is shown in the code snippet below:
     using namespace tpp;
 
     // prepare input
-    std::vector<Delaunay::Point> delaunayInput = { ... };       
+    std::vector<Delaunay::Point> tesselationPoints = { ... };       
 
     // tesselate
-    Delaunay trGenerator(delaunayInput);
+    Delaunay trGenerator(tesselationPoints);
     trGenerator.Tesselate();
 
 That's all! Now let's have a look at the generated tesselation.
@@ -173,12 +174,18 @@ That's all! Now let's have a look at the generated tesselation.
 
 To iterate over results of Voronoi tesselation two iterator classes are provided:
 
- - *VoronoiVertexIterator* which enumerates the Voronoi points, and 
+ - *VoronoiVertexIterator* which enumerates the generated Voronoi points, and 
  - *VoronoiEdgeIterator* which shows how these points are connected.
 
- We can use them like this:
+ To illustrate the results let's have a look at the figure below:
 
-    // get points:
+![triangle-PP's GUI screenshot 2](pics/triangle-pp-testApp-Voronoi.jpg)
+
+The Voronoi vertices and edges are shown in red in the figure, while the tesselation input points are blue.
+
+ We can use those iterator classes like this:
+
+    // get points/vertices
     for (auto viter = trGenerator.vvbegin(); viter != trGenerator.vvend(); ++viter)
     {
         // access data

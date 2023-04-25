@@ -198,9 +198,10 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
       trGenerator.Triangulate(useConstraints_, trace);
    }
 
-   triangulated_ = true;
-   
    // draw
+   triangulated_ = true;
+   tesselated_ = false;
+   
    drawTriangualtion(trGenerator, drawnPoints);
 }
 
@@ -349,6 +350,7 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
       if (!triangulated_)
       {
          // overpaint "H" with white!
+         //  --> OPEN TODO:: not quite working, some outline still visible!
          drawHoleMarker(pos, Qt::white);
       }
    }
@@ -360,7 +362,6 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
 
    // find adjacent vertices, remove them...
    //  -- OR: just re-triangulate!
-
    on_triangualtePointsPushButton_clicked();
 }
 
@@ -398,12 +399,14 @@ void TrianglePPDemoApp::onTriangulationPointMoved(const QPoint& pos1, const QPoi
    Q_UNUSED(pos1);
    Q_UNUSED(pos2);
 
+   bool wasTesselated = tesselated_;
+
    if (triangulated_)
    {
       on_triangualtePointsPushButton_clicked();
    }
 
-   if (tesselated_)
+   if (wasTesselated)
    {
       on_tesselatePointsPushButton_clicked();
    }
