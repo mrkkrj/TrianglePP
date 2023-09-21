@@ -1,0 +1,9 @@
+GLB files are useful in scenarios that require animation and motion, or when there is a desire for interactivity. 
+Those situations include:
+
+ - Video game developers can save their work as GLB files.
+
+ - Interactive websites and ads use the GLB format to display objects that users can interact with (like a couch that 
+   they can rotate and view from any angle).
+
+ - AR and VR developers can also save their work in the format.

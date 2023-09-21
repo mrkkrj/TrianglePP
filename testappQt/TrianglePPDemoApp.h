@@ -11,13 +11,14 @@
 #include "ui_TrianglePPDemoApp.h"
 
 
-namespace tpp {
+namespace tpp 
+{
    class Delaunay;
 }
 
 
 /**
-   @brief: Class for creating, drawing and displaying triangulations in a Qt window application
+   @brief: Class for creating, drawing and displaying triangulations in a Qt application window
  */
 class TrianglePPDemoApp : public QMainWindow
 {

@@ -2,6 +2,9 @@
     @file  tpp_delaunay.hpp    
 
     @brief  Declaration of the main Delaunay class of the Triangle++ wrapper
+
+      Original Triangle/TriLib code: http://www.cs.cmu.edu/~quake/triangle.html
+      Paper about Triangle/TriLib impl.: http://www.cs.cmu.edu/~quake-papers/triangle.ps
     
     @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
     @author  Piyush Kumar (piyush), http://compgeom.com/~piyush
@@ -325,7 +328,7 @@ namespace tpp
       bool readPoints(const std::string& filePath, std::vector<Point>& points);
 
       /**
-        @brief: @brief: Read vertices from a text file in TriLib's .poly file format.
+        @brief: Read vertices from a text file in TriLib's .poly file format.
 
         @param filePath: directory and the name of file to be read
         @param points: vertices read from the file
@@ -355,7 +358,7 @@ namespace tpp
       };
 
    private:
-      void triangulateTriLib(std::string& triswitches);
+      void invokeTriLib(std::string& triswitches);
       void setQualityOptions(std::string& options, bool quality);
       void setDebugLevelOption(std::string& options, DebugOutputLevel traceLvl);
       void sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap, DebugOutputLevel traceLvl = None);

@@ -15,6 +15,7 @@
 #include <numbers> // C++20!
 #endif
 #include <algorithm>
+#include <set>
 
 // debug support
 #define DEBUG_OUTPUT_STDOUT false 
@@ -401,7 +402,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
        trConstrGenerator.setHolesConstraint(constrDelaunayHoles);
        trConstrGenerator.Triangulate(withQuality, dbgOutput);
        
-       expected = 11; // checked with GUI
+       expected = 9; // checked with GUI
        checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + holes (quality=true)");
 
        trConstrGenerator.Triangulate(!withQuality, dbgOutput);
@@ -410,7 +411,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
        checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + holes (quality=true)");
     }
 
-    SECTION("TEST 5.1: holes + unconstrainded triangluation (CDT)") 
+    SECTION("TEST 5.2: holes + unconstrainded triangluation (CDT)") 
     { 
        std::vector<Delaunay::Point> zeroSegments;
        std::vector<Delaunay::Point> unconstrDelaunayHoles;
@@ -491,6 +492,157 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
        expected = 13; // checked with GUI
        checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "Constrained + convex hull (quality=false)");
     }
+
+    SECTION("TEST 6.4: quality triangulation infinite loop bug - minimal example")
+    {
+       // originally this went into an infinite loop!
+       //  -- now the SELF_CHECK option is set as default, so without fix an execption would be thrown
+
+       using Point = Delaunay::Point;
+
+       std::vector<Point> pslgPoints;
+       std::vector<int> pslgSegments;
+
+       pslgPoints.push_back(Point(305, 56));  // 0 ---> int. error
+       //pslgPoints.push_back(Point(305, 56.3));  // 0 ---> OK
+
+       pslgPoints.push_back(Point(283, 138)); // 1
+       pslgPoints.push_back(Point(292, 68));  // 2
+       pslgPoints.push_back(Point(211, 59));  // 3
+      
+       pslgSegments.push_back(1);  // 1 0
+       pslgSegments.push_back(0);
+       pslgSegments.push_back(3);  // 3 1
+       pslgSegments.push_back(1);
+       pslgSegments.push_back(3);  // 3 2
+       pslgSegments.push_back(2);
+       pslgSegments.push_back(2);  // 2 0
+       pslgSegments.push_back(0);
+
+       Delaunay trPlsgGenerator(pslgPoints);
+
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgSegments);
+       REQUIRE(segmentsOK);
+
+       // 1. remove concavities!
+       trPlsgGenerator.useConvexHullWithSegments(false); 
+       // 2. use default quality constraints!
+       bool withQuality = true; 
+
+       trPlsgGenerator.Triangulate(withQuality, dbgOutput); // infinite loop / exception!
+       int count = trPlsgGenerator.triangleCount();
+                     
+       REQUIRE(trPlsgGenerator.triangleCount() == 5);
+    }
+
+
+    SECTION("TEST 6.5: quality triangulation infinite loop bug - original data from bug report")
+    {
+       // originally this went into an infinite loop!
+       //  -- now the SELF_CHECK option is set as default, so without fix an execption weould be thrown
+
+       using Point = Delaunay::Point;
+
+       // code from bug report:
+       std::vector<Point> pslgPoints;
+       std::vector<Point> pslgSegments;
+
+       pslgPoints.push_back(Point(96.38755452, 468.29728961));
+       pslgPoints.push_back(Point(96.38755452, 1083.30027734));
+       pslgPoints.push_back(Point(2029.39415452, 1044.64014531));
+       pslgPoints.push_back(Point(2029.39415452, 820.85321715));
+       pslgPoints.push_back(Point(2266.38760020, 816.11334821));
+       pslgPoints.push_back(Point(5096.38755452, 872.71353653));
+       pslgPoints.push_back(Point(5096.38755422, 257.71036145));
+       pslgPoints.push_back(Point(1859.23857089, 284.39844942));
+       pslgPoints.push_back(Point(1021.25668363, 449.67990700));
+
+       pslgSegments.push_back(Point(96.38755452, 468.29728961));
+       pslgSegments.push_back(Point(96.38755452, 1083.30027734));
+       pslgSegments.push_back(Point(96.38755452, 1083.30027734));
+       pslgSegments.push_back(Point(2029.39415452, 1044.64014531));
+       pslgSegments.push_back(Point(2029.39415452, 1044.64014531));
+       pslgSegments.push_back(Point(2029.39415452, 820.85321715));
+
+       pslgSegments.push_back(Point(2029.39415452, 820.85321715));
+       pslgSegments.push_back(Point(2266.38760020, 816.11334821));
+
+       pslgSegments.push_back(Point(2266.38760020, 816.11334821));
+       pslgSegments.push_back(Point(5096.38755452, 872.71353653));
+       pslgSegments.push_back(Point(5096.38755452, 872.71353653));
+       pslgSegments.push_back(Point(5096.38755422, 257.71036145));
+       pslgSegments.push_back(Point(5096.38755422, 257.71036145));
+       pslgSegments.push_back(Point(1859.23857089, 284.39844942));
+       pslgSegments.push_back(Point(1859.23857089, 284.39844942));
+       pslgSegments.push_back(Point(1021.25668363, 449.67990700));
+       pslgSegments.push_back(Point(1021.25668363, 449.67990700));
+       pslgSegments.push_back(Point(96.38755452, 468.29728961));
+
+       int expected = 0;
+       bool withQuality = true;
+
+       Delaunay trPlsgGenerator(pslgPoints);
+       trPlsgGenerator.enableMeshIndexGeneration();  // For Iterating using mesh indexes
+
+       double min_area = 15000;     
+#if 1
+       trPlsgGenerator.setMinAngle(30.5f);
+       trPlsgGenerator.setMaxArea(min_area);
+#endif
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(pslgSegments);
+       trPlsgGenerator.useConvexHullWithSegments(false); 
+
+       trPlsgGenerator.Triangulate(withQuality, dbgOutput); // hangs in endless loop / throws exception!
+
+       std::vector< std::vector<double> > mesh_;
+       std::vector<std::vector<int>> vertices_to_triangles;
+
+       // iterate over triangles
+       std::set<int> vertIds;
+
+       Delaunay::Point p0, p1, p2;
+       int meshIdx0 = -1, meshIdx1 = -1, meshIdx2 = -1;
+
+       for (FaceIterator fit = trPlsgGenerator.fbegin(); fit != trPlsgGenerator.fend(); ++fit)
+       {
+          fit.Org(p0, meshIdx0);  // queries the mesh index!
+          fit.Dest(p1, meshIdx1);
+          fit.Apex(p2, meshIdx2);
+
+          vertIds.insert(meshIdx0);
+          vertIds.insert(meshIdx1);
+          vertIds.insert(meshIdx2);
+
+          vertices_to_triangles.push_back({ meshIdx0, meshIdx1, meshIdx2 });
+
+          double x1 = -1;
+          double y1 = -1;
+          double x2 = -1;
+          double y2 = -1;
+          double x3 = -1;
+          double y3 = -1;
+
+          x1 = p0[0]; y1 = p0[1];
+          x2 = p1[0]; y2 = p1[1];
+          x3 = p2[0]; y3 = p2[1];
+
+          mesh_.push_back({ p0[0], p0[1] });
+          mesh_.push_back({ p1[0], p1[1] });
+          mesh_.push_back({ p2[0], p2[1] });
+          mesh_.push_back({ p0[0], p0[1] });
+#if 0
+          //std::cout << "[[" << x1 << ", " << y1 << "], " << "[" << x2 << ", " << y2 << "], " << "[" << x3 << ", " << y3 << "]," << "[" << x1 << ", " << y1 << "]],\n";
+          std::cout << "[" << meshIdx0 << ", " << meshIdx1 << ", " << meshIdx2 << "]\n";
+#endif
+       }
+              
+       // checks
+       auto test = trPlsgGenerator.triangleCount();
+
+       REQUIRE(segmentsOK);
+       REQUIRE(trPlsgGenerator.triangleCount() == 330);
+    }
+
 }
 
 
@@ -694,6 +846,7 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
     SECTION("TEST 10.1: PSLG triangluation with duplicate points and duplicate segments")
     {
         // Testdata: as specified in ../tppDataFiles/hex-overlap.poly
+
         std::vector<Delaunay::Point> pslgDelaunayInput1;
         std::vector<int> pslgSegmentEndpointIdx1;
 

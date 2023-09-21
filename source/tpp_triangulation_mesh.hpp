@@ -1,20 +1,6 @@
  /** 
     @file  tpp_triangulation_mesh.hpp    
-
     @brief Declaration of the TriangulationMesh class for the Triangle++ wrapper.
-
-    OPEN TODO::
-      dnext:  Find the next edge counterclockwise with the same destination.
-      dnext(abc) -> *ba
-
-      dprev:  Find the next edge clockwise with the same destination.
-      dprev(abc) -> cb*
-
-      rnext:  Find the next edge (counterclockwise) of the adjacent triangle.
-      rnext(abc) -> *a*
-
-      rprev:  Find the previous edge (clockwise) of the adjacent triangle.
-      rprev(abc) -> b**
 
     @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
  */
@@ -34,6 +20,19 @@ namespace tpp
 
         A triangle abc has an origin (Org) a, a destination (Dest) b, and apex (Apex) c.
         These vertices occur in counterclockwise order about the triangle.
+
+        ::: OPEN TODO :::
+         dnext:  Find the next edge counterclockwise with the same destination.
+         dnext(abc) -> *ba
+
+         dprev:  Find the next edge clockwise with the same destination.
+         dprev(abc) -> cb*
+
+         rnext:  Find the next edge (counterclockwise) of the adjacent triangle.
+         rnext(abc) -> *a*
+
+         rprev:  Find the previous edge (clockwise) of the adjacent triangle.
+         rprev(abc) -> b**
     */
    class TriangulationMesh
    {

@@ -1,0 +1,21 @@
+Date: Wed, Aug 10, 2022, 08:50
+Subject: Re: Triangulation help
+To: Marek Krajewski <marek.j.krajewski@googlemail.com>
+
+Hello Marek, 
+
+Hope you are feeling much better now and all is well with you and your family.
+
+I have actually managed to solve the issue I had; those straight lines you see in the graphic are coincident and overlap which is 
+why triangulation would fail. I managed to sanitize the input before triangulation.
+
+But I did run into another issue, I tried to get a screenshot, but since it has been a while, I wasn't able to recreate it.
+
+Let's say you have two separate segments overlapping each other ( one exactly on top of the other ) and also two separate hole 
+points within the segments that overlap each other; triangulation fails.
+
+I use your library as part of parsing Gerber files and triangulating them to create Draco encoded .glb files.
+
+Regards,
+Yejneshwar Sivamoorthy
+  

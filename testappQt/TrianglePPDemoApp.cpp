@@ -63,6 +63,7 @@ namespace {
       return QPoint(x, y);
    }
 
+
    std::vector<Delaunay::Point> toTppPointVector(const QVector<QPoint>& qPoints)
    {
       std::vector<Delaunay::Point> tppPoints;
@@ -189,13 +190,21 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    tpp::Delaunay trGenerator(delaunayInput);
    configDelaunay(trGenerator);
    
-   if (useConformingDelaunay_)
+   try
    {
-      trGenerator.TriangulateConf(useConstraints_, trace);
+      if (useConformingDelaunay_)
+      {
+         trGenerator.TriangulateConf(useConstraints_, trace);
+      }
+      else
+      {
+         trGenerator.Triangulate(useConstraints_, trace);
+      }
    }
-   else
+   catch (std::exception& e)
    {
-      trGenerator.Triangulate(useConstraints_, trace);
+      statusBar()->showMessage(tr("Triangulate threw an exception, txt=\"%1\"").arg(e.what()));
+      return;
    }
 
    // draw
@@ -561,11 +570,8 @@ void TrianglePPDemoApp::showExample2()
 
     drawSegments(pslgSegmentEndpoints);
 
-
     // OPEN TODO:: draw holes
-
-    // ....
-
+        // ....
 }
 
 
@@ -655,7 +661,7 @@ void TrianglePPDemoApp::clearDisplay()
    ui.drawAreaWidget->clearImage();
    statusBar()->showMessage("");
    
-   segmentEndpointIndexes_.clear(); // forget them, bound to old points!
+   segmentEndpointIndexes_.clear();  // forget them, bound to old points!
    holePointIndexes_.clear();
    holePoints_.clear();
 
@@ -885,6 +891,10 @@ void TrianglePPDemoApp::findScalingForDrawArea(
            scaleFactor = scaleFactor2;
        }
     }
+
+    // TEST::
+    offsetX = -minX;
+    offsetY = -minY;
 }
 
 

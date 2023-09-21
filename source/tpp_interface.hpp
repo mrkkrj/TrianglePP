@@ -8,11 +8,10 @@
       triangulations and, last but not least, also Voronoi diagrams.
 
       Original Triangle/TriLib code: http://www.cs.cmu.edu/~quake/triangle.html
-      Paper about Triangle/TriLib impl.: http://www.cs.cmu.edu/~quake-papers/triangle.ps
 
     @author  Marek Krajewski (mrkkrj), www.ib-krajewski.de
     @author  Piyush Kumar (piyush), http://compgeom.com/~piyush
-    @author  Jonathan Richard Shewchuk (TriLib!!!), https://people.eecs.berkeley.edu/~jrs/        
+    @author  Jonathan Richard Shewchuk (original TriLib!!!), https://people.eecs.berkeley.edu/~jrs/        
 
     @copyright  Copyright 20218, Marek Krajewski, released under the terms of LGPL v3
 
@@ -35,6 +34,8 @@
        03/02/23: mrkkrj – added first support for input sanitization 
        15/03/23: mrkkrj – added support for iteration over the resulting mesh, some refactorings 
        27/03/23: mrkkrj – API break, removed old (i.e. deprecated) names, changed comment formatting
+       05/07/23: mrkkrj – set TriLib's SELF_CHECK option as default, make it overridable with TRIANGLE_NO_TRILIB_SELFCHECK,
+                          bugfix TriLib internal error in deletevertex()
  */
 
 #ifndef TRPP_INTERFACE

@@ -1,0 +1,14 @@
+Since there are no Input validation of the data given for triangulation you need to think about this. 
+Poly2Tri does not support repeat points within epsilon.
+
+ - If you have a cyclic function that generates random points make sure you don't add the same coordinate twice.
+ - If you are given input and aren't sure same point exist twice you need to check for this yourself.
+ - Only simple polygons are supported. You may add holes or interior Steiner points
+ - Interior holes must not touch other holes, nor touch the polyline boundary
+ - Use the library in this order:
+  - Initialize CDT with a simple polyline (this defines the constrained edges)
+  - Add holes if necessary (also simple polylines)
+  - Add Steiner points
+  - Triangulate
+
+Make sure you understand the preceding notice before posting an issue. If you have an issue not covered by the above, include your data-set with the problem. The only easy day was yesterday; have a nice day.

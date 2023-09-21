@@ -12,7 +12,8 @@
 #   include <cstdio>
 #   include <string>
 
-namespace tpp {
+namespace tpp 
+{
    extern FILE* g_debugFile;
    extern std::string g_debugFileName;
 }
@@ -30,7 +31,10 @@ namespace tpp {
                              tpp::g_debugFile = fopen(a, "w");\
                              if(!tpp::g_debugFile) std::cerr << "ERROR: Cannot open trace file: " << a << std::endl;\
                              else tpp::g_debugFileName = a; } }
-#   define END_TRACE(a) { if(tpp::g_debugFile && g_debugFileName == a) { fclose(tpp::g_debugFile); tpp::g_debugFile = nullptr; tpp::g_debugFileName = ""; } }
+
+#   define END_TRACE(a) { if(tpp::g_debugFile && g_debugFileName == a) {\
+                               fclose(tpp::g_debugFile); \
+                               tpp::g_debugFile = nullptr; tpp::g_debugFileName = ""; } }
 #else
 #   define TRACE(a)
 #   define TRACE2i(a,b) 

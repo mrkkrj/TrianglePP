@@ -82,16 +82,21 @@ and... move the points around!
 This code is a wrapper for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
 For more information you can look at:
  - http://www.cs.cmu.edu/~quake/triangle.html
+ - http://www.cs.cmu.edu/~quake/triangle.demo.html
  - README in the docs directory
 
 ## TODOs:
  - remove warnings
 
+ - decouple tpp::Delaunay from the reviver::dpoint<> class
+
  - add support for regions and reading of region attributes from .poly file
  - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (???)
- - add support for refining of triangulations (?)
- - add support for saving Voronoi meshes in 
+ - add support for saving Voronoi meshes in an .edge file
+ - add support for saving triangulations as GLB files (Draco encoded?)
+
+ - add support for refining of triangulations (?) 
  - add convex hull demonstration to the Qt demo app (??)
- 
+  
  - add CI support (Travis?)
  - Port the Qt demo app to Emscripten

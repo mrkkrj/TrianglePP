@@ -231,10 +231,30 @@ t.b.c. ...
 
 ## Traces and Logs
 
-If compiled with *TRIANGLE_DBG_TO_FILE* define, debug traces will be written to the *./triangle.out.txt* file. Moreover ...
+If compiled with *TRIANGLE_DBG_TO_FILE* define, basic triangulation debug traces will be written to the *./triangle.out.txt* file. 
+
+Moreover, debug traces for reading and writing point/segment files a separate output file can be used by calling the
+
+ *Delaunay::enableFileIOTrace(true);*
+
+ method. The file I/O traces are then written to the *./tpp_fileIO.out.txt* file. **Caution:** If this file is written, the basic triangulation debug traces won't be generated!
+
+
+Additionally, debug output will be sent to stdout, depending on the traceLvl parameter in Triangulate() or Tesselate() methods.
 
 t.b.c. ...
 
+
+## Library versions
+
+Two versions of the library can be built:
+
+ - library doing sanity checks while working (default setting): it will incure some performance overhead
+   in this version several checks will be enabled in order to throw exceptions instead of just crashing or looping endelessly!!!
+
+ - library without sanity checks for *maximum performance*
+   for this the *TRIANGLE_NO_TRILIB_SELFCHECK* define must be set when compiling TrianglePP
+   
 
 ## File I/O
 
@@ -244,7 +264,44 @@ Documentation for the used formats can be found ....
 t.b.c. ...
 
 
-### .node and .poly files
+### .node files
+
+As documentation at http://www.cs.cmu.edu/~quake/triangle.node.html is saying, the format of .node files can be specified as an ASCII file with following contents:
+
+*"
+.node files
+
+    - First line: <# of vertices> <dimension (must be 2)> <# of attributes> <# of boundary markers (0 or 1)>
+    - Remaining lines: <vertex #> <x> <y> [attributes] [boundary marker]
+
+Blank lines and comments prefixed by `#' may be placed anywhere. Vertices must be numbered consecutively, starting from one or zero.
+
+    ...
+*"
+
+t.b.c. ...
+
+
+### .poly files
+
+As documentation at http://www.cs.cmu.edu/~quake/triangle.poly.html is saying, the format of .poly files can be specified as an ASCII file with following contents:
+
+*"
+.poly files
+
+    - First line: <# of vertices> <dimension (must be 2)> <# of attributes> <# of boundary markers (0 or 1)>
+    - Following lines: <vertex #> <x> <y> [attributes] [boundary marker]
+    - One line: <# of segments> <# of boundary markers (0 or 1)>
+    - Following lines: <segment #> <endpoint> <endpoint> [boundary marker]
+    - One line: <# of holes>
+    - Following lines: <hole #> <x> <y>
+    - Optional line: <# of regional attributes and/or area constraints>
+    - Optional following lines: <region #> <x> <y> <attribute> <maximum area>
+
+A .poly file represents a PSLG, as well as some additional information. PSLG stands for Planar Straight Line Graph, a term familiar to computational geometers. By definition, a PSLG is just a list of vertices and segments. A .poly file can also contain information about holes and concavities, as well as regional attributes and constraints on the areas of triangles.
+
+    ...
+*"
 
 t.b.c. ...
 
@@ -257,6 +314,8 @@ t.b.c. ...
 ### Example TrPP data files
 
 examples in this directory are....
+
+t.b.c. ...
 
 
 ## Theory:
@@ -276,3 +335,7 @@ Algorithm used for DCT construction: "*Fast segment insertion and incremental co
 1. **triangle.pdf** - J.R. Shevchuk, *"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator"*, copy of: 'http://www.cs.cmu.edu/~quake-papers/triangle.ps'
 
 2. **TriLib README.txt** - Docs extracted form Triangle's sources
+
+3. **Delaunay Refinement Mesh Generation.pdf** - J.R. Shevchuk, *"Delaunay Refinement Mesh Generation"*, PhD dissertation, 1997 - general introduction to the Delaunay algorithms
+
+4. **robust-predicates.pdf**  - J.R. Shevchuk, *"Robust Adaptive Floating-Point Geometric Predicates"* - discussion of some floating point techniques used
