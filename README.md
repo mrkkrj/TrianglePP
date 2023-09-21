@@ -2,11 +2,14 @@
 [comment]: # " ![triangle-PP's logo](triangle-PP-sm.jpg) "
 <img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original J.P. Shevchuk's 2005 C-language *Triangle* package.
 
-It can create standard **Delaunay** triangulations, **quality Delaunay** triangulations, **constrained Delaunay** triangulations and **Voronoi** diagrams.
+It can create standard **Delaunay** triangulations and their duals, i.e. **Voronoi** diagrams (aka Dirichlet tessellations). 
 
-I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) of the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended the wrapper for constrainied triangulations and Voronoi diagrams. 
-Then the code was ported to x64 Windows and Linux, *CMake* support (for both the example program and the GUI demonstrator) was added, as well as Catch2 unit test suite. 
-Recently, support for reading and writing of *Triangle*'s file formats and input data sanitization were also added.
+Additionally it can generate:
+ 1. **quality Delaunay** triangulations (where we can set bounds on the areas and angles of the resulting triangles) 
+ 2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result) 
+
+Constrained Delaunay triangulation opens up some very interesting possibilities - it allows us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints! See below in the **Demo App** section for some screenshots illustrating that.
+Moreover, support for saving and reading **point and polygon files** is available.
 
 This code is released under LPGL licence.
 
@@ -62,7 +65,7 @@ constrained triangulations:
 
 ![triangle-PP's GUI Screenshot Linux 1](docs/pics/triangle-pp-Linux-constrained-with-hole.jpg)
 
-and with tesselations:
+and with tesselations/Voronoi diagrams:
 
 ![triangle-PP's GUI screenshot 2](docs/pics/triangle-pp-testApp-Voronoi.jpg)
 
@@ -74,7 +77,6 @@ and... move the points around!
 
 ![DemoApp moving points](docs/pics/moving-the-points.gif)
 
-
 ## Original Triangle package
 
 ![Triangle logo](T.gif) 
@@ -84,6 +86,12 @@ For more information you can look at:
  - http://www.cs.cmu.edu/~quake/triangle.html
  - http://www.cs.cmu.edu/~quake/triangle.demo.html
  - README in the docs directory
+ 
+## History
+
+I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) of the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended the wrapper for constrainied triangulations and Voronoi diagrams. 
+Then the code was ported to x64 Windows and Linux, *CMake* support (for both the example program and the GUI demonstrator) was added, as well as Catch2 unit test suite. 
+Recently, support for reading and writing of *Triangle*'s file formats and input data sanitization were also added.
 
 ## TODOs:
  - remove warnings
