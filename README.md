@@ -1,6 +1,8 @@
 # Triangle++
 [comment]: # " ![triangle-PP's logo](triangle-PP-sm.jpg) "
-<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original J.P. Shevchuk's 2005 C-language *Triangle* package. The library can create standard **Delaunay** triangulations and their duals, i.e. **Voronoi** diagrams (aka Dirichlet tessellations). 
+<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original J.P. Shevchuk's 2005 C-language *Triangle* package. 
+
+The library can create standard **Delaunay** triangulations and their duals, i.e. **Voronoi** diagrams (aka Dirichlet tessellations). 
 
 Additionally it can generate:
  1. **quality Delaunay** triangulations (where we can set bounds on the areas and angles of the resulting triangles) 
