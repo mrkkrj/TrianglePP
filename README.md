@@ -1,14 +1,13 @@
 # Triangle++
 [comment]: # " ![triangle-PP's logo](triangle-PP-sm.jpg) "
-<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original J.P. Shevchuk's 2005 C-language *Triangle* package.
-
-It can create standard **Delaunay** triangulations and their duals, i.e. **Voronoi** diagrams (aka Dirichlet tessellations). 
+<img src="triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/><br/>*Triangle++* (aka *TrianglePP*) is a C++ wrapper for the original J.P. Shevchuk's 2005 C-language *Triangle* package. The library can create standard **Delaunay** triangulations and their duals, i.e. **Voronoi** diagrams (aka Dirichlet tessellations). 
 
 Additionally it can generate:
  1. **quality Delaunay** triangulations (where we can set bounds on the areas and angles of the resulting triangles) 
- 2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result) 
+ 2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result). 
 
-Constrained Delaunay triangulation opens up some very interesting possibilities - it allows us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints! See below in the **Demo App** section for some screenshots illustrating that.
+    Constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints! See below in the *Demo App* section for some screenshots illustrating some of those possibilities.
+
 Moreover, support for saving and reading **point and polygon files** is available.
 
 This code is released under LPGL licence.
