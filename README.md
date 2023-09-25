@@ -8,7 +8,7 @@ Additionally it can generate:
  1. **quality Delaunay** triangulations (where we can set bounds on the areas and angles of the resulting triangles) 
  2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result). 
 
-    Constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints! See below in the *Demo App* section for some screenshots illustrating some of those possibilities.
+    BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints! See below in the *Demo App* section for some screenshots illustrating some of those possibilities.
 
 Moreover, support for saving and reading **point and polygon files** is available.
 
@@ -37,9 +37,17 @@ For usage patterns see the examples in the *trpp_example.cpp* source file. The i
         int vertexIdx2 = fit.Dest();
         int vertexIdx3 = fit.Apex();
 
-        // access point's cooridinates: 
+        // access point's coordinates: 
         double x1 = delaunayInput[vertexIdx1][0];
         double y1 = delaunayInput[vertexIdx1][1];
+    }
+
+You can also use the *foreach()* style loop as shown below:
+
+    for (const auto& f : trGenerator.faces())
+    {
+        int vertexIdx1 = f.Org();
+        ...
     }
 
 For more examples consult the *docs* directory.

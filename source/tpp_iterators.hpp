@@ -33,8 +33,9 @@ namespace tpp
 
       FaceIterator() : m_delaunay(nullptr), meshPointCount(0) { floop.tri = nullptr; }
 
-      bool empty() const;      
-      bool isdummy() const;  // pointing to the dummy triangle?
+      bool empty() const;    // points to no triangle?  
+      bool isdummy() const;  // deprecated!!!! --> pointing to a ghost triangle?
+      bool isGhost() const;  // pointing to a ghost triangle?
       bool hasSteinerPoints() const;
 
       /**

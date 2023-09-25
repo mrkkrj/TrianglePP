@@ -1463,12 +1463,19 @@ FaceIterator FaceIterator::operator++(int)
 }
 
 
-bool FaceIterator::isdummy() const
+bool FaceIterator::isGhost() const
 {
    TP_MESH_ITER();
    TP_PLOOP_ITER();
 
    return (ploop->tri == tpmesh->dummytri);
+}
+
+
+bool FaceIterator::isdummy() const
+{
+   // deprected, will be removed!!!
+   return isGhost();
 }
 
 
@@ -2137,7 +2144,7 @@ void TriangulationMesh::trianglesAroundVertex(int vertexid, std::vector<int>& iv
    while (linkn != start)
    {
       nfit = Onext(nfit);
-      if (nfit.isdummy())
+      if (nfit.isGhost())
       {
          // Do another algorithm
          ivv.clear();
@@ -2156,7 +2163,7 @@ void TriangulationMesh::trianglesAroundVertex(int vertexid, std::vector<int>& iv
          while (linkn != start)
          {
             nfit = Oprev(nfit);
-            if (nfit.isdummy())
+            if (nfit.isGhost())
                return;
             int a = nfit.Org();
             int b = nfit.Dest();
