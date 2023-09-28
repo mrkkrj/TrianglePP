@@ -41,7 +41,7 @@ namespace tpp
 #   define TRACE2s(a,b) 
 #   define TRACE2b(a,b) 
 #   define INIT_TRACE(a) 
-#   define END_TRACE() 
+#   define END_TRACE(a) 
 #endif // TRIANGLE_DBG_TO_FILE
 
 #endif
