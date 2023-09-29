@@ -9,7 +9,9 @@ Additionally it can generate:
  2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result). 
 
     BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints, even different ones for each separate **region**!
-                             ![triangle-PP's constrained example](docs/pics/constr-triangulation-example.jpg)
+    
+          ![triangle-PP's constrained example](docs/pics/constr-triangulation-example.jpg)
+    
     See below in the *Demo App* section for some screenshots illustrating some of those possibilities.    
 
 Moreover, support for saving and reading **point and polygon files** is available.
