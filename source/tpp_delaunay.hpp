@@ -36,7 +36,7 @@ namespace tpp
 
    enum DebugOutputLevel // OPEN TODO:: forward-decl.
    {
-      None,
+      None,    // mute
       Info,    // most useful; it gives information on algorithmic progress and much more detailed statistics
       Vertex,  // gives vertex-by-vertex details, and prints so much that Triangle runs much more slowly (!!!)
       Debug    // gives information only a debugger could love
@@ -66,6 +66,7 @@ namespace tpp
    {
    public:
       typedef reviver::dpoint<double, 2> Point; // OPEN TODO:: decouple from this dependency!
+      typedef reviver::dpoint<double, 4> Point4; // OPEN TODO:: decouple from this dependency!
 
       /**
          @brief: constructor
@@ -205,6 +206,21 @@ namespace tpp
      bool setHolesConstraint(const std::vector<Point>& holes);
 
      /**
+       @brief: Set region constraints for the triangulation
+
+       @param regions: vector of 2 dimensional points where each points marks a regions, i.e. it infects all
+                       triangles around in until it sees a segment
+       @param areas:  max. triangle area for the region with the same index in the regions vector
+       @return: true if the input is valid, false otherwise
+      */
+     bool setRegionsConstraint(const std::vector<Point>& regions, const std::vector<float>& areas);
+
+     /**
+       @brief: Convenience method
+      */
+     bool setRegionsConstraint(const std::vector<Point4>& regionConstr); // OPEN TODO::: remove???
+
+     /**
         @brief:  Set a user test function for the triangulation
                  OPEN TODO::: NYI!!!
       */
@@ -332,12 +348,13 @@ namespace tpp
 
         @param filePath: directory and the name of file to be read
         @param points: vertices read from the file
-        @param segmentEndpoints:  ------>> OPEN TODO::: comment!!!!!
+        @param segmentEndpoints: indexes of the point pairs defining the segments, relative to the points vector
         @param holeMarkers: coordinates of hole marker points
+        @param regionConstr: coordinates of region marker points, plus region attribute, plus the max area constraint for the region
         @return: true if file read, false otherwise
        */
       bool readSegments(const std::string& filePath, std::vector<Point>& points, std::vector<int>& segmentEndpoints,
-                        std::vector<Delaunay::Point>& holeMarkers);
+                        std::vector<Delaunay::Point>& holeMarkers, std::vector<Point4>& regionConstr);
 
       /**
          @brief: debug helper, works only if TRIANGLE_DBG_TO_FILE is set!
@@ -370,7 +387,7 @@ namespace tpp
       void static SetPoint(Point& point, /*Triwrap::vertex*/ double* vertexptr);
 
       bool readSegmentsFromFile(char* polyfileName, FILE* polyfile, std::vector<int>& segmentEndpoints);
-      void readHolesFromFile(char* polyfileName, FILE* polyfile, std::vector<Point>& holeMarkers) const;
+      void readHolesFromFile(char* polyfileName, FILE* polyfile, std::vector<Point>& holeMarkers, std::vector<Point4>& regionConstr) const;
       std::unordered_map<int, int> checkForDuplicatePoints() const;   
       int GetFirstIndexNumber() const;
 
@@ -399,6 +416,7 @@ namespace tpp
       std::vector<int> m_segmentList;
       std::vector<Point> m_holesList;
       std::vector<double> m_defaultExtraAttrs;
+      std::vector<Point4> m_regionsConstrList;
    }; 
 
 }

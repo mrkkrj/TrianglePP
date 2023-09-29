@@ -80,24 +80,41 @@ To avoid that we can generate a continuous indexing for all the points of the tr
         ...
     }
 
-In this case, the veratex coordinates will be always copied to the *point* parameter of the corresponding iterator's method.
-
-t.b.c. ...
+In this case, the vertex coordinates will be always copied to the *point* parameter of the corresponding iterator's method.
 
 ### Other iterators
 
-t.b.c. ...
+We can also iterate over all *points* of a triangulation using **VertexIterator** as shown below:
 
+    // iterate over vertices
+    for (VertexIterator vit = trGenerator.vbegin(); vit != trGenerator.vend(); ++vit)
+    {
+        int vertexIdx = vit.vertexId();  // queries the input data index!
+
+        // point coordinates
+        double x = vit.x();
+        double y = vit.y();
+    }
+
+You can also use the *foreach()* style loop as shown below:
+
+    for (const auto& v : trGenerator.vertices())
+    {
+        int vertexIdx = v.vertexId()
+        ....
+    }
 
 ### Mesh walking
 
 t.b.c. ...
 
-
 ### Quality constraints
 
 t.b.c. ...
 
+### Regions and region constraints
+
+t.b.c. ...
 
 ### Segment constraints
 
@@ -226,9 +243,6 @@ The Voronoi vertices and edges are shown in red in the figure, while the tessela
     }
 
 
-t.b.c. ...
-
-
 ## Traces and Logs
 
 If compiled with *TRIANGLE_DBG_TO_FILE* define, basic triangulation debug traces will be written to the *./triangle.out.txt* file. 
@@ -241,8 +255,6 @@ Moreover, debug traces for reading and writing point/segment files a separate ou
 
 
 Additionally, debug output will be sent to stdout, depending on the traceLvl parameter in Triangulate() or Tesselate() methods.
-
-t.b.c. ...
 
 
 ## Library versions
@@ -330,12 +342,12 @@ For backgroud info on the original implementation see "*Triangle: Engineering a 
 Algorithm used for DCT construction: "*Fast segment insertion and incremental construction of constrained Delaunay triangulations*", Shewchuk, J.R., Brown, B.C., Computational Geometry, Volume 48, Issue 8, September 2015, Pages 554-574 - https://doi.org/10.1016/j.comgeo.2015.04.006
 
 
-### Local TriLib documantation files:
+### Local TriLib documentation files:
  
-1. **triangle.pdf** - J.R. Shevchuk, *"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator"*, copy of: 'http://www.cs.cmu.edu/~quake-papers/triangle.ps'
+1. **triangle.pdf** - J.R. Shevchuk, *"Triangle: Engineering a 2D Quality Mesh Generator and Delaunay Triangulator"*, copy of: 'http://www.cs.cmu.edu/~quake-papers/triangle.ps' - overview of the C implementation
 
 2. **TriLib README.txt** - Docs extracted form Triangle's sources
 
-3. **Delaunay Refinement Mesh Generation.pdf** - J.R. Shevchuk, *"Delaunay Refinement Mesh Generation"*, PhD dissertation, 1997 - general introduction to the Delaunay algorithms
+3. **Delaunay Refinement Mesh Generation.pdf** - J.R. Shevchuk, *"Delaunay Refinement Mesh Generation"*, PhD dissertation, 1997 - general introduction to the Delaunay algorithms, detailed decription of 2D and 3D triangle refinement algorithms
 
 4. **robust-predicates.pdf**  - J.R. Shevchuk, *"Robust Adaptive Floating-Point Geometric Predicates"* - discussion of some floating point techniques used

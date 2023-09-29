@@ -673,27 +673,31 @@ TEST_CASE("Reading files", "[trpp]")
         std::vector<Delaunay::Point> points;
         std::vector<int> segments;
         std::vector<Delaunay::Point> holes;
+        std::vector<Delaunay::Point4> regions;
 
-        ioStatus = trReader.readSegments("../tppDataFiles/face.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("../tppDataFiles/face.poly", points, segments, holes, regions);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 26);       // look inside the file
         REQUIRE(segments.size()/2  == 22);  // look inside the file
         REQUIRE(holes.size() == 3);         // look inside the file
+        REQUIRE(regions.size() == 0);       // look inside the file
 
-        ioStatus = trReader.readSegments("../tppDataFiles/box.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("../tppDataFiles/box.poly", points, segments, holes, regions);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 8);        // look inside the file
         REQUIRE(segments.size() / 2 == 5);  // look inside the file
         REQUIRE(holes.size() == 1);         // look inside the file
+        REQUIRE(regions.size() == 0);       // look inside the file
 
-        ioStatus = trReader.readSegments("../tppDataFiles/la.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("../tppDataFiles/la.poly", points, segments, holes, regions);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == 141);        // look inside the file
         REQUIRE(segments.size() / 2 == 148);  // look inside the file
         REQUIRE(holes.size() == 0);           // look inside the file
+        REQUIRE(regions.size() == 6);         // look inside the file
     }
 }
 
@@ -736,13 +740,15 @@ TEST_CASE("Writing files", "[trpp]")
         std::vector<Delaunay::Point> points;
         std::vector<int> segments;
         std::vector<Delaunay::Point> holes;
+        std::vector<Delaunay::Point4> regions;
 
-        ioStatus = trReader.readSegments("./test.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("./test.poly", points, segments, holes, regions);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());
         REQUIRE(segments.size() == pslgDelaunaySegments.size()); 
-        REQUIRE(holes.size() == 0); // no holes!
+        REQUIRE(holes.size() == 0);    // no holes!
+        REQUIRE(regions.size() == 0);  // no regions!
     }
 
     SECTION("TEST 8.2: writing a .poly file containig segments & holes")
@@ -766,8 +772,9 @@ TEST_CASE("Writing files", "[trpp]")
         std::vector<Delaunay::Point> points;
         std::vector<int> segments;
         std::vector<Delaunay::Point> holes;
+        std::vector<Delaunay::Point4> regions; // OPEN TODO::: make it an optional arg, don't parse if not required ????
 
-        ioStatus = trReader.readSegments("./test.poly", points, segments, holes);
+        ioStatus = trReader.readSegments("./test.poly", points, segments, holes, regions);
 
         REQUIRE(ioStatus == true);
         REQUIRE(points.size() == pslgDelaunayInput.size());

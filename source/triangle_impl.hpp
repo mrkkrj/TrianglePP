@@ -3,7 +3,7 @@
     @brief The original JPS's C-code of TriLib, wrapped in the Triwrap class by @piyush. 
 
     It also contains some extensions and changes by @mrkkrj like e.g.: the
-    TRILIB_EXIT_BY_EXCEPTION,  TRIFILES_OUTPUT_SUPPORT and TRIFILES_READ_SUPPORT 
+    TRILIB_EXIT_BY_EXCEPTION, TRIFILES_OUTPUT_SUPPORT and TRIFILES_READ_SUPPORT 
     ifdefs, addition of TRACE() macros, etc.
  */
 
@@ -12883,7 +12883,7 @@ char *polyfilename;
 
 #define TRILIBRARY
 
-#endif /* TRIFILES_OUTPUT_SUPPORT */
+#endif /* TRIFILES_READ_SUPPORT */
 
 /**                                                                         **/
 /**                                                                         **/

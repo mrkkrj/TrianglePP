@@ -36,6 +36,7 @@
        27/03/23: mrkkrj – API break, removed old (i.e. deprecated) names, changed comment formatting
        05/07/23: mrkkrj – set TriLib's SELF_CHECK option as default, make it overridable with TRIANGLE_NO_TRILIB_SELFCHECK,
                           bugfix TriLib internal error in deletevertex()
+       29/09/23: mrkkrj – first support for regions and regional constraints
  */
 
 #ifndef TRPP_INTERFACE

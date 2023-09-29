@@ -35,6 +35,12 @@ namespace {
    const QColor c_TriangleColor = Qt::blue;
    const QColor c_VoronoiColor = Qt::red;
    const QColor c_SegmentColor = "limegreen";
+   const QColor c_RegionColor = Qt::darkMagenta;
+
+
+   // TEST:::
+   std::vector<Delaunay::Point4> g_regionConstr; // OPEN TODO -- refactor !!!!!!!!!!!!!!
+   // TEST::: ------------
 
 
    // impl. helpers
@@ -393,13 +399,23 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 
 void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 {
-   drawHoleMarker(pos, segmentColor());
+   drawHoleMarker(pos, c_SegmentColor);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
-   holePointIndexes_ << pointIdx;
    holePoints_ << pos;
 
    ui.hideHolesCheckBox->show();
+}
+
+
+void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPoint& pos)
+{
+   drawRegionMarker(pos, c_RegionColor);
+   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+
+   regionPoints_ << pos;
+
+   ui.hideHolesCheckBox->show(); // OPEN TODO::: hideMarkersCheckBox
 }
 
 
@@ -662,8 +678,8 @@ void TrianglePPDemoApp::clearDisplay()
    statusBar()->showMessage("");
    
    segmentEndpointIndexes_.clear();  // forget them, bound to old points!
-   holePointIndexes_.clear();
    holePoints_.clear();
+   regionPoints_.clear();
 
    triangulated_ = false;
    tesselated_ = false;
@@ -722,11 +738,19 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
     }
 
     // ... and hole markers
-    QColor holeColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : segmentColor();
+    QColor holeColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : c_SegmentColor; // OPEN TODO::: holeMarkerColor()
 
     for (auto& point : holePoints_)
     {
        drawHoleMarker(point, holeColor);
+    }
+
+    // plus region markers
+    QColor regionColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : c_RegionColor; // OPEN TODO::: regionMarkerColor()
+
+    for (auto& point : regionPoints_)
+    {
+       drawRegionMarker(point, regionColor);
     }
 
     ui.drawAreaWidget->setDrawColor(c_TriangleColor);
@@ -811,6 +835,18 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
       {
          trGenerator.setMaxArea(maxArea_);
       }
+
+      if (!g_regionConstr.empty())
+      {
+         std::vector<float> areas;
+         for (auto& rc : g_regionConstr)
+         {
+            // rescale also the areas
+            areas.push_back(rc[3] * (scaleFactor_ * scaleFactor_));
+         }
+
+         trGenerator.setRegionsConstraint(toTppPointVector(regionPoints_), areas);         
+      }
    }
    else
    {
@@ -845,6 +881,24 @@ void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos, const QColor& color)
 
    ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
       
+   ui.drawAreaWidget->setDrawMode(DrawingArea::DrawHoleMarker);
+   ui.drawAreaWidget->drawPoint(pos);
+   ui.drawAreaWidget->setDrawMode(currMode);
+}
+
+
+// OPEN TODO::: drawMarker() generic methos?????
+
+void TrianglePPDemoApp::drawRegionMarker(const QPoint& pos, const QColor& color)
+{
+   auto currMode = ui.drawAreaWidget->getDrawMode();
+
+   ui.drawAreaWidget->setDrawColor(color);
+   QFont f;
+   f.setPixelSize(22);
+
+   ui.drawAreaWidget->drawText(pos * 0.96, "R", &f); 
+
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawHoleMarker);
    ui.drawAreaWidget->drawPoint(pos);
    ui.drawAreaWidget->setDrawMode(currMode);
@@ -898,7 +952,7 @@ void TrianglePPDemoApp::findScalingForDrawArea(
 }
 
 
-void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
+void TrianglePPDemoApp::flipPoints(std::vector<Point>& points, float* middlePtr) const
 {
     float maxY = 0;
     float minY = ui.drawAreaWidget->height();
@@ -937,12 +991,23 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points) const
 
     auto middle = (maxY - minY)/2 + minY;
 
-    for (auto& pt : points)
-    {       
-        pt.y = pt.y < middle
-                ? middle + (middle - pt.y)
-                : middle - (pt.y - middle);
+    flipAround(points, middle);
+
+    if (middlePtr)
+    {
+       *middlePtr = middle;
     }
+}
+
+
+void TrianglePPDemoApp::flipAround(std::vector<Point>& points, float middle) const
+{
+   for (auto& pt : points)
+   {
+      pt.y = pt.y < middle
+         ? middle + (middle - pt.y)
+         : middle - (pt.y - middle);
+   }
 }
 
 
@@ -1042,7 +1107,7 @@ void TrianglePPDemoApp::readFromFile()
         }
         else
         {
-            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers);
+            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers, g_regionConstr);
         }
     }
     catch (std::exception& e)
@@ -1077,10 +1142,11 @@ void TrianglePPDemoApp::readFromFile()
     double offsetX = 0;
     double offsetY = 0;
     double scaleFactor = 1;
+    float middle;
 
     findScalingForDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
     rescalePoints(dempAppPoints, offsetX, offsetY, scaleFactor);
-    flipPoints(dempAppPoints);
+    flipPoints(dempAppPoints, &middle);
 
     drawPoints(dempAppPoints);
 
@@ -1091,16 +1157,38 @@ void TrianglePPDemoApp::readFromFile()
     drawSegments(segmentEndpoints);
 
     // draw holes
-    std::vector<Point> dempAppHoles;
-    convertPoints(holeMarkers, dempAppHoles);
+    std::vector<Point> demoAppHoles;
+    convertPoints(holeMarkers, demoAppHoles);
 
-    rescalePoints(dempAppHoles, offsetX, offsetY, scaleFactor);
-    flipPoints(dempAppHoles);
+    rescalePoints(demoAppHoles, offsetX, offsetY, scaleFactor);
+    flipAround(demoAppHoles, middle);
 
-    for (auto& point : dempAppHoles)
+    for (auto& point : demoAppHoles)
     {
        onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
                                   { (int)(point.x), (int)(point.y) });
+    }
+    
+    // ...and region markers        
+    std::vector<Delaunay::Point> regionMarkers;
+
+    for (auto& rc : g_regionConstr)
+    {
+       regionMarkers.emplace_back(rc[0], rc[1]);
+    }    
+
+    std::vector<Point> demoAppRegions;
+    convertPoints(regionMarkers, demoAppRegions);
+
+    rescalePoints(demoAppRegions, offsetX, offsetY, scaleFactor);
+    flipAround(demoAppRegions, middle);
+
+    scaleFactor_ = scaleFactor;
+
+    for (auto& point : demoAppRegions)
+    {
+       onPointChangedToRegionMarker(-1, // region point index not used at the moment!
+          { (int)(point.x), (int)(point.y) });
     }
 }
 

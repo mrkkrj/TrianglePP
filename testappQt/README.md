@@ -11,7 +11,6 @@ A small demonstrator/tester for the library.
 ## TODOs:
 
  - BUG - reading files with holes: hole positions off!!! (tppDataFiles/hex-overlap.poly)
- - BUG - out of memory error with: Example2 + holes + remove concavities + quality (!!!)
 
  - remove warnings
  - correct rescaling so that points on the border of frame will be entirely visible (???)
