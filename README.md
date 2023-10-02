@@ -10,7 +10,7 @@ Additionally it can generate:
 
     BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints, even different ones for each separate **region**.   
     
-          ![triangle-PP's constrained example](docs/pics/constr-triangulation-example.jpg)
+          <img src="docs/pics/constr-triangulation-example.jpg" alt="constrained example" width="260"/>
     
     See below in the *Demo App* section for some screenshots illustrating some of those possibilities.    
 
@@ -66,7 +66,11 @@ and with tesselations/Voronoi diagrams:
 
 ![triangle-PP's GUI screenshot 2](docs/pics/triangle-pp-testApp-Voronoi.jpg)
 
-Moreover, you can try your hand at quality triangulations:
+and... even move the points around!
+
+![DemoApp moving points](docs/pics/moving-the-points.gif)
+
+Moreover, you can try your hand at: quality triangulations
 
 ![triangle-PP's GUI screenshot](docs/pics/triangle-pp-testApp-Constrained.jpg)
 
@@ -89,10 +93,6 @@ constrained triangulations:
 You can then save and read your work:
 
 ![triangle-PP's File I/O](docs/pics/triangle-pp-testApp-File_IO.jpg)
-
-and... move the points around!
-
-![DemoApp moving points](docs/pics/moving-the-points.gif)
 
 ## Original Triangle package
 
