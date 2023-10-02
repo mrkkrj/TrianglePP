@@ -8,11 +8,10 @@ Additionally it can generate:
  1. **quality Delaunay** triangulations (where we can set bounds on the areas and angles of the resulting triangles) 
  2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result). 
 
-    BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and excluded from triangulation. On top of this, we can even set the triangulation constraints, even different ones for each separate **region**.   
-    
-          <img src="docs/pics/constr-triangulation-example.jpg" alt="constrained example" width="260"/>
-    
-    See below in the *Demo App* section for some screenshots illustrating some of those possibilities.    
+    BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and **excluded** from triangulation. On top of this, we can even specify quality constraints, even different ones for each separate **region**. The next figure shows an example of that:   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="docs/pics/constr-triangulation-example.jpg" alt="constrained example" width="180"/>    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See below in the *Demo App* section for screenshots illustrating some other possibilities.
 
 Moreover, support for saving and reading **point and polygon files** is available.
 
@@ -70,7 +69,7 @@ and... even move the points around!
 
 ![DemoApp moving points](docs/pics/moving-the-points.gif)
 
-Moreover, you can try your hand at: quality triangulations
+Moreover, you can try your hand at quality triangulations:
 
 ![triangle-PP's GUI screenshot](docs/pics/triangle-pp-testApp-Constrained.jpg)
 
@@ -90,7 +89,8 @@ constrained triangulations:
 
 ![triangle-PP's GUI regions](docs/pics/triangle-pp-testApp-regions.jpg)
 
-You can then save and read your work:
+
+You can then save your work to a text file and then read it back some other time:
 
 ![triangle-PP's File I/O](docs/pics/triangle-pp-testApp-File_IO.jpg)
 
@@ -102,7 +102,7 @@ This code is a wrapper for the original 2005 J.P. Shevchuk's *Triangle* package 
 For more information you can look at:
  - http://www.cs.cmu.edu/~quake/triangle.html
  - http://www.cs.cmu.edu/~quake/triangle.demo.html
- - README in the docs directory
+ - README in the *docs* directory
  
 ## History
 
@@ -115,11 +115,11 @@ Recently, support for reading and writing of *Triangle*'s file formats, regions 
 
  - decouple tpp::Delaunay from the reviver::dpoint<> class
 
- - Add support for all options in constrained triangulations (Steiner point constraints, regions, etc) (???)
+ - Add support for all options in constrained triangulations (Steiner point constraints, regions and boundary attributes)
  - add support for saving Voronoi meshes in an .edge file
  - add support for saving triangulations as GLB files (Draco encoded?)
 
- - add support for refining of triangulations (?) 
+ - add support for refining of triangulations (??) 
  - add convex hull demonstration to the Qt demo app (??)
   
  - add CI support (Travis?)
