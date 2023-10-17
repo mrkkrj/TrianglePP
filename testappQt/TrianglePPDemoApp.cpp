@@ -35,13 +35,8 @@ namespace {
    const QColor c_TriangleColor = Qt::blue;
    const QColor c_VoronoiColor = Qt::red;
    const QColor c_SegmentColor = "limegreen";
-   const QColor c_RegionColor = Qt::darkMagenta;
-
-
-   // TEST:::
-   std::vector<Delaunay::Point4> g_regionConstr; // OPEN TODO -- refactor !!!!!!!!!!!!!!
-   // TEST::: ------------
-
+   const QColor c_HoleMarkerColor = "limegreen";
+   const QColor c_RegionMarkerColor = Qt::darkMagenta;
 
    // impl. helpers
    QPoint getDelaunayResultPoint(
@@ -108,7 +103,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)     
    
    ui.pointModeComboBox->setCurrentIndex(AutomaticMode);
-   ui.hideHolesCheckBox->hide();
+   ui.hideMarkersCheckBox->hide();
      
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
@@ -311,14 +306,22 @@ void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 }
 
 
-void TrianglePPDemoApp::on_hideHolesCheckBox_toggled(bool checked)
+void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
 {
    // repaint all holes
-   QColor holeColor = checked ? Qt::white : segmentColor();
+   QColor holeColor = checked ? Qt::white : c_HoleMarkerColor; // OPEN TODO::: holeMarkerColor()
 
    for (auto& hole : holePoints_)
    {
       drawHoleMarker(hole, holeColor);
+   }
+
+   // plus region markers
+   QColor regionColor = ui.hideMarkersCheckBox->isChecked() ? Qt::white : c_RegionMarkerColor; // OPEN TODO::: regionMarkerColor()
+
+   for (auto& point : regionPoints_)
+   {
+      drawRegionMarker(point, regionColor);
    }
 
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
@@ -359,7 +362,7 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
 
       if (holePoints_.empty())
       {
-         ui.hideHolesCheckBox->hide();
+         ui.hideMarkersCheckBox->hide();
       }
 
       if (!triangulated_)
@@ -399,23 +402,23 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 
 void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 {
-   drawHoleMarker(pos, c_SegmentColor);
+   drawHoleMarker(pos, c_HoleMarkerColor);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    holePoints_ << pos;
 
-   ui.hideHolesCheckBox->show();
+   ui.hideMarkersCheckBox->show();
 }
 
 
 void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPoint& pos)
 {
-   drawRegionMarker(pos, c_RegionColor);
+   drawRegionMarker(pos, c_RegionMarkerColor);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    regionPoints_ << pos;
 
-   ui.hideHolesCheckBox->show(); // OPEN TODO::: hideMarkersCheckBox
+   ui.hideMarkersCheckBox->show(); // OPEN TODO::: hideMarkersCheckBox
 }
 
 
@@ -680,6 +683,7 @@ void TrianglePPDemoApp::clearDisplay()
    segmentEndpointIndexes_.clear();  // forget them, bound to old points!
    holePoints_.clear();
    regionPoints_.clear();
+   regionMaxAreas_.clear();
 
    triangulated_ = false;
    tesselated_ = false;
@@ -737,23 +741,8 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
        ui.drawAreaWidget->drawLine(pointsOnScreen[start], pointsOnScreen[end]);
     }
 
-    // ... and hole markers
-    QColor holeColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : c_SegmentColor; // OPEN TODO::: holeMarkerColor()
-
-    for (auto& point : holePoints_)
-    {
-       drawHoleMarker(point, holeColor);
-    }
-
-    // plus region markers
-    QColor regionColor = ui.hideHolesCheckBox->isChecked() ? Qt::white : c_RegionColor; // OPEN TODO::: regionMarkerColor()
-
-    for (auto& point : regionPoints_)
-    {
-       drawRegionMarker(point, regionColor);
-    }
-
-    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+    // ... and hole+region markers
+    on_hideMarkersCheckBox_toggled(ui.hideMarkersCheckBox->isChecked());
 
     // ready
     statusBar()->showMessage(tr("Created %1 triangles").arg(trGenerator.triangleCount()));
@@ -836,16 +825,9 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
          trGenerator.setMaxArea(maxArea_);
       }
 
-      if (!g_regionConstr.empty())
+      if (!regionPoints_.empty())
       {
-         std::vector<float> areas;
-         for (auto& rc : g_regionConstr)
-         {
-            // rescale also the areas
-            areas.push_back(rc[3] * (scaleFactor_ * scaleFactor_));
-         }
-
-         trGenerator.setRegionsConstraint(toTppPointVector(regionPoints_), areas);         
+         trGenerator.setRegionsConstraint(toTppPointVector(regionPoints_), regionMaxAreas_.toStdVector());         
       }
    }
    else
@@ -1095,6 +1077,7 @@ void TrianglePPDemoApp::readFromFile()
     std::vector<Delaunay::Point> points;
     std::vector<int> segmentEndpoints;
     std::vector<Delaunay::Point> holeMarkers;
+    std::vector<Delaunay::Point4> regionConstraints; 
 
     tpp::Delaunay trGenerator(points);
     bool ok = false;
@@ -1107,7 +1090,7 @@ void TrianglePPDemoApp::readFromFile()
         }
         else
         {
-            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers, g_regionConstr);
+            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers, regionConstraints);
         }
     }
     catch (std::exception& e)
@@ -1172,7 +1155,7 @@ void TrianglePPDemoApp::readFromFile()
     // ...and region markers        
     std::vector<Delaunay::Point> regionMarkers;
 
-    for (auto& rc : g_regionConstr)
+    for (auto& rc : regionConstraints)
     {
        regionMarkers.emplace_back(rc[0], rc[1]);
     }    
@@ -1189,6 +1172,12 @@ void TrianglePPDemoApp::readFromFile()
     {
        onPointChangedToRegionMarker(-1, // region point index not used at the moment!
           { (int)(point.x), (int)(point.y) });
+    }
+
+    // rescale also the areas
+    for (auto& rc : regionConstraints)
+    {     
+       regionMaxAreas_.push_back(rc[3] * (scaleFactor_ * scaleFactor_));
     }
 }
 

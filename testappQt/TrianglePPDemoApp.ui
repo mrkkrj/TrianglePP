@@ -105,9 +105,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="hideHolesCheckBox">
+         <widget class="QCheckBox" name="hideMarkersCheckBox">
           <property name="text">
-           <string>Hide hole markers</string>
+           <string>Hide markers</string>
           </property>
          </widget>
         </item>

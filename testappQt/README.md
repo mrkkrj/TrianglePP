@@ -10,7 +10,7 @@ A small demonstrator/tester for the library.
 
 ## TODOs:
 
- - BUG - reading files with holes: hole positions off!!! (tppDataFiles/hex-overlap.poly)
+ - add GUI support for adding region markers and region constraints
 
  - remove warnings
  - correct rescaling so that points on the border of frame will be entirely visible (???)

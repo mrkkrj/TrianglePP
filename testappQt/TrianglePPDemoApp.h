@@ -33,7 +33,7 @@ public slots:
    void on_tesselatePointsPushButton_clicked();
    void on_pointModeComboBox_currentIndexChanged(int index);
    void on_useConstraintsCheckBox_toggled(bool checked);
-   void on_hideHolesCheckBox_toggled(bool checked);
+   void on_hideMarkersCheckBox_toggled(bool checked);
    void on_optionsToolButton_clicked();
 
 private slots:
@@ -103,5 +103,6 @@ private:
     QVector<int> segmentEndpointIndexes_;
     QVector<QPoint> holePoints_;
     QVector<QPoint> regionPoints_;
+    QVector<float> regionMaxAreas_;
     float scaleFactor_;
 };

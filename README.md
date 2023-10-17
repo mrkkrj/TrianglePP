@@ -122,4 +122,4 @@ Recently, support for reading and writing of *Triangle*'s file formats, regions 
  - add convex hull demonstration to the Qt demo app (??)
   
  - add CI support (Travis?)
- - Port the Qt demo app to Emscripten
+ - Port the Qt demo app to Emscripten (&& Qt 6 !!!)

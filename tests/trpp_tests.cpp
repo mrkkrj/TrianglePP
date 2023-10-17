@@ -295,7 +295,7 @@ TEST_CASE("Voronoi tesselation", "[trpp]")
 TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
 {
     // prepare input 
-    //  - see "example constr segments.jpg" for visualisation!
+    //  - see "example_constr_segments.jpg" for visualisation!
     std::vector<Delaunay::Point> constrDelaunayInput;
     
     constrDelaunayInput.push_back(Delaunay::Point(0, 0));
@@ -338,7 +338,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
     }
 
     // prepare segments 
-    //  - see "example constr segments.jpg" for visualisation!
+    //  - see "example_constr_segments.jpg" for visualisation!
     std::vector<Delaunay::Point> constrDelaunaySegments;
 
     constrDelaunaySegments.push_back(Delaunay::Point(0, 1));
@@ -353,7 +353,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
     {
         trConstrGenerator.Triangulate(dbgOutput);
 
-        expected = 11; // count not changed, see "example constr segments.jpg" for visualisation!
+        expected = 11; // count not changed, see "example_constr_segments.jpg" for visualisation!
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (quality=false)");
 
         // OPEN TODO:::
@@ -372,7 +372,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
 
         trConstrGenerator.Triangulate(dbgOutput);
 
-        expected = 11; // count not changed, see "example constr segments.jpg" for visualisation!
+        expected = 11; // count not changed, see "example_constr_segments.jpg" for visualisation!
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (endpoint indexes)");
 
 
@@ -534,7 +534,6 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
                      
        REQUIRE(trPlsgGenerator.triangleCount() == 5);
     }
-
 
     SECTION("TEST 6.5: quality triangulation infinite loop bug - original data from bug report")
     {
@@ -1489,6 +1488,106 @@ TEST_CASE("Different triangulation algorithms", "[trpp]")
    auto triCountSweepline = triGen.triangleCount();
 
    REQUIRE(triCountDefault == triCountSweepline);
+}
+
+
+TEST_CASE("regions and region-local constraints", "[trpp]")
+{
+   // prepare input 
+   //  - see "example_constr_segments.jpg" for visualisation!
+   std::vector<Delaunay::Point> constrDelaunayInput;
+
+   constrDelaunayInput.push_back(Delaunay::Point(0, 0));
+   constrDelaunayInput.push_back(Delaunay::Point(0, 1));
+   constrDelaunayInput.push_back(Delaunay::Point(0, 3));
+   constrDelaunayInput.push_back(Delaunay::Point(2, 0));
+   constrDelaunayInput.push_back(Delaunay::Point(4, 1.25));
+   constrDelaunayInput.push_back(Delaunay::Point(4, 3));
+   constrDelaunayInput.push_back(Delaunay::Point(6, 0));
+   constrDelaunayInput.push_back(Delaunay::Point(8, 1.25));
+   constrDelaunayInput.push_back(Delaunay::Point(9, 0));
+   constrDelaunayInput.push_back(Delaunay::Point(9, 0.75));
+   constrDelaunayInput.push_back(Delaunay::Point(9, 3));
+
+   int expected = 0;
+   int referenceCt = 0;
+   int referenceQualityCt = 0;
+   bool withQuality = true;
+
+   Delaunay trConstrGenerator(constrDelaunayInput);
+
+   // prepare segments 
+   //  - see "example_constr_segments.jpg" for visualisation!
+   std::vector<Delaunay::Point> constrDelaunaySegments;
+
+   constrDelaunaySegments.push_back(Delaunay::Point(0, 1));
+   constrDelaunaySegments.push_back(Delaunay::Point(9, 0.75));
+   constrDelaunaySegments.push_back(Delaunay::Point(0, 0));
+   constrDelaunaySegments.push_back(Delaunay::Point(9, 0));
+   constrDelaunaySegments.push_back(Delaunay::Point(0, 3));
+   constrDelaunaySegments.push_back(Delaunay::Point(9, 3));
+
+   // segment-constrained triangulation
+
+   trConstrGenerator.setSegmentConstraint(constrDelaunaySegments);
+   trConstrGenerator.useConvexHullWithSegments(true); // don't remove concavities!
+
+   SECTION("TEST R.1: CDT triangulation (without quality constr.)")
+   {
+      trConstrGenerator.Triangulate(dbgOutput);
+
+      expected = 11; // count not changed, see "example_constr_segments.jpg" for visualisation!
+      checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (quality=false)");
+   }
+
+   SECTION("TEST R.2: CDT triangulation with quality constr.")
+   {
+      trConstrGenerator.Triangulate(withQuality, dbgOutput);
+
+      expected = 29; // checked with GUI
+      checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (quality=true)");
+   }
+
+   // triangulation with regions
+
+   SECTION("TEST R.3: regions + segment-constrainded triangluation (CDT)")
+   {
+      std::vector<Delaunay::Point> constrDelaunayRegions;
+      std::vector<float> constrDelaunayRegionMaxAreas;
+
+      constrDelaunayRegions.push_back(Delaunay::Point(3, 0.5));
+      constrDelaunayRegions.push_back(Delaunay::Point(3, 1.25));
+
+      constrDelaunayRegionMaxAreas.push_back(0.18);
+      constrDelaunayRegionMaxAreas.push_back(0.85);
+
+      trConstrGenerator.setRegionsConstraint(constrDelaunayRegions, constrDelaunayRegionMaxAreas);
+      trConstrGenerator.Triangulate(withQuality, dbgOutput);
+
+      expected = 110; // checked with GUI (tppDataFiles/basic regions.poly)
+      checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + regions (quality=true)");
+
+      trConstrGenerator.Triangulate(!withQuality, dbgOutput);
+
+      expected = 11; // checked with GUI (tppDataFiles/basic regions.poly)
+      checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + regions (quality=false)");
+
+      // ... and holes
+
+      std::vector<Delaunay::Point> constrDelaunayHoles;
+      constrDelaunayHoles.push_back(Delaunay::Point(4, 0.33)); // switch off the lower region!
+      trConstrGenerator.setHolesConstraint(constrDelaunayHoles);
+
+      trConstrGenerator.Triangulate(withQuality, dbgOutput);
+
+      expected = 35; // checked with GUI (tppDataFiles/basic regions.poly)
+      checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + regions + holes (quality=true)");
+
+      trConstrGenerator.Triangulate(!withQuality, dbgOutput);
+
+      expected = 7; // checked with GUI (tppDataFiles/basic regions.poly)
+      checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained + regions + holes (quality=false)");
+   }
 }
 
 
