@@ -49,6 +49,13 @@ else()
 	add_library(${PROJECT_NAME} SHARED ${ALL_FILES})
 endif()
 
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
+)
+
 ################################################################################
 # Include directories
 ################################################################################
@@ -72,11 +79,3 @@ endif()
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
-
-################################################################################
-# Install
-################################################################################
-install(TARGETS ${PROJECT_NAME} 
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION bin)
