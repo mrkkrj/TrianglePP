@@ -13,9 +13,16 @@
 #ifndef REVIVER_POINT_HPP
 #define REVIVER_POINT_HPP
 
-// changed mrkkrj --
+// mrkkrj
+#ifndef TRPP_BUILD_SHARED
+// mrkkrj - legacy usage
 #include "tpp_assert.hpp"
-// END changed --
+#else
+// mrkkrj - HACK:: we don't want export Assert function aout of DLL!
+#include <cassert>
+#define Assert(a, b) assert(a && b)
+#endif
+
 #include <iostream>
 #include <valarray>
 #include <stdio.h>

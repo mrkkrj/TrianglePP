@@ -25,7 +25,7 @@ namespace tpp
         A triangle abc has an origin (Org) a, a destination (Dest) b, and apex (Apex) c.
         These vertices occur in counterclockwise order about the triangle.
     */
-   class FaceIterator
+   class TRPP_LIB_EXPORT FaceIterator
    {
    public:
       FaceIterator& operator++();
@@ -87,9 +87,9 @@ namespace tpp
 
       Face operator*() { return Face(this); }
 
-      friend bool operator==(FaceIterator const&, FaceIterator const&);
-      friend bool operator!=(FaceIterator const&, FaceIterator const&);
-      friend bool operator<(FaceIterator const&, FaceIterator const&);
+      friend bool TRPP_LIB_EXPORT operator==(FaceIterator const&, FaceIterator const&);
+      friend bool TRPP_LIB_EXPORT operator!=(FaceIterator const&, FaceIterator const&);
+      friend bool TRPP_LIB_EXPORT operator<(FaceIterator const&, FaceIterator const&);
 
    private:
       struct tdata // TriLib's internal data
@@ -118,7 +118,7 @@ namespace tpp
    /**
       @brief: This class supports iteration over faces in a foreach() loop
     */
-   struct FacesList
+   struct TRPP_LIB_EXPORT FacesList
    {
       FacesList(Delaunay* triangulator) : m_delaunay(triangulator) {}
 
@@ -135,7 +135,7 @@ namespace tpp
 
         Implements access to the resulting vertices of the triangulation
     */
-   class VertexIterator
+   class TRPP_LIB_EXPORT VertexIterator
    {
    public:
       VertexIterator operator++();
@@ -148,8 +148,8 @@ namespace tpp
       double y() const;
 
       friend class Delaunay;
-      friend bool operator==(VertexIterator const&, VertexIterator const&);
-      friend bool operator!=(VertexIterator const&, VertexIterator const&);
+      friend bool TRPP_LIB_EXPORT operator==(VertexIterator const&, VertexIterator const&);
+      friend bool TRPP_LIB_EXPORT operator!=(VertexIterator const&, VertexIterator const&);
 
    private:
       VertexIterator(Delaunay* triangulator);   
@@ -162,7 +162,7 @@ namespace tpp
    /**
       @brief: This class supports iteration over vertices in a foreach() loop
     */
-   struct VertexList
+   struct TRPP_LIB_EXPORT VertexList
    {
       VertexList(Delaunay* triangulator) : m_delaunay(triangulator) {}
 
@@ -192,7 +192,7 @@ namespace tpp
 
         Implements access to the resulting Voronoi points
     */
-   class VoronoiVertexIterator 
+   class TRPP_LIB_EXPORT VoronoiVertexIterator
    {
    public:
       VoronoiVertexIterator operator++();
@@ -202,8 +202,8 @@ namespace tpp
       void advance(int steps);
 
       friend class Delaunay;
-      friend bool operator==(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
-      friend bool operator!=(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
+      friend bool TRPP_LIB_EXPORT operator==(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
+      friend bool TRPP_LIB_EXPORT operator!=(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
 
    private:
       VoronoiVertexIterator(Delaunay* tiangulator);
@@ -221,7 +221,7 @@ namespace tpp
 
         Implements access to the resulting connections between Voronoi points
     */
-   class VoronoiEdgeIterator 
+   class TRPP_LIB_EXPORT VoronoiEdgeIterator
    {
    public:    
       VoronoiEdgeIterator operator++();
@@ -247,8 +247,8 @@ namespace tpp
       Delaunay::Point Dest(bool& finiteEdge);
 
       friend class Delaunay;
-      friend bool operator==(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
-      friend bool operator!=(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
+      friend bool TRPP_LIB_EXPORT operator==(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
+      friend bool TRPP_LIB_EXPORT operator!=(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
 
    private:
       VoronoiEdgeIterator(Delaunay* tiangulator);

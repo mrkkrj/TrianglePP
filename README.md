@@ -52,6 +52,10 @@ You can also use the *foreach()* style loop as shown below:
         ...
     }
 
+
+You can also build TriagnlePP as a DLL/shared library, the CMake file foth this can be found in the *dll* subdirectory.
+**WARNING:** Only tested on Windows as for now!!!!
+
 For more examples consult the *docs* directory.
 
 ## Demo App:

@@ -34,7 +34,7 @@ namespace tpp
          rprev:  Find the previous edge (clockwise) of the adjacent triangle.
          rprev(abc) -> b**
     */
-   class TriangulationMesh
+   class TRPP_LIB_EXPORT TriangulationMesh
    {
    public:
       /**

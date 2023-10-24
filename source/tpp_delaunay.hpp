@@ -62,7 +62,7 @@ namespace tpp
       @note: Currently the dpoint class by Piyush Kumar is used: a d-dimensional reviver::dpoint class 
              with d=2. If you want to use your own point class, you might have to work hard :-(...
     */
-   class Delaunay 
+   class TRPP_LIB_EXPORT Delaunay
    {
    public:
       typedef reviver::dpoint<double, 2> Point; // OPEN TODO:: decouple from this dependency!

@@ -37,10 +37,18 @@
        05/07/23: mrkkrj – set TriLib's SELF_CHECK option as default, make it overridable with TRIANGLE_NO_TRILIB_SELFCHECK,
                           bugfix TriLib internal error in deletevertex()
        29/09/23: mrkkrj – first support for regions and regional constraints
+       24/10/23: mrkkrj – support for DLL builds
  */
 
 #ifndef TRPP_INTERFACE
 #define TRPP_INTERFACE
+
+#ifndef TRPP_BUILD_SHARED
+# define TRPP_LIB_EXPORT
+#else
+// DLL build support
+#include <tpp_export.h>
+#endif
 
 // the triangulator
 #include "tpp_delaunay.hpp"
