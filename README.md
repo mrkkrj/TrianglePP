@@ -10,7 +10,7 @@ Additionally it can generate:
 
     BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and **excluded** from triangulation. On top of this, we can even specify quality constraints, even different ones for each separate **region**. The next figure shows an example of that: <img src="docs/pics/constr-triangulation-example.jpg" alt="constrained example" height="220"/>    
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See below in the *Demo App* section for screenshots illustrating some other possibilities.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See below in the **Demo App** section for screenshots illustrating some other possibilities.
 
 Moreover, support for saving and reading **point and polygon files** is available.
 
@@ -52,15 +52,22 @@ You can also use the *foreach()* style loop as shown below:
         ...
     }
 
-
-You can also build TriagnlePP as a DLL/shared library, the CMake file foth this can be found in the *dll* subdirectory.
-**WARNING:** Only tested on Windows as for now!!!!
-
 For more examples consult the *docs* directory.
+
+## Build:
+
+Normally, you just add two source files to your project:
+ - *tpp_assert.cpp*
+ - *tpp_impl.cpp*,
+
+and include the API definition file *tpp_interface.hpp* where it is needed.
+
+Alternatively, you can also build *TrianglePP* as a **DLL/shared library**. The CMake file for that can be found in the *dll* subdirectory along with an example project using *TrianglePP* as a shared library.
+ - **WARNING:** DLL build was only tested on Windows as for now!!!!
 
 ## Demo App:
 
-Additionally, under *testappQt* you'll find a GUI programm to play with the triangulations:
+Additionally, under *testappQt* you'll find a **GUI programm** to play with the triangulations:
 
 ![triangle-PP's GUI test program](docs/pics/triangle-pp-testApp.gif)
 
@@ -105,13 +112,13 @@ This code is a wrapper for the original 2005 J.P. Shevchuk's *Triangle* package 
 For more information you can look at:
  - http://www.cs.cmu.edu/~quake/triangle.html
  - http://www.cs.cmu.edu/~quake/triangle.demo.html
- - README in the *docs* directory
+ - *README* file in the *docs* directory
  
 ## History
 
 I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) of the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended the wrapper for constrainied triangulations and Voronoi diagrams. 
 Then the code was ported to x64 Windows and Linux, *CMake* support (for both the example program and the GUI demonstrator) was added, as well as Catch2 unit test suite. 
-Recently, support for reading and writing of *Triangle*'s file formats, regions and regional constraints and input data sanitization were also added.
+Recently, support for reading and writing of *Triangle*'s file formats, regions and regional constraints, as well as for input data sanitization were also added.
 
 ## TODOs:
  - remove warnings
