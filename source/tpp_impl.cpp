@@ -505,7 +505,9 @@ bool Delaunay::readSegments(
         std::vector<Delaunay::Point>& points,
         std::vector<int>& segmentEndpoints,
         std::vector<Delaunay::Point>& holeMarkers,
-        std::vector<Point4>& regionConstr)
+        std::vector<Point4>& regionConstr,
+        int* duplicatePointCount,
+        DebugOutputLevel traceLvl)
 {
     if (!m_triangleWrap)
     {
@@ -549,7 +551,7 @@ bool Delaunay::readSegments(
             }
         }
 
-        sanitizeInputData(duplicates); 
+        sanitizeInputData(duplicates, traceLvl);
 
         points = m_pointList; // OPEN TODO::: make it optional param????
         segmentEndpoints = m_segmentList; // OPEN TODO::: make it optional param????
@@ -594,6 +596,11 @@ bool Delaunay::readSegments(
         }
 
         segmentEndpoints = m_segmentList; // OPEN TODO::: make it optional param????
+    }
+
+    if (duplicatePointCount)
+    {
+       *duplicatePointCount = duplicates.size();
     }
 
     // get hole marker points
@@ -1129,8 +1136,14 @@ void Delaunay::initTriangleInputData(triangulateio* pin, const std::vector<Point
 
 void Delaunay::sanitizeInputData(std::unordered_map<int, int> duplicatePointsMap, DebugOutputLevel traceLvl)
 {
-    // don't use duplicated points in segments
+    // don't use duplicated points in segment definitions
     //  - replace with "originals"
+   
+    if (traceLvl != None)
+    {
+        printf("Warning:  %d duplicate vertexes found - trying to sanitize input data!\n", duplicatePointsMap.size());
+    }
+
     for (size_t i = 0; i < m_segmentList.size(); ++i)
     {
         auto& pointIdx = m_segmentList[i];

@@ -351,10 +351,13 @@ namespace tpp
         @param segmentEndpoints: indexes of the point pairs defining the segments, relative to the points vector
         @param holeMarkers: coordinates of hole marker points
         @param regionConstr: coordinates of region marker points, plus region attribute, plus the max area constraint for the region
+        @param duplicatePointCount: (optional) how many duplicate points were removed from input?
+        @param traceLvl: enable traces
         @return: true if file read, false otherwise
        */
       bool readSegments(const std::string& filePath, std::vector<Point>& points, std::vector<int>& segmentEndpoints,
-                        std::vector<Delaunay::Point>& holeMarkers, std::vector<Point4>& regionConstr);
+                        std::vector<Delaunay::Point>& holeMarkers, std::vector<Point4>& regionConstr, 
+                        int* duplicatePointCount = nullptr, DebugOutputLevel traceLvl = None);
 
       /**
          @brief: debug helper, works only if TRIANGLE_DBG_TO_FILE is set!

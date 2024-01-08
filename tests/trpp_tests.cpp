@@ -835,6 +835,46 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
        checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "PSLG duplicate points");
     }
 
+
+    SECTION("TEST 9.1.a: PSLG triangluation with duplicate points - bug report .poly file")
+    {
+       Delaunay trReader;
+       bool ioStatus = false;
+
+       std::vector<Delaunay::Point> points;
+       std::vector<int> segments;
+       std::vector<Delaunay::Point> holes;
+       std::vector<Delaunay::Point4> regions;
+       int duplicatesCt = 0;
+
+       ioStatus = trReader.readSegments("../tests/Test-bug-report-02.02.24.poly", points, segments, holes, regions, &duplicatesCt);
+
+       REQUIRE(ioStatus == true);
+       REQUIRE(points.size() == 2400 - 16);   // look inside the file: 2400 but 16 duplicates! 
+       REQUIRE(duplicatesCt == 16);
+       REQUIRE(segments.size() / 2 == 2400);  // look inside the file
+       REQUIRE(holes.size() == 158);          // look inside the file
+       REQUIRE(regions.size() == 0);          // look inside the file
+              
+       // triangulate
+       REQUIRE(trReader.verticeCount() == 2400); 
+
+       Delaunay trPlsgGenerator(points);
+
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(segments, dbgOutput);
+       REQUIRE(segmentsOK);
+
+       segmentsOK = trPlsgGenerator.setHolesConstraint(holes);
+       REQUIRE(segmentsOK);
+
+       trPlsgGenerator.Triangulate(dbgOutput);
+       REQUIRE(trPlsgGenerator.triangleCount() == 2682);
+
+       trPlsgGenerator.Triangulate(true, dbgOutput);
+       REQUIRE(trPlsgGenerator.triangleCount() == 7252);
+    }
+
+
     // TODO:::
     //  SECTION("TEST 9.2: PSLG triangluation with duplicate points NOT used in segments")
     

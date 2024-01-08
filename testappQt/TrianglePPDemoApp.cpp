@@ -176,9 +176,6 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    std::vector<Delaunay::Point> delaunayInput;
    for (auto& point : drawnPoints)
    {
-      if (isHoleMarker(point))
-         continue;
-
       delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
    }
 
@@ -1081,6 +1078,7 @@ void TrianglePPDemoApp::readFromFile()
 
     tpp::Delaunay trGenerator(points);
     bool ok = false;
+    int duplicatePointsCount = 0;
     
     try 
     {
@@ -1090,7 +1088,7 @@ void TrianglePPDemoApp::readFromFile()
         }
         else
         {
-            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers, regionConstraints);
+            ok = trGenerator.readSegments(fileName.toStdString(), points, segmentEndpoints, holeMarkers, regionConstraints, &duplicatePointsCount);
         }
     }
     catch (std::exception& e)
@@ -1129,12 +1127,19 @@ void TrianglePPDemoApp::readFromFile()
 
     findScalingForDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
     rescalePoints(dempAppPoints, offsetX, offsetY, scaleFactor);
-    flipPoints(dempAppPoints, &middle);
+    
+    // TEST::
+    bool flip = true; // TEST::   
+    if (flip) flipPoints(dempAppPoints, &middle);
 
     drawPoints(dempAppPoints);
 
-    statusBar()->showMessage(tr("Read %1 points and %2 segments from %3")
-                                 .arg(points.size()).arg(segmentEndpoints.size()/2).arg(fileName));
+    QString msg = 
+       (duplicatePointsCount == 0) 
+            ? tr("Read %1 points and %2 segments from %3")
+            : tr("Read %1 unique points and %2 sanitized segments from %3");
+
+    statusBar()->showMessage(msg.arg(points.size()).arg(segmentEndpoints.size() / 2).arg(fileName));
 
     // ...and segments
     drawSegments(segmentEndpoints);
@@ -1144,12 +1149,23 @@ void TrianglePPDemoApp::readFromFile()
     convertPoints(holeMarkers, demoAppHoles);
 
     rescalePoints(demoAppHoles, offsetX, offsetY, scaleFactor);
-    flipAround(demoAppHoles, middle);
+
+    // TEST:::
+    if (flip) flipAround(demoAppHoles, middle);
 
     for (auto& point : demoAppHoles)
     {
-       onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
-                                  { (int)(point.x), (int)(point.y) });
+       QPoint pos{ (int)(point.x), (int)(point.y) };
+
+       if (!ui.hideMarkersCheckBox->isChecked())
+       {
+          onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
+                                     pos);
+       }
+       else
+       {
+          holePoints_ << pos;
+       }
     }
     
     // ...and region markers        
@@ -1164,14 +1180,25 @@ void TrianglePPDemoApp::readFromFile()
     convertPoints(regionMarkers, demoAppRegions);
 
     rescalePoints(demoAppRegions, offsetX, offsetY, scaleFactor);
-    flipAround(demoAppRegions, middle);
+
+    // TEST:::
+    if (flip) flipAround(demoAppRegions, middle);
 
     scaleFactor_ = scaleFactor;
 
     for (auto& point : demoAppRegions)
     {
-       onPointChangedToRegionMarker(-1, // region point index not used at the moment!
-          { (int)(point.x), (int)(point.y) });
+       QPoint pos{ (int)(point.x), (int)(point.y) };
+
+       if (!ui.hideMarkersCheckBox->isChecked())
+       {
+          onPointChangedToRegionMarker(-1, // region point index not used at the moment!
+                                       pos);
+       }
+       else
+       {
+          regionPoints_ << pos;
+       }
     }
 
     // rescale also the areas
