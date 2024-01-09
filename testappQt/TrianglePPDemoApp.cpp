@@ -1155,7 +1155,7 @@ void TrianglePPDemoApp::readFromFile()
 
     for (auto& point : demoAppHoles)
     {
-       QPoint pos{ (int)(point.x), (int)(point.y) };
+       QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
 
        if (!ui.hideMarkersCheckBox->isChecked())
        {
@@ -1188,7 +1188,7 @@ void TrianglePPDemoApp::readFromFile()
 
     for (auto& point : demoAppRegions)
     {
-       QPoint pos{ (int)(point.x), (int)(point.y) };
+       QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
 
        if (!ui.hideMarkersCheckBox->isChecked())
        {
