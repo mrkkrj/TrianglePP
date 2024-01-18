@@ -176,6 +176,10 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    std::vector<Delaunay::Point> delaunayInput;
    for (auto& point : drawnPoints)
    {
+      // TEST::: ---> OLD...
+      //if (isHoleMarker(point))
+      //   continue;
+
       delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
    }
 
@@ -1136,10 +1140,10 @@ void TrianglePPDemoApp::readFromFile()
 
     QString msg = 
        (duplicatePointsCount == 0) 
-            ? tr("Read %1 points and %2 segments from %3")
-            : tr("Read %1 unique points and %2 sanitized segments from %3");
+            ? tr("Read %1 points, %2 segments, and %4 holes from %3")
+            : tr("Read %1 unique points, %2 sanitized segments, and %4 holes from %3");
 
-    statusBar()->showMessage(msg.arg(points.size()).arg(segmentEndpoints.size() / 2).arg(fileName));
+    statusBar()->showMessage(msg.arg(points.size()).arg(segmentEndpoints.size() / 2).arg(fileName).arg(holeMarkers.size()));
 
     // ...and segments
     drawSegments(segmentEndpoints);
@@ -1155,7 +1159,9 @@ void TrianglePPDemoApp::readFromFile()
 
     for (auto& point : demoAppHoles)
     {
-       QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
+       // TEST:::
+       //QPoint pos{ (int)(point.x), (int)(point.y) };
+       QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };       
 
        if (!ui.hideMarkersCheckBox->isChecked())
        {
@@ -1188,6 +1194,8 @@ void TrianglePPDemoApp::readFromFile()
 
     for (auto& point : demoAppRegions)
     {
+       // TEST:::
+       //QPoint pos{ (int)(point.x), (int)(point.y) };
        QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
 
        if (!ui.hideMarkersCheckBox->isChecked())

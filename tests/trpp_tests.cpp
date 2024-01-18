@@ -641,7 +641,6 @@ TEST_CASE("Planar Straight Line Graph (PSLG) triangulation", "[trpp]")
        REQUIRE(segmentsOK);
        REQUIRE(trPlsgGenerator.triangleCount() == 330);
     }
-
 }
 
 
@@ -697,6 +696,43 @@ TEST_CASE("Reading files", "[trpp]")
         REQUIRE(segments.size() / 2 == 148);  // look inside the file
         REQUIRE(holes.size() == 0);           // look inside the file
         REQUIRE(regions.size() == 6);         // look inside the file
+    }
+
+    SECTION("TEST 7.4: reading a BIG .poly file (also: PSLG triangulation regression bug report)")
+    {
+       Delaunay trReader;
+       bool ioStatus = false;
+
+       std::vector<Delaunay::Point> points;
+       std::vector<int> segments;
+       std::vector<Delaunay::Point> holes;
+       std::vector<Delaunay::Point4> regions;
+       int duplicatesCt = 0;
+
+       ioStatus = trReader.readSegments("../tests/Copper-Bottom.poly", points, segments, holes, regions, &duplicatesCt);
+
+       REQUIRE(ioStatus == true);
+       REQUIRE(points.size() == 10161);   // look inside the file
+       REQUIRE(duplicatesCt == 0);
+       REQUIRE(segments.size() / 2 == 10161); // look inside the file
+       REQUIRE(holes.size() == 212);          // look inside the file
+       REQUIRE(regions.size() == 0);          // look inside the file
+
+       // triangulate
+       Delaunay trPlsgGenerator(points);
+
+       bool segmentsOK = trPlsgGenerator.setSegmentConstraint(segments, dbgOutput);
+       REQUIRE(segmentsOK);
+
+       segmentsOK = trPlsgGenerator.setHolesConstraint(holes);
+       REQUIRE(segmentsOK);
+
+       trPlsgGenerator.Triangulate(dbgOutput);
+       REQUIRE(trPlsgGenerator.triangleCount() == 766);
+
+       bool quality = true;
+       trPlsgGenerator.Triangulate(quality, dbgOutput);
+       REQUIRE(trPlsgGenerator.triangleCount() == 2787);
     }
 }
 
@@ -835,7 +871,6 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
        checkTriangleCount(trPlsgGenerator, pslgDelaunayInput, expected, "PSLG duplicate points");
     }
 
-
     SECTION("TEST 9.1.a: PSLG triangluation with duplicate points - bug report .poly file")
     {
        Delaunay trReader;
@@ -870,10 +905,10 @@ TEST_CASE("Segment-constrained triangulation with duplicates", "[trpp]")
        trPlsgGenerator.Triangulate(dbgOutput);
        REQUIRE(trPlsgGenerator.triangleCount() == 2682);
 
-       trPlsgGenerator.Triangulate(true, dbgOutput);
+       bool quality = true;
+       trPlsgGenerator.Triangulate(quality, dbgOutput);
        REQUIRE(trPlsgGenerator.triangleCount() == 7252);
     }
-
 
     // TODO:::
     //  SECTION("TEST 9.2: PSLG triangluation with duplicate points NOT used in segments")
