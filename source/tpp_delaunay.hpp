@@ -174,6 +174,11 @@ namespace tpp
       void setMaxArea(float area) { m_maxArea = area; }
 
       /**
+        @brief: Convenience method
+       */
+      void removeQualityConstraints() { setQualityConstraints(-1, -1); };
+
+      /**
         @brief: Set the segment constraints for triangulation
 
         @param segments: vector of 2 dimensional points where each consecutive pair of points describes

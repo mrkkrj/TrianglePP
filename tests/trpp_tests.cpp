@@ -344,7 +344,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
     constrDelaunaySegments.push_back(Delaunay::Point(0, 1));
     constrDelaunaySegments.push_back(Delaunay::Point(9, 0.75));
 
-    // 4. segment-constrained triangulation
+    // - segment-constrained triangulation
 
     trConstrGenerator.setSegmentConstraint(constrDelaunaySegments);
     trConstrGenerator.useConvexHullWithSegments(true); // don't remove concavities!
@@ -388,7 +388,7 @@ TEST_CASE("segment-constrainded triangluation (CDT)", "[trpp]")
         checkTriangleCount(trConstrGenerator, constrDelaunayInput, expected, "Constrained (quality=true)");
     }
 
-    // 5. triangulation with holes
+    // - triangulation with holes
 
     SECTION("TEST 5.1: holes + segment-constrainded triangluation (CDT)") 
     { 
@@ -712,13 +712,13 @@ TEST_CASE("Reading files", "[trpp]")
        ioStatus = trReader.readSegments("../tests/Copper-Bottom.poly", points, segments, holes, regions, &duplicatesCt);
 
        REQUIRE(ioStatus == true);
-       REQUIRE(points.size() == 10161);   // look inside the file
+       REQUIRE(points.size() == 10161);       // look inside the file
        REQUIRE(duplicatesCt == 0);
        REQUIRE(segments.size() / 2 == 10161); // look inside the file
        REQUIRE(holes.size() == 212);          // look inside the file
        REQUIRE(regions.size() == 0);          // look inside the file
 
-       // triangulate
+       // 1. triangulate
        Delaunay trPlsgGenerator(points);
 
        bool segmentsOK = trPlsgGenerator.setSegmentConstraint(segments, dbgOutput);
@@ -730,7 +730,26 @@ TEST_CASE("Reading files", "[trpp]")
        trPlsgGenerator.Triangulate(dbgOutput);
        REQUIRE(trPlsgGenerator.triangleCount() == 766);
 
+       // 2. triangulate with constraints
        bool quality = true;
+       trPlsgGenerator.setMaxArea(30);
+       trPlsgGenerator.setMinAngle(30);
+
+       bool maybePossible = false;
+       bool triangulationGuaranteed = trPlsgGenerator.checkConstraints(maybePossible);
+
+       //REQUIRE(triangulationGuaranteed == true);
+       REQUIRE(((triangulationGuaranteed == true) || (maybePossible == true))); // !!!
+
+       trPlsgGenerator.TriangulateConf(quality, dbgOutput);
+       REQUIRE(trPlsgGenerator.triangleCount() == 6482);
+
+       trPlsgGenerator.Triangulate(quality, dbgOutput);
+       REQUIRE(trPlsgGenerator.triangleCount() == 6445);
+
+       // 3. triangulate with default constraints
+       trPlsgGenerator.removeQualityConstraints();
+
        trPlsgGenerator.Triangulate(quality, dbgOutput);
        REQUIRE(trPlsgGenerator.triangleCount() == 2787);
     }
