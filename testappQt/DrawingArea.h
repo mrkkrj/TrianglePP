@@ -41,6 +41,7 @@ public:
     int getPointSize() const;
     int getLineWidth() const;
     bool isModified() const;
+    bool hasPoints() const;
 
     void drawPoint(const QPoint& pos);
     void clearPoint(const QPoint& pos);

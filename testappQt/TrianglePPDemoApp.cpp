@@ -84,6 +84,8 @@ namespace {
 
 TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
     : QMainWindow(parent),
+      zoomInAct_(nullptr),
+      zoomOutAct_(nullptr),
       mode_(ManualMode),
       useConstraints_(false),
       triangulated_(false),
@@ -104,12 +106,22 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    
    ui.pointModeComboBox->setCurrentIndex(AutomaticMode);
    ui.hideMarkersCheckBox->hide();
-     
+
+   zoomInAct_ = new QAction(this);
+   zoomInAct_->setShortcut(QKeySequence::ZoomIn);
+   addAction(zoomInAct_);
+   zoomOutAct_ = new QAction(this);
+   zoomOutAct_->setShortcut(QKeySequence::ZoomOut);
+   addAction(zoomOutAct_);
+
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
    connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPDemoApp::onSegmentEndpointsSelected);
    connect(ui.drawAreaWidget, &DrawingArea::pointChangedToHoleMarker, this, &TrianglePPDemoApp::onPointChangedToHoleMarker);
    connect(ui.drawAreaWidget, &DrawingArea::pointMoved, this, &TrianglePPDemoApp::onTriangulationPointMoved);
+
+   connect(zoomInAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomIn);
+   connect(zoomOutAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomOut);
 }
 
 
@@ -344,10 +356,20 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
    QAction action2("Info", this);
    connect(&action2, &QAction::triggered, this, &TrianglePPDemoApp::showInfo);
    ctxtMenu.addAction(&action2);
-   
-   QAction action3("Close", this);
-   connect(&action3, &QAction::triggered, this, &TrianglePPDemoApp::close);
-   ctxtMenu.addAction(&action3);
+
+   QAction action31("Zoom In (Ctrl +)", this);
+   action31.setEnabled(ui.drawAreaWidget->hasPoints());
+   connect(&action31, &QAction::triggered, this, &TrianglePPDemoApp::zoomIn);
+   ctxtMenu.addAction(&action31);
+
+   QAction action32("Zoom Out (Ctrl -)", this);
+   action32.setEnabled(ui.drawAreaWidget->hasPoints());
+   connect(&action32, &QAction::triggered, this, &TrianglePPDemoApp::zoomOut);
+   ctxtMenu.addAction(&action32);
+
+   QAction action4("Close", this);
+   connect(&action4, &QAction::triggered, this, &TrianglePPDemoApp::close);
+   ctxtMenu.addAction(&action4);
 
    ctxtMenu.exec(mapToGlobal(ui.optionsToolButton->geometry().bottomLeft()));
 }
@@ -403,6 +425,8 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 
 void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
 {
+   Q_UNUSED(pointIdx);
+
    drawHoleMarker(pos, c_HoleMarkerColor);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
@@ -414,6 +438,8 @@ void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& p
 
 void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPoint& pos)
 {
+   Q_UNUSED(pointIdx);
+
    drawRegionMarker(pos, c_RegionMarkerColor);
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
@@ -550,10 +576,10 @@ void TrianglePPDemoApp::showExample2()
     pslgDelaunayInput.push_back(Point(1, 0));
     pslgDelaunayInput.push_back(Point(3, 0));
     pslgDelaunayInput.push_back(Point(4, 0));
-    pslgDelaunayInput.push_back(Point(1.5, 1));
-    pslgDelaunayInput.push_back(Point(2.5, 1));
-    pslgDelaunayInput.push_back(Point(1.6, 1.5));
-    pslgDelaunayInput.push_back(Point(2.4, 1.5));
+    pslgDelaunayInput.push_back(Point(1.5f, 1));
+    pslgDelaunayInput.push_back(Point(2.5f, 1));
+    pslgDelaunayInput.push_back(Point(1.6f, 1.5f));
+    pslgDelaunayInput.push_back(Point(2.4f, 1.5f));
     pslgDelaunayInput.push_back(Point(2, 2));
     pslgDelaunayInput.push_back(Point(2, 3));
 
@@ -860,7 +886,7 @@ void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos, const QColor& color)
 
    ui.drawAreaWidget->setDrawColor(color);
    QFont f;
-   f.setPixelSize(22);
+   f.setPixelSize(22); // OPEN TODO:: adapt to the size of viewport!!!!
 
    ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
       
@@ -1004,6 +1030,94 @@ void TrianglePPDemoApp::rescalePoints(std::vector<Point>& points, double offsetX
 }
 
 
+void TrianglePPDemoApp::zoomIn()
+{
+    zoomPoints(1.25);
+}
+
+
+void TrianglePPDemoApp::zoomOut()
+{
+    zoomPoints(0.75);
+}
+
+
+void TrianglePPDemoApp::zoomPoints(float zoomFactor)
+{
+    auto drawnPoints = ui.drawAreaWidget->getPointCoordinates();
+    auto holeMarkers = holePoints_;
+    auto regionMarkers = regionPoints_;
+    auto regionMaxAreas = regionMaxAreas_;
+
+    ui.drawAreaWidget->clearImage();
+    holePoints_.clear();
+    regionPoints_.clear();
+    regionMaxAreas_.clear();
+
+    // OPEN TODO::: region markers & region constraints!!!
+
+    for (auto& point : drawnPoints)
+    {
+       QPoint scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
+       ui.drawAreaWidget->drawPoint(scaledPt);
+    }
+
+    for (auto& point : holeMarkers)
+    {
+       QPoint scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
+       ui.drawAreaWidget->drawPoint(scaledPt);
+
+       if (!ui.hideMarkersCheckBox->isChecked())
+       {
+          onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
+                                     scaledPt);
+       }
+       else
+       {
+          holePoints_ << scaledPt;
+       }
+    }
+
+    for (auto& point : regionMarkers)
+    {
+        QPoint scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
+        ui.drawAreaWidget->drawPoint(scaledPt);
+
+        if (!ui.hideMarkersCheckBox->isChecked())
+        {
+           onPointChangedToRegionMarker(-1, // hole point index not used at the moment!
+                                        scaledPt);
+        }
+        else
+        {
+           regionPoints_ << scaledPt;
+        }
+    }
+
+    for (auto& area : regionMaxAreas)
+    {
+       regionMaxAreas_.push_back(area * (zoomFactor * zoomFactor));
+    }
+
+
+    // redraw
+    if (triangulated_)
+    {
+       on_triangualtePointsPushButton_clicked();
+    }
+    else
+    {
+        auto segmentEndpointIndexes = segmentEndpointIndexes_.toStdVector();
+        segmentEndpointIndexes_.clear();
+
+        drawSegments(segmentEndpointIndexes);
+    }
+
+
+    // OPEN TODO:: tesselated_ --> TESSELATE
+}
+
+
 QColor TrianglePPDemoApp::segmentColor() const
 {         
    return seperateSegmentColor_ ? c_SegmentColor : c_TriangleColor;
@@ -1130,11 +1244,8 @@ void TrianglePPDemoApp::readFromFile()
     float middle;
 
     findScalingForDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
-    rescalePoints(dempAppPoints, offsetX, offsetY, scaleFactor);
-    
-    // TEST::
-    bool flip = true; // TEST::   
-    if (flip) flipPoints(dempAppPoints, &middle);
+    rescalePoints(dempAppPoints, offsetX, offsetY, scaleFactor);    
+    flipPoints(dempAppPoints, &middle);
 
     drawPoints(dempAppPoints);
 
@@ -1153,9 +1264,7 @@ void TrianglePPDemoApp::readFromFile()
     convertPoints(holeMarkers, demoAppHoles);
 
     rescalePoints(demoAppHoles, offsetX, offsetY, scaleFactor);
-
-    // TEST:::
-    if (flip) flipAround(demoAppHoles, middle);
+    flipAround(demoAppHoles, middle);
 
     for (auto& point : demoAppHoles)
     {
@@ -1186,9 +1295,7 @@ void TrianglePPDemoApp::readFromFile()
     convertPoints(regionMarkers, demoAppRegions);
 
     rescalePoints(demoAppRegions, offsetX, offsetY, scaleFactor);
-
-    // TEST:::
-    if (flip) flipAround(demoAppRegions, middle);
+    flipAround(demoAppRegions, middle);
 
     scaleFactor_ = scaleFactor;
 
@@ -1251,4 +1358,3 @@ void TrianglePPDemoApp::drawSegments(const std::vector<int>& segmentEndpointsInd
         onSegmentEndpointsSelected(segmentEndpointsIndexes[i], segmentEndpointsIndexes[i + 1]);
     }
 }
-

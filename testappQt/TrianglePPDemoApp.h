@@ -75,11 +75,17 @@ private:
    void flipPoints(std::vector<Point>& points, float* middle = nullptr) const;
    void flipAround(std::vector<Point>& points, float middle) const;
    void rescalePoints(std::vector<Point>& points, double offsetX, double offsetY, double scaleFactor) const;
+   void zoomIn();
+   void zoomOut();
+   void zoomPoints(float zoomFactor);
 
    QColor segmentColor() const;
 
 private:
     Ui::TrianglePPDemoAppClass ui;
+
+    QAction* zoomInAct_;
+    QAction* zoomOutAct_;
 
     enum PointGenerationMode { 
        ManualMode = 0, AutomaticMode, FromImageMode, FromFileMode, Example1Mode, Example2Mode

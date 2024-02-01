@@ -95,6 +95,12 @@ bool DrawingArea::isModified() const
 }
 
 
+bool DrawingArea::hasPoints() const
+{
+    return points_.size() > 0;
+}
+
+
 void DrawingArea::drawPoint(const QPoint& pos)
 {
    drawPointAt(pos);

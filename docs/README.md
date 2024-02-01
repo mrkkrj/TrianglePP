@@ -120,11 +120,9 @@ or
 
 However, the minimum angle constraint has some caveats. The documentation of the original Triangle package says the following:
 
-"If the minimum angle is 28.6 degrees or smaller, Triangle is *mathematically guaranteed* to terminate (assuming infinite precision arithmetic -
-Triangle may fail to terminate if you run out of precision). In practice, Triangle often succeeds for minimum angles up to 34 degrees.
-For some meshes, however, you might need to reduce the minimum angle to avoid problems associated with insufficient floating-point precision."
+"If the minimum angle is 28.6 degrees or smaller, Triangle is **mathematically guaranteed** to terminate (assuming infinite precision arithmetic - Triangle may fail to terminate if you run out of precision). In practice, Triangle often succeeds for minimum angles up to 34 degrees. For some meshes, however, you might need to reduce the minimum angle to avoid problems associated with insufficient floating-point precision."
 
-There is a method in the Triangle++ API that checks current constraints for viability_
+There is a method in the Triangle++ API that checks current constraints for viability:
 
     /**
       @brief: Are the quality constraints acceptable?
