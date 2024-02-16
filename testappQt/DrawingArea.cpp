@@ -101,7 +101,7 @@ bool DrawingArea::hasPoints() const
 }
 
 
-void DrawingArea::drawPoint(const QPoint& pos)
+void DrawingArea::drawPoint(const QPointF& pos)
 {
    drawPointAt(pos);
 
@@ -116,7 +116,7 @@ void DrawingArea::drawPoint(const QPoint& pos)
 }
 
 
-void DrawingArea::clearPoint(const QPoint& pos)
+void DrawingArea::clearPoint(const QPointF& pos)
 {
    if (removePoint(pos, points_))
    {
@@ -126,7 +126,7 @@ void DrawingArea::clearPoint(const QPoint& pos)
 }
 
 
-void DrawingArea::drawLine(const QPoint& from, const QPoint& to)
+void DrawingArea::drawLine(const QPointF& from, const QPointF& to)
 {
    startPos_ = from;
    drawLineTo(to);
@@ -135,7 +135,7 @@ void DrawingArea::drawLine(const QPoint& from, const QPoint& to)
 }
 
 
-void DrawingArea::drawText(const QPoint& pos, const QString& txt, const QFont* font)
+void DrawingArea::drawText(const QPointF& pos, const QString& txt, const QFont* font)
 {
    QPainter painter(&img_);
    auto pen = QPen(penColor_);
@@ -160,13 +160,13 @@ void DrawingArea::drawText(const QPoint& pos, const QString& txt, const QFont* f
 }
 
 
-QVector<QPoint> DrawingArea::getPointCoordinates() const
+QVector<QPointF> DrawingArea::getPointCoordinates() const
 {
    return points_;
 }
 
 
-QVector<QPoint> DrawingArea::getHoleMarkerCoordinates() const
+QVector<QPointF> DrawingArea::getHoleMarkerCoordinates() const
 {
    return holeMarkerPoints_;
 }
@@ -456,7 +456,7 @@ void DrawingArea::changePointToHoleMarker()
 
 // private methods
 
-void DrawingArea::drawLineTo(const QPoint& endPos)
+void DrawingArea::drawLineTo(const QPointF& endPos)
 {
    QPainter painter(&img_);
    auto pen = QPen(penColor_, penWidth_, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -466,14 +466,14 @@ void DrawingArea::drawLineTo(const QPoint& endPos)
 
    // update only the changed region
    int rad = (penWidth_ / 2) + 2;
-   update(QRect(startPos_, endPos).normalized().adjusted(-rad, -rad, +rad, +rad));
+   update(QRectF(startPos_, endPos).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
 
    startPos_ = endPos;
    imgDirty_ = true;
 }
 
 
-void DrawingArea::drawPointAt(const QPoint& pos)
+void DrawingArea::drawPointAt(const QPointF& pos)
 {
    QPainter painter(&img_);
 
@@ -500,7 +500,7 @@ void DrawingArea::drawPointAt(const QPoint& pos)
 }
 
 
-bool DrawingArea::removePoint(const QPoint& pos, QVector<QPoint>& pointsList)
+bool DrawingArea::removePoint(const QPointF& pos, QVector<QPointF>& pointsList)
 {
    int idx = pointsList.indexOf(pos);
 
@@ -536,13 +536,13 @@ void DrawingArea::resizeImage(QImage& img, const QSize& newSize)
    resized.fill(qRgb(255, 255, 255));
 
    QPainter painter(&resized);
-   painter.drawImage(QPoint(0, 0), img);
+   painter.drawImage(QPointF(0, 0), img);
 
    img = resized;
 }
 
 
-bool DrawingArea::pointClicked(const QPoint& clickPos, int& pointIndex) const
+bool DrawingArea::pointClicked(const QPointF& clickPos, int& pointIndex) const
 {
    for (auto& pt : points_)
    {
@@ -558,7 +558,7 @@ bool DrawingArea::pointClicked(const QPoint& clickPos, int& pointIndex) const
 }
 
 
-void DrawingArea::showPointCtxMenu(const QPoint& pos)
+void DrawingArea::showPointCtxMenu(const QPointF& pos)
 {
    QMenu ctxtMenu(tr(""), this);
 
@@ -593,5 +593,5 @@ void DrawingArea::showPointCtxMenu(const QPoint& pos)
    ctxtMenu.addAction(&action5);
    action5.setEnabled(lineStartPointIdx_ == -1 && !isHoleMarker);
 
-   ctxtMenu.exec(mapToGlobal(startPos_));
+   ctxtMenu.exec(mapToGlobal(startPos_.toPoint()));
 }

@@ -10,7 +10,7 @@
 #include <QWidget>
 #include <QColor>
 #include <QImage>
-#include <QPoint>
+#include <QPointF>
 #include <QVector>
 
 /**
@@ -43,13 +43,13 @@ public:
     bool isModified() const;
     bool hasPoints() const;
 
-    void drawPoint(const QPoint& pos);
-    void clearPoint(const QPoint& pos);
-    void drawLine(const QPoint& from, const QPoint& to);
-    void drawText(const QPoint& pos, const QString& txt, const QFont* font = nullptr);
+    void drawPoint(const QPointF& pos);
+    void clearPoint(const QPointF& pos);
+    void drawLine(const QPointF& from, const QPointF& to);
+    void drawText(const QPointF& pos, const QString& txt, const QFont* font = nullptr);
 
-    QVector<QPoint> getPointCoordinates() const;
-    QVector<QPoint> getHoleMarkerCoordinates() const;
+    QVector<QPointF> getPointCoordinates() const;
+    QVector<QPointF> getHoleMarkerCoordinates() const;
 
     bool openImage(const QString& fileName);
     bool saveImage(const QString& fileName, const char* fileFormat);
@@ -57,15 +57,15 @@ public:
     void printImage();
 
 signals:
-   void pointAdded(const QPoint& pos);
-   void pointDeleted(const QPoint& pos);
-   void holeMarkerDeleted(const QPoint& pos);
-   void lineAdded(const QPoint& start, const QPoint& end);
-   void lineDeleted(const QPoint& start, const QPoint& end);
+   void pointAdded(const QPointF& pos);
+   void pointDeleted(const QPointF& pos);
+   void holeMarkerDeleted(const QPointF& pos);
+   void lineAdded(const QPointF& start, const QPointF& end);
+   void lineDeleted(const QPointF& start, const QPointF& end);
    void linePointsSelected(int startIdx, int endIdx);
-   void pointChangedToHoleMarker(int pointIdx, const QPoint& pos);
-   void pointMoved(const QPoint& pos1, const QPoint& pos2);
-   void pointPositionChanged(const QPoint& originalPos, const QPoint& currentPos);
+   void pointChangedToHoleMarker(int pointIdx, const QPointF& pos);
+   void pointMoved(const QPointF& pos1, const QPointF& pos2);
+   void pointPositionChanged(const QPointF& originalPos, const QPointF& currentPos);
    
 protected:
    void paintEvent(QPaintEvent* ev) override;
@@ -84,12 +84,12 @@ private slots:
    void changePointToHoleMarker();
 
 private:
-   void drawLineTo(const QPoint& endPos);
-   void drawPointAt(const QPoint& pos);
-   bool removePoint(const QPoint& pos, QVector<QPoint>& points);
+   void drawLineTo(const QPointF& endPos);
+   void drawPointAt(const QPointF& pos);
+   bool removePoint(const QPointF& pos, QVector<QPointF>& points);
    void resizeImage(QImage& img, const QSize& newSz); 
-   bool pointClicked(const QPoint& clickPos, int& pointIndex) const;
-   void showPointCtxMenu(const QPoint& pos);   
+   bool pointClicked(const QPointF& clickPos, int& pointIndex) const;
+   void showPointCtxMenu(const QPointF& pos);
 
    DrawMode mode_;
    int penWidth_;
@@ -97,11 +97,11 @@ private:
    QColor penColor_;
 
    bool lineStarted_;
-   QPoint startPos_;
-   QPoint lastMovingPos_;
+   QPointF startPos_;
+   QPointF lastMovingPos_;
    int startPosIndex_;
-   QVector<QPoint> points_;
-   QVector<QPoint> holeMarkerPoints_;
+   QVector<QPointF> points_;
+   QVector<QPointF> holeMarkerPoints_;
 
    int lineStartPointIdx_;
 

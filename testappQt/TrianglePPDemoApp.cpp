@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QPixmap>
+#include <QScrollBar> // TEST::
 
 #include <vector>
 #include <random>
@@ -39,7 +40,7 @@ namespace {
    const QColor c_RegionMarkerColor = Qt::darkMagenta;
 
    // impl. helpers
-   QPoint getDelaunayResultPoint(
+   QPointF getDelaunayResultPoint(
          const Delaunay& trGenerator,
          int resultIndex,
          const Delaunay::Point& steinerPt)
@@ -61,11 +62,11 @@ namespace {
           y = trGenerator.pointAtVertexId(resultIndex)[1];
       }
 
-      return QPoint(x, y);
+      return QPointF(x, y);
    }
 
 
-   std::vector<Delaunay::Point> toTppPointVector(const QVector<QPoint>& qPoints)
+   std::vector<Delaunay::Point> toTppPointVector(const QVector<QPointF>& qPoints)
    {
       std::vector<Delaunay::Point> tppPoints;
 
@@ -129,6 +130,10 @@ void TrianglePPDemoApp::on_generatePointsPushButton_clicked()
 {
    clearDisplay();
 
+   // TEST::
+   readFromFile_ = false;
+   zoomFactor_ = 1.0;
+
    switch (mode_)
    {
    case ManualMode:
@@ -186,14 +191,23 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    }
 
    std::vector<Delaunay::Point> delaunayInput;
-   for (auto& point : drawnPoints)
-   {
-      // TEST::: ---> OLD...
-      //if (isHoleMarker(point))
-      //   continue;
 
-      delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
+   if(readFromFile_)
+   {
+       // TEST:::
+       for (auto& point : vertexPointsOrig_)
+       {
+          delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
+       }
    }
+   else
+   {
+       for (auto& point : drawnPoints)
+       {
+          delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
+       }
+   }
+
 
 #ifdef TRIANGLE_DETAIL_DEBUG
    auto trace = tpp::Debug;
@@ -326,7 +340,7 @@ void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
 
    for (auto& hole : holePoints_)
    {
-      drawHoleMarker(hole, holeColor);
+      drawMarkerPoint(hole, holeColor, "H");
    }
 
    // plus region markers
@@ -334,7 +348,7 @@ void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
 
    for (auto& point : regionPoints_)
    {
-      drawRegionMarker(point, regionColor);
+      drawMarkerPoint(point, regionColor, "R");
    }
 
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
@@ -377,7 +391,7 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
 
 // private methods
 
-void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
+void TrianglePPDemoApp::onTriangulationPointDeleted(const QPointF& pos)
 {
    if (holePoints_.contains(pos))
    {
@@ -392,7 +406,7 @@ void TrianglePPDemoApp::onTriangulationPointDeleted(const QPoint& pos)
       {
          // overpaint "H" with white!
          //  --> OPEN TODO:: not quite working, some outline still visible!
-         drawHoleMarker(pos, Qt::white);
+         drawMarkerPoint(pos, Qt::white, "H");
       }
    }
 
@@ -423,11 +437,11 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 }
 
 
-void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& pos)
+void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPointF& pos)
 {
    Q_UNUSED(pointIdx);
 
-   drawHoleMarker(pos, c_HoleMarkerColor);
+   drawMarkerPoint(pos, c_HoleMarkerColor, "H");
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    holePoints_ << pos;
@@ -436,11 +450,11 @@ void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPoint& p
 }
 
 
-void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPoint& pos)
+void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPointF& pos)
 {
    Q_UNUSED(pointIdx);
 
-   drawRegionMarker(pos, c_RegionMarkerColor);
+   drawMarkerPoint(pos, c_RegionMarkerColor, "R");
    ui.drawAreaWidget->setDrawColor(c_TriangleColor);
 
    regionPoints_ << pos;
@@ -449,7 +463,7 @@ void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPoint&
 }
 
 
-void TrianglePPDemoApp::onTriangulationPointMoved(const QPoint& pos1, const QPoint& pos2)
+void TrianglePPDemoApp::onTriangulationPointMoved(const QPointF& pos1, const QPointF& pos2)
 {
    Q_UNUSED(pos1);
    Q_UNUSED(pos2);
@@ -522,7 +536,7 @@ void TrianglePPDemoApp::generateRandomPoints()
       // OPEN TODO:: 
       //  -- check minimum distance to other points ????
 
-      ui.drawAreaWidget->drawPoint({distrWidth(reng), distrHeight(reng)});
+      ui.drawAreaWidget->drawPoint(QPointF(distrWidth(reng), distrHeight(reng)));
    }     
 }
 
@@ -617,7 +631,7 @@ void TrianglePPDemoApp::showExample2()
     drawSegments(pslgSegmentEndpoints);
 
     // OPEN TODO:: draw holes
-        // ....
+    // ....
 }
 
 
@@ -733,7 +747,7 @@ void TrianglePPDemoApp::clearVoronoiPoints()
 }
 
 
-void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPoint>& pointsOnScreen)
+void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPointF>& pointsOnScreen)
 {
     // draw triangles
     for (tpp::FaceIterator fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
@@ -749,7 +763,18 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
 
        auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
        {
-           return getDelaunayResultPoint(trGenerator, index, dpoint);
+           if(readFromFile_)
+           {
+               auto qpoint = getDelaunayResultPoint(trGenerator, index, dpoint);
+
+               // rescale + move!
+               return QPointF((qpoint.x() + offsetX_) * scaleFactor_, (qpoint.y() + offsetY_) * scaleFactor_);
+
+
+               // and flip!
+           }
+           else
+              return getDelaunayResultPoint(trGenerator, index, dpoint);
        };
 
        // draw triangle
@@ -788,8 +813,8 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
       double x = point[0];
       double y = point[1];
 
-      ui.drawAreaWidget->drawPoint(QPoint(x, y));
-      voronoiPoints_.append(QPoint(x, y));
+      ui.drawAreaWidget->drawPoint(QPointF(x, y));
+      voronoiPoints_.append(QPointF(x, y));
    }
 
    // ... and Voronoi edges
@@ -824,14 +849,14 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
          double xinfininty = (xend > xstart) ? 10000 : 0;
          double yinfininty = xinfininty * slope + intercept;
                   
-         ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xinfininty, yinfininty));
+         ui.drawAreaWidget->drawLine(QPointF(xstart, ystart), QPointF(xinfininty, yinfininty));
       }
       else
       {
          double xend = p2[0];
          double yend = p2[1];
 
-         ui.drawAreaWidget->drawLine(QPoint(xstart, ystart), QPoint(xend, yend));
+         ui.drawAreaWidget->drawLine(QPointF(xstart, ystart), QPointF(xend, yend));
       }
    }
 
@@ -870,17 +895,25 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
       QMessageBox::critical(this, tr("Triangle++"), tr("Incorrect segment constraints, ignoring!"));
    }
 
-   trGenerator.setHolesConstraint(toTppPointVector(holePoints_));   
+   if(readFromFile_)
+   {
+      // TEST:::
+      trGenerator.setHolesConstraint(toTppPointVector(holePointsOrig_));
+   }
+   else
+   {
+      trGenerator.setHolesConstraint(toTppPointVector(holePoints_));
+   }
 }
 
 
-bool TrianglePPDemoApp::isHoleMarker(const QPoint& point) const
+bool TrianglePPDemoApp::isHoleMarker(const QPointF& point) const
 {
    return holePoints_.contains(point);
 }
 
 
-void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos, const QColor& color)
+void TrianglePPDemoApp::drawMarkerPoint(const QPointF& pos, const QColor& color, const QString& text)
 {
    auto currMode = ui.drawAreaWidget->getDrawMode();
 
@@ -888,25 +921,7 @@ void TrianglePPDemoApp::drawHoleMarker(const QPoint& pos, const QColor& color)
    QFont f;
    f.setPixelSize(22); // OPEN TODO:: adapt to the size of viewport!!!!
 
-   ui.drawAreaWidget->drawText(pos * 0.96, "H", &f);
-      
-   ui.drawAreaWidget->setDrawMode(DrawingArea::DrawHoleMarker);
-   ui.drawAreaWidget->drawPoint(pos);
-   ui.drawAreaWidget->setDrawMode(currMode);
-}
-
-
-// OPEN TODO::: drawMarker() generic methos?????
-
-void TrianglePPDemoApp::drawRegionMarker(const QPoint& pos, const QColor& color)
-{
-   auto currMode = ui.drawAreaWidget->getDrawMode();
-
-   ui.drawAreaWidget->setDrawColor(color);
-   QFont f;
-   f.setPixelSize(22);
-
-   ui.drawAreaWidget->drawText(pos * 0.96, "R", &f); 
+   ui.drawAreaWidget->drawText(pos * 0.96, text, &f);
 
    ui.drawAreaWidget->setDrawMode(DrawingArea::DrawHoleMarker);
    ui.drawAreaWidget->drawPoint(pos);
@@ -1058,13 +1073,13 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
 
     for (auto& point : drawnPoints)
     {
-       QPoint scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
+       QPointF scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
        ui.drawAreaWidget->drawPoint(scaledPt);
     }
 
     for (auto& point : holeMarkers)
     {
-       QPoint scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
+       QPointF scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
        ui.drawAreaWidget->drawPoint(scaledPt);
 
        if (!ui.hideMarkersCheckBox->isChecked())
@@ -1080,7 +1095,7 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
 
     for (auto& point : regionMarkers)
     {
-        QPoint scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
+        QPointF scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
         ui.drawAreaWidget->drawPoint(scaledPt);
 
         if (!ui.hideMarkersCheckBox->isChecked())
@@ -1101,6 +1116,13 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
 
 
     // redraw
+
+    // TEST:::
+#if 1
+    ui.drawAreaWidget->setMinimumSize(ui.drawAreaWidget->width() * zoomFactor,
+                              ui.drawAreaWidget->height() * zoomFactor);
+#endif
+
     if (triangulated_)
     {
        on_triangualtePointsPushButton_clicked();
@@ -1115,6 +1137,7 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
 
 
     // OPEN TODO:: tesselated_ --> TESSELATE
+
 }
 
 
@@ -1221,6 +1244,9 @@ void TrianglePPDemoApp::readFromFile()
        return;
     } 
 
+    // TEST::
+    readFromFile_ = true;
+
     // convert points
     std::vector<Point> dempAppPoints;
 
@@ -1235,7 +1261,7 @@ void TrianglePPDemoApp::readFromFile()
         }
     };
 
-    convertPoints(points, dempAppPoints);
+    convertPoints(points, dempAppPoints);    
 
     // draw points
     double offsetX = 0;
@@ -1243,9 +1269,14 @@ void TrianglePPDemoApp::readFromFile()
     double scaleFactor = 1;
     float middle;
 
+    // TEST:::
+    bool flip = false;      // OPEN TODO::: remove!!!
+    // TEST:::
+
+
     findScalingForDrawArea(trGenerator, offsetX, offsetY, scaleFactor);
     rescalePoints(dempAppPoints, offsetX, offsetY, scaleFactor);    
-    flipPoints(dempAppPoints, &middle);
+    if(flip) flipPoints(dempAppPoints, &middle);
 
     drawPoints(dempAppPoints);
 
@@ -1264,13 +1295,14 @@ void TrianglePPDemoApp::readFromFile()
     convertPoints(holeMarkers, demoAppHoles);
 
     rescalePoints(demoAppHoles, offsetX, offsetY, scaleFactor);
-    flipAround(demoAppHoles, middle);
+    if(flip) flipAround(demoAppHoles, middle);
 
     for (auto& point : demoAppHoles)
     {
        // TEST:::
-       //QPoint pos{ (int)(point.x), (int)(point.y) };
-       QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };       
+       QPointF pos{ (point.x), (point.y) };
+       //QPointF pos{ (int)(point.x), (int)(point.y) };
+       //QPointF pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
 
        if (!ui.hideMarkersCheckBox->isChecked())
        {
@@ -1295,15 +1327,19 @@ void TrianglePPDemoApp::readFromFile()
     convertPoints(regionMarkers, demoAppRegions);
 
     rescalePoints(demoAppRegions, offsetX, offsetY, scaleFactor);
-    flipAround(demoAppRegions, middle);
+    if(flip) flipAround(demoAppRegions, middle);
 
     scaleFactor_ = scaleFactor;
+    offsetX_ = offsetX;
+    offsetY_ = offsetY;
+    flippedAroundYPoint_ = middle;
 
     for (auto& point : demoAppRegions)
     {
        // TEST:::
-       //QPoint pos{ (int)(point.x), (int)(point.y) };
-       QPoint pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
+       QPointF pos{ (point.x), (point.y) };
+       //QPointF pos{ (int)(point.x), (int)(point.y) };
+       //QPointF pos{ (int)(point.x + 0.5), (int)(point.y + 0.5) };
 
        if (!ui.hideMarkersCheckBox->isChecked())
        {
@@ -1321,6 +1357,29 @@ void TrianglePPDemoApp::readFromFile()
     {     
        regionMaxAreas_.push_back(rc[3] * (scaleFactor_ * scaleFactor_));
     }
+
+
+    // TEST:::
+    // save original points:
+
+    auto convertToQPoints = [](std::vector<Delaunay::Point>& trppPoints, QVector<QPointF>& qPoints)
+    {
+        for (size_t i = 0; i < trppPoints.size(); ++i)
+        {
+           double x = trppPoints[i][0];
+           double y = trppPoints[i][1];
+
+           qPoints.append(QPointF(x, y));
+        }
+    };
+
+    vertexPointsOrig_.clear();
+    convertToQPoints(points, vertexPointsOrig_);
+
+    holePointsOrig_.clear();
+    convertToQPoints(holeMarkers, holePointsOrig_);
+
+    // TEST:::
 }
 
 
@@ -1329,7 +1388,7 @@ void TrianglePPDemoApp::drawPoints(const std::vector<Point>& points, float offse
     for (size_t i = 0; i < points.size(); ++i)
     {
         auto& pt = points[i];
-        ui.drawAreaWidget->drawPoint({ (int)(pt.x * scaleFactor + offsetX), (int)(pt.y * scaleFactor + offsetY) });
+        ui.drawAreaWidget->drawPoint({ (pt.x * scaleFactor + offsetX), (pt.y * scaleFactor + offsetY) });
     }
 }
 

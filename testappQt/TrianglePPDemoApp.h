@@ -37,11 +37,11 @@ public slots:
    void on_optionsToolButton_clicked();
 
 private slots:
-   void onTriangulationPointDeleted(const QPoint& pos);
+   void onTriangulationPointDeleted(const QPointF& pos);
    void onSegmentEndpointsSelected(int startPointIdx, int endPointIdx);
-   void onPointChangedToHoleMarker(int pointIdx, const QPoint& pos);
-   void onPointChangedToRegionMarker(int pointIdx, const QPoint& pos);
-   void onTriangulationPointMoved(const QPoint& pos1, const QPoint& pos2);
+   void onPointChangedToHoleMarker(int pointIdx, const QPointF& pos);
+   void onPointChangedToRegionMarker(int pointIdx, const QPointF& pos);
+   void onTriangulationPointMoved(const QPointF& pos1, const QPointF& pos2);
 
 private:
    void setGenerateButtonText();
@@ -52,12 +52,11 @@ private:
    void showInfo();
    void clearDisplay();
    void clearVoronoiPoints();
-   void drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPoint>& pointsOnScreen);
+   void drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QPointF>& pointsOnScreen);
    void drawVoronoiTesselation(tpp::Delaunay& trGenerator);
    void configDelaunay(tpp::Delaunay& trGenerator);
-   bool isHoleMarker(const QPoint& point) const;
-   void drawHoleMarker(const QPoint& pos, const QColor& color);
-   void drawRegionMarker(const QPoint& pos, const QColor& color);
+   bool isHoleMarker(const QPointF& point) const;
+   void drawMarkerPoint(const QPointF& pos, const QColor& color, const QString& text);
    void findScalingForDrawArea(const tpp::Delaunay& trGenerator, double& offsetX, double& offsetY, double& scaleFactor) const;
 
    void writeToFile();
@@ -105,10 +104,27 @@ private:
 
     QString lastFileDir_;
 
-    QVector<QPoint> voronoiPoints_;
+    QVector<QPointF> voronoiPoints_;
     QVector<int> segmentEndpointIndexes_;
-    QVector<QPoint> holePoints_;
-    QVector<QPoint> regionPoints_;
+    QVector<QPointF> holePoints_;
+    QVector<QPointF> regionPoints_;
     QVector<float> regionMaxAreas_;
-    float scaleFactor_;
+
+    float scaleFactor_; // if read from file!
+    // TEST
+    float offsetX_;
+    float offsetY_;
+    float flippedAroundYPoint_;
+
+    // TEST:::
+    bool readFromFile_ = false; // OPEN TODO::: to constr
+
+    // TEST::
+    float zoomFactor_ = 1.0; // OPEN TODO::: to constr
+
+    QVector<QPointF> vertexPointsOrig_;
+    QVector<QPointF> holePointsOrig_;
+    QVector<QPointF> regionPointsOrig_;
+    // TEST:::
+
 };
