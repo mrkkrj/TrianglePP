@@ -78,6 +78,7 @@ private:
    void zoomOut();
    void zoomPoints(float zoomFactor);
 
+   QPointF rescaleReadPoint(const QPointF& point) const;
    QColor segmentColor() const;
 
 private:
@@ -110,21 +111,17 @@ private:
     QVector<QPointF> regionPoints_;
     QVector<float> regionMaxAreas_;
 
-    float scaleFactor_; // if read from file!
-    // TEST
+    // support for precise triangulation when points/segments are read form file:
+    bool readFromFile_;
+
+    float scaleFactor_;
     float offsetX_;
     float offsetY_;
-    float flippedAroundYPoint_;
-
-    // TEST:::
-    bool readFromFile_ = false; // OPEN TODO::: to constr
-
-    // TEST::
-    float zoomFactor_ = 1.0; // OPEN TODO::: to constr
+    float middle_;
+    float zoomFactor_;
 
     QVector<QPointF> vertexPointsOrig_;
     QVector<QPointF> holePointsOrig_;
     QVector<QPointF> regionPointsOrig_;
-    // TEST:::
-
+    QVector<float> regionMaxAreasOrig_;
 };
