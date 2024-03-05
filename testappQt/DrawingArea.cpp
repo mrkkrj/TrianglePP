@@ -377,7 +377,8 @@ void DrawingArea::resizeEvent(QResizeEvent* ev)
       update();
    }
 
-   QWidget::resizeEvent(ev);
+   QWidget::resizeEvent(ev);   
+   emit drawingAreaResized();
 }
 
 

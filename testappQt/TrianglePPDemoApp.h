@@ -36,6 +36,9 @@ public slots:
    void on_hideMarkersCheckBox_toggled(bool checked);
    void on_optionsToolButton_clicked();
 
+protected:
+   void resizeEvent(QResizeEvent *event) override;
+
 private slots:
    void onTriangulationPointDeleted(const QPointF& pos);
    void onSegmentEndpointsSelected(int startPointIdx, int endPointIdx);
@@ -77,6 +80,7 @@ private:
    void zoomIn();
    void zoomOut();
    void zoomPoints(float zoomFactor);
+   void resetZoom();
 
    QPointF rescaleReadPoint(const QPointF& point) const;
    QColor segmentColor() const;
@@ -119,6 +123,7 @@ private:
     float offsetY_;
     float middle_;
     float zoomFactor_;
+    QSize originalSize_;
 
     QVector<QPointF> vertexPointsOrig_;
     QVector<QPointF> holePointsOrig_;

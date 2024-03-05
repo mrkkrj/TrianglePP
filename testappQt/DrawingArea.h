@@ -66,6 +66,7 @@ signals:
    void pointChangedToHoleMarker(int pointIdx, const QPointF& pos);
    void pointMoved(const QPointF& pos1, const QPointF& pos2);
    void pointPositionChanged(const QPointF& originalPos, const QPointF& currentPos);
+   void drawingAreaResized();
    
 protected:
    void paintEvent(QPaintEvent* ev) override;

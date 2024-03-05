@@ -91,6 +91,12 @@ namespace {
        }
    };
 
+
+   QPointF multiplyPoint(const QPointF& point, float multFactor)
+   {
+      return QPointF(point.x() * multFactor, point.y() * multFactor);
+   }
+
 }
 
 
@@ -144,11 +150,8 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
 void TrianglePPDemoApp::on_generatePointsPushButton_clicked()
 {
    clearDisplay();
-
+   resetZoom();
    readFromFile_ = false;
-   zoomFactor_ = 1.0;
-
-   // OPEN TODO::: reset the size of DrawingArea ???
 
    switch (mode_)
    {
@@ -160,12 +163,8 @@ void TrianglePPDemoApp::on_generatePointsPushButton_clicked()
       break;
    case FromImageMode:
       // find characteristic points in the image
-
       // OPEN TODO::: --> image processing, characteristic points
-      //Q_ASSERT(false && "FromImageMode ---> NYI!!!");
       QMessageBox::critical(this/*qApp->activeModalWidget()*/, "ERROR", "FromImage mode ---> NYI, sorry !!!");
-      // OPEN TODO::: end ---
-
       break;
    case FromFileMode:
       readFromFile();
@@ -222,7 +221,6 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
           delaunayInput.push_back(Delaunay::Point(point.x(), point.y()));
        }
    }
-
 
 #ifdef TRIANGLE_DETAIL_DEBUG
    auto trace = tpp::Debug;
@@ -306,8 +304,10 @@ void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
 {
    Q_ASSERT(ManualMode == PointGenerationMode(0));
 
-   mode_ = PointGenerationMode(index); // 0 == ManualMode!
+   mode_ = PointGenerationMode(index); // starting from 0 == ManualMode!
    setGenerateButtonText();
+
+   readFromFile_ = false;
 
    // some immediate action needed?
    switch (mode_)
@@ -318,16 +318,19 @@ void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
 
    case FromFileMode:
       clearDisplay();
+      resetZoom();
       readFromFile();
       break;
 
    case Example1Mode:
        clearDisplay();
+       resetZoom();
        showExample1();
        break;
 
    case Example2Mode:
        clearDisplay();
+       resetZoom();
        showExample2();
        break;
 
@@ -351,7 +354,7 @@ void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
 {
    // repaint all holes
-   QColor holeColor = checked ? Qt::white : c_HoleMarkerColor; // OPEN TODO::: holeMarkerColor()
+   QColor holeColor = checked ? Qt::white : c_HoleMarkerColor;
 
    for (auto& hole : holePoints_)
    {
@@ -359,7 +362,7 @@ void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
    }
 
    // plus region markers
-   QColor regionColor = ui.hideMarkersCheckBox->isChecked() ? Qt::white : c_RegionMarkerColor; // OPEN TODO::: regionMarkerColor()
+   QColor regionColor = ui.hideMarkersCheckBox->isChecked() ? Qt::white : c_RegionMarkerColor;
 
    for (auto& point : regionPoints_)
    {
@@ -401,6 +404,17 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
    ctxtMenu.addAction(&action4);
 
    ctxtMenu.exec(mapToGlobal(ui.optionsToolButton->geometry().bottomLeft()));
+}
+
+
+void TrianglePPDemoApp::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    if(zoomFactor_ == 1.0)
+    {
+        originalSize_ = ui.drawAreaWidget->size();
+    }
 }
 
 
@@ -474,7 +488,7 @@ void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPointF
 
    regionPoints_ << pos;
 
-   ui.hideMarkersCheckBox->show(); // OPEN TODO::: hideMarkersCheckBox
+   ui.hideMarkersCheckBox->show();
 }
 
 
@@ -778,18 +792,9 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
 
        auto getResultPoint = [&](int index, const Delaunay::Point& dpoint)
        {
-           if(readFromFile_)
-           {
-               auto qpoint = getDelaunayResultPoint(trGenerator, index, dpoint);
-
-               // rescale + move!
-               return QPointF((qpoint.x() + offsetX_) * scaleFactor_ * zoomFactor_, (qpoint.y() + offsetY_) * scaleFactor_ * zoomFactor_);
-
-
-               // OPEN TODO::: and flip!
-           }
-           else
-              return getDelaunayResultPoint(trGenerator, index, dpoint);
+           return readFromFile_
+                   ? rescaleReadPoint(getDelaunayResultPoint(trGenerator, index, dpoint))
+                   : getDelaunayResultPoint(trGenerator, index, dpoint);
        };
 
        // draw triangle
@@ -963,6 +968,9 @@ void TrianglePPDemoApp::findScalingForDrawArea(
        offsetY = -minY;
     }
 
+    // TEST:::
+    //qDebug() << " findScalingForDrawArea -- drawAreaWidget->size()=" << ui.drawAreaWidget->size();
+
     if (width < ui.drawAreaWidget->width())
     {
        scaleFactor = ui.drawAreaWidget->width() / width;
@@ -1020,7 +1028,7 @@ void TrianglePPDemoApp::flipPoints(std::vector<Point>& points, float* middlePtr)
         return;
     }
 
-    auto middle = (maxY - minY)/2 + minY;
+    auto middle = (maxY - minY)/2.0 + minY;
 
     flipAround(points, middle);
 
@@ -1055,7 +1063,6 @@ void TrianglePPDemoApp::rescalePoints(std::vector<Point>& points, double offsetX
 void TrianglePPDemoApp::zoomIn()
 {
     zoomFactor_ += (zoomFactor_ >= 0.25f) ? 0.25f : 0.1f;
-
     zoomPoints(1.25);
 }
 
@@ -1080,96 +1087,59 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
     regionPoints_.clear();
     regionMaxAreas_.clear();
 
-    if(readFromFile_)
+    // vertices
+    auto& vertexPointsRef = readFromFile_ ? vertexPointsOrig_ : drawnPoints;
+
+    for (auto& point : vertexPointsRef)
     {
-        for (auto& point : vertexPointsOrig_)
-        {
-            QPointF scaledPt = rescaleReadPoint(point);
-            ui.drawAreaWidget->drawPoint(scaledPt);
-        }
-    }
-    else
-    {
-        for (auto& point : drawnPoints)
-        {
-           QPointF scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
-           ui.drawAreaWidget->drawPoint(scaledPt);
-        }
+       QPointF scaledPt = readFromFile_
+               ? rescaleReadPoint(point) : multiplyPoint(point, zoomFactor);
+       ui.drawAreaWidget->drawPoint(scaledPt);
     }
 
-    if(readFromFile_)
-    {
-        for (auto& point : holePointsOrig_)
-        {
-            QPointF scaledPt = rescaleReadPoint(point);
-            ui.drawAreaWidget->drawPoint(scaledPt);
+    // holes
+    auto& holePointsRef = readFromFile_ ? holePointsOrig_ : holeMarkers;
 
-            if (!ui.hideMarkersCheckBox->isChecked())
-            {
-               onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
-                                          scaledPt);
-            }
-            else
-            {
-               holePoints_ << scaledPt;
-            } // OPEN TODO::: make new method??
-        }
-    }
-    else
+    for (auto& point : holePointsRef)
     {
-        for (auto& point : holeMarkers)
-        {
-           QPointF scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
-           ui.drawAreaWidget->drawPoint(scaledPt);
+       QPointF scaledPt = readFromFile_
+               ? rescaleReadPoint(point) : multiplyPoint(point, zoomFactor);
+       ui.drawAreaWidget->drawPoint(scaledPt);
 
-           if (!ui.hideMarkersCheckBox->isChecked())
-           {
-              onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
-                                         scaledPt);
-           }
-           else
-           {
-              holePoints_ << scaledPt;
-           }
-        }
+       if (!ui.hideMarkersCheckBox->isChecked())
+       {
+          onPointChangedToHoleMarker(-1, // hole point index not used at the moment!
+                                     scaledPt);
+       }
+       else
+       {
+          holePoints_ << scaledPt;
+       }
     }
 
-    if(readFromFile_)
-    {
-        for (auto& point : regionPointsOrig_)
-        {
-            QPointF scaledPt = rescaleReadPoint(point);
-            ui.drawAreaWidget->drawPoint(scaledPt);
+    // regions
+    auto& regionPointsRef = readFromFile_ ? regionPointsOrig_ : regionMarkers;
 
-            if (!ui.hideMarkersCheckBox->isChecked())
-            {
-               onPointChangedToRegionMarker(-1, // hole point index not used at the moment!
-                                            scaledPt);
-            }
-            else
-            {
-               regionPoints_ << scaledPt;
-            }
-        }
+    for (auto& point : regionPointsRef)
+    {
+       QPointF scaledPt = readFromFile_
+               ? rescaleReadPoint(point) : multiplyPoint(point, zoomFactor);
+       ui.drawAreaWidget->drawPoint(scaledPt);
+
+       if (!ui.hideMarkersCheckBox->isChecked())
+       {
+          onPointChangedToRegionMarker(-1, // region point index not used at the moment!
+                                       scaledPt);
+       }
+       else
+       {
+          regionPoints_ << scaledPt;
+       }
     }
-    else
+
+    if(!readFromFile_)
     {
-        for (auto& point : regionMarkers)
-        {
-            QPointF scaledPt(point.x() * zoomFactor, point.y() * zoomFactor);
-            ui.drawAreaWidget->drawPoint(scaledPt);
-
-            if (!ui.hideMarkersCheckBox->isChecked())
-            {
-               onPointChangedToRegionMarker(-1, // hole point index not used at the moment!
-                                            scaledPt);
-            }
-            else
-            {
-               regionPoints_ << scaledPt;
-            }
-        }
-
+        // increase regional constraints also!!!
         for (auto& area : regionMaxAreas)
         {
            regionMaxAreas_.push_back(area * (zoomFactor * zoomFactor));
@@ -1178,12 +1148,8 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
 
     // resize draw area
 
-    // TEST:::
-
     // OPEN TODO:::
-    //  1. if(readFromFile_)
-    //  2. reset zoom after clearDisplay() !!!!!!!!!!!!!
-
+    //  1. if(readFromFile_) ????
 
     ui.drawAreaWidget->setMinimumSize(ui.drawAreaWidget->width() * zoomFactor,
                                       ui.drawAreaWidget->height() * zoomFactor);
@@ -1204,6 +1170,24 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
 
 
     // OPEN TODO:: if (tesselated_) --> TESSELATE
+
+}
+
+
+void TrianglePPDemoApp::resetZoom()
+{
+    if(zoomFactor_ == 1.0)
+    {
+        return;
+    }
+
+    zoomFactor_ = 1.0;
+
+    if (originalSize_.isValid())
+    {
+        ui.drawAreaWidget->setMinimumSize(originalSize_);
+        ui.drawAreaWidget->resize(originalSize_);
+    }
 
 }
 
@@ -1246,7 +1230,6 @@ void TrianglePPDemoApp::writeToFile()
            trGenerator.setHolesConstraint(toTppPointVector(holePoints_));
        }
 
-       // OPEN TODO:::
        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                                        lastFileDir_ + "/Trpp_Segments.poly", 
                                                        tr("Segment File (*.poly)"));
@@ -1317,7 +1300,6 @@ void TrianglePPDemoApp::readFromFile()
     } 
     else
     {
-        // TEST::
         readFromFile_ = true;
     }
 
@@ -1419,20 +1401,11 @@ void TrianglePPDemoApp::readFromFile()
        }
     }
 
-    // OPEN TODO::: NO!!!! not when reading from file!
-#if 0
-    // rescale also the areas
-    for (auto& rc : regionConstraints)
-    {     
-       regionMaxAreas_.push_back(rc[3] * (scaleFactor_ * scaleFactor_));
-    }
-#else
     for (auto& rc : regionConstraints)
     {
        // save original area constraints
        regionMaxAreasOrig_.push_back(rc[3]);
     }
-#endif
 
     // save original points:
     vertexPointsOrig_.clear();
