@@ -2,7 +2,9 @@
 <!-- img src="../triangle-PP-sm.jpg" alt="triangle-PP's logo" width="160"/ -->
 ## Qt-based GUI Demonstrator for TrianglePP
 <br>
-A small demonstrator/tester for the library.
+
+A small demonstrator/tester for the library.<br>
+
 
 ![triangle-PP info screen](./triangle-PP-info-screen.jpg) 
 
