@@ -80,6 +80,14 @@ namespace {
    }
 
 
+   template <class T>
+   std::vector<T> toStdVector(const QVector<T>& qv)
+   {
+       std::vector<T> v(qv.constBegin(), qv.constEnd());
+       return v;
+   }
+
+
    void convertToQPoints(std::vector<Delaunay::Point>& trppPoints, QVector<QPointF>& qPoints)
    {
        for (size_t i = 0; i < trppPoints.size(); ++i)
@@ -899,8 +907,9 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
 
       if (!regionPoints_.empty())
       {        
-         trGenerator.setRegionsConstraint(toTppPointVector(readFromFile_? regionPointsOrig_ : regionPoints_),
-                                          readFromFile_ ? regionMaxAreasOrig_.toStdVector() : regionMaxAreas_.toStdVector());
+         trGenerator.setRegionsConstraint(
+              toTppPointVector(readFromFile_? regionPointsOrig_ : regionPoints_),
+              readFromFile_ ? toStdVector(regionMaxAreasOrig_) : toStdVector(regionMaxAreas_));
       }
    }
    else
@@ -911,7 +920,7 @@ void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
 
    trGenerator.useConvexHullWithSegments(includeConvexHull_);
 
-   if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
+   if (!trGenerator.setSegmentConstraint(toStdVector(segmentEndpointIndexes_)))
    {
       QMessageBox::critical(this, tr("Triangle++"), tr("Incorrect segment constraints, ignoring!"));
    }
@@ -1162,7 +1171,7 @@ void TrianglePPDemoApp::zoomPoints(float zoomFactor)
     }
     else
     {
-        auto segmentEndpointIndexes = segmentEndpointIndexes_.toStdVector();
+        auto segmentEndpointIndexes = toStdVector(segmentEndpointIndexes_);
         segmentEndpointIndexes_.clear();
 
         drawSegments(segmentEndpointIndexes);
@@ -1219,7 +1228,7 @@ void TrianglePPDemoApp::writeToFile()
 
     if (!segmentEndpointIndexes_.empty())
     {
-       if (!trGenerator.setSegmentConstraint(segmentEndpointIndexes_.toStdVector()))
+       if (!trGenerator.setSegmentConstraint(toStdVector(segmentEndpointIndexes_)))
        {
           QMessageBox::critical(this, tr("Triangle++"), tr("Incorrect segment constraints, ignoring!"));
           return;

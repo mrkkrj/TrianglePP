@@ -287,6 +287,10 @@ Two versions of the library can be built:
  - library without sanity checks for *maximum performance*
    for this the *TRIANGLE_NO_TRILIB_SELFCHECK* define must be set when compiling TrianglePP
    
+### Branches
+The Demo App GUI program was recently ported to Qt6. For that the Qt5 version of the repository was placed on a separate branch, which isn't planned to be maintained. 
+Thus there will be no backports of fixes or new features for **both** *TrianglePP* library **and** the *Demo App* on the Qt5 branch if not explicitely requested by the users!
+
 
 ## File I/O
 

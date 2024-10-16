@@ -118,7 +118,7 @@ For more information you can look at:
 
 I started with Piyush Kumar's [C++/OO wrapper](https://bitbucket.org/piyush/triangle/overview) of the original *Triangle* code, ported it to Visual C++ (VisualStudio 2008/Win32), did some bugfixes, and extended the wrapper for constrainied triangulations and Voronoi diagrams. 
 Then the code was ported to x64 Windows and Linux, *CMake* support (for both the example program and the GUI demonstrator) was added, as well as Catch2 unit test suite. 
-Recently, support for reading and writing of *Triangle*'s file formats, regions and regional constraints, as well as for input data sanitization were also added.
+Recently, support for reading and writing of *Triangle*'s file formats, regions and regional constraints, as well as for input data sanitization were also added. GUI DemoApp was then ported fron Qt5 to Qt6.
 
 ## TODOs:
  - remove warnings
@@ -128,11 +128,11 @@ Recently, support for reading and writing of *Triangle*'s file formats, regions 
  - add support for saving Voronoi meshes in an .edge file
  - add support for saving triangulations as GLB files (Draco encoded?)
 
- - add support for refining of triangulations (??) 
- - add convex hull demonstration to the Qt demo app (??)
+ - add support for refining of triangulations (needed ???) 
+ - add convex hull demonstration to the Qt demo app (needed ???)
   
  - add CI support (Travis?)
- - Port the Qt demo app to Emscripten (&& Qt 6 !!!)
+ - Port the Qt demo app to Emscripten
 
  - add Python bindings
  - add Python demo

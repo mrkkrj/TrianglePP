@@ -24,7 +24,7 @@ set(CMAKE_AUTOUIC ON)
 
 #set(CMAKE_AUTOUIC_SEARCH_PATHS "src/ui")
 
-find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Gui REQUIRED)
 
 ################################################################################
 # Source groups
@@ -117,8 +117,8 @@ endif()
 # Dependencies
 ################################################################################
 set(ADDITIONAL_LIBRARY_DEPENDENCIES
-    "Qt5::Core;"
-    "Qt5::Gui;"
-    "Qt5::Widgets"
+    "Qt6::Core;"
+    "Qt6::Gui;"
+    "Qt6::Widgets"
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
