@@ -3,12 +3,13 @@
 ## Qt-based GUI Demonstrator for TrianglePP
 <br>
 
-A small demonstrator/tester for the library.<br>
+A small demonstrator/tester for the library.
+<br>
 
 
 ![triangle-PP info screen](./triangle-PP-info-screen.jpg) 
 
-For more screenshots of what this demonstrator can do, please consult the main README file of this project.
+ - For more screenshots of what this demonstrator can do, please consult the main *README* file of the project.
 
 **Note:** On Windows Demo App is compiled with *TRIANGLE_DBG_TO_FILE* define, so the debug traces will be written to the *./triangle.out.txt* file.
 
