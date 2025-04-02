@@ -318,7 +318,7 @@ Thus there will be no backports of fixes or new features for **both** *TriangleP
 ## File I/O
 
 You can write and read ASCII files containing point and segement definitions using Triangle++ methods. Some examples are stored in the *tppDataFiles* directory. 
-Documentation for the used formats can be found in [TriLib README.txt](./TriLib%2README.txt) in the *"File Formats"* section
+Documentation for the used formats can be found in [TriLib README.txt](./TriLib%2README.txt) in the *"File Formats"* section. The 2 most often used input formats are also shortly introduced below:
 
 
 ### .node files
@@ -334,7 +334,7 @@ As documentation at http://www.cs.cmu.edu/~quake/triangle.node.html is saying, t
 Blank lines and comments prefixed by `#' may be placed anywhere. Vertices must be numbered consecutively, starting from one or zero.
 
     ...
-*"
+"*
 
 t.b.c. ...
 
@@ -365,7 +365,8 @@ t.b.c. ...
 
 ### Input files sanitization
 
-t.b.c. ...
+The library will try to sanitize the input data, as to prevent the triangulation algorithm from crashing or throwing an assert. At the moment following sanitizations are implemented:
+ - removal of duplicated points in segment definitions
 
 
 ### Example TrPP data files
