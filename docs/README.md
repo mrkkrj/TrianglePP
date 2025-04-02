@@ -106,7 +106,16 @@ You can also use the *foreach()* style loop as shown below:
 
 ### Mesh walking
 
-t.b.c. ...
+The *TriangulationMesh* class provides operations on oriented triangles (aka faces) of a triangulation result, for example:
+
+- Access the triangle adjoining the edge with number N
+- Access the triangle opposite to current edge of the face
+- Find the next edge (counterclockwise) of a triangle
+- Find the previous edge (clockwise) of a triangle
+- Find the next edge (counterclockwise) of a triangle with the same origin
+- Find the next edge clockwise with the same origin
+- Calculate incident triangles around a vertex
+- etc.
 
 ### Quality constraints
 
@@ -134,7 +143,21 @@ There is a method in the Triangle++ API that checks current constraints for viab
 
 ### Regions and region constraints
 
-t.b.c. ...
+You can use following method in the Triangle++ API to set max area constraint for a region in the input mesh:
+
+    /**
+       @param regions: vector of 2 dimensional points where each points marks a regions, i.e. it infects all
+                       triangles around in until it sees a segment
+       @param areas:  max. triangle area for the region with the same index in the regions vector
+       @return: true if the input is valid, false otherwise
+      */
+     bool setRegionsConstraint(const std::vector<Point>& regions, const std::vector<float>& areas);
+
+You can also define region constraint in **.poly** input files, as shown in *tppDataFiles/box-regions.poly* example file. 
+
+Example of 2 regions with constraints is shown below (using the Demo App):
+
+![triangle-PP's GUI regions](pics/triangle-pp-testApp-regions.jpg)
 
 ### Segment constraints
 
@@ -149,7 +172,7 @@ and:
 
  - Docs:
          If segment constraints are set, this method creates a constrained Delaunay triangulation where
-         each PSLG segment is present as a single edge in the triangulation. Note that some of the resulting
+         **each PSLG segment is present as a single edge in the triangulation**. Note that some of the resulting
          triangles might *not be Delaunay*! In quality triangulation *additional* vertices called Steiner 
          points may be created.
 
@@ -169,8 +192,8 @@ and:
 
 
  - Docs:
-          A conforming Delaunay triangulation is a *true Delaunay* triangulation in which each constraining 
-          segment may have been *subdivided* into several edges by the insertion of *additional* vertices, called 
+          A conforming Delaunay triangulation is a *true Delaunay* triangulation in which **each constraining 
+          segment may have been *subdivided* into several edges** by the insertion of *additional* vertices, called 
           Steiner points (@see: http://www.cs.cmu.edu/~quake/triangle.defs.html)
 
 
@@ -295,9 +318,7 @@ Thus there will be no backports of fixes or new features for **both** *TriangleP
 ## File I/O
 
 You can write and read ASCII files containing point and segement definitions using Triangle++ methods. Some examples are stored in the *tppDataFiles* directory. 
-Documentation for the used formats can be found .... 
-
-t.b.c. ...
+Documentation for the used formats can be found in [TriLib README.txt](./TriLib%2README.txt) in the *"File Formats"* section
 
 
 ### .node files
