@@ -125,7 +125,10 @@ Recently, support for reading and writing of *Triangle*'s file formats, regions 
 ## TODOs:
  - remove warnings
 
- - decouple tpp::Delaunay from the reviver::dpoint<> class
+ - add Python bindings **(important, contributions welcome !!!)**
+ - add Python demo
+ - 
+ - decouple tpp::Delaunay from the reviver::dpoint<> class (???)
  - Add support for all options in constrained triangulations (Steiner point constraints, boundary attributes)
  - add support for saving Voronoi meshes in an .edge file
  - add support for saving triangulations as GLB files (Draco encoded?)
@@ -135,6 +138,3 @@ Recently, support for reading and writing of *Triangle*'s file formats, regions 
   
  - add CI support (Travis ??)
  - Port the Qt demo app to Emscripten
-
- - add Python bindings (important, contributions welcome !!!)
- - add Python demo
