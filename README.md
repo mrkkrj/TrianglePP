@@ -62,7 +62,9 @@ Normally, you just add two source files to your project:
 
 and include the API definition file *tpp_interface.hpp* where it is needed.
 
-Alternatively, you can also build *TrianglePP* as a **DLL/shared library**. The CMake file for that can be found in the *dll* subdirectory along with an example project using *TrianglePP* as a shared library.
+Alternatively, you can also build *TrianglePP* as a **static library** using the *CMakeLists.txt* file from the top level directory. 
+
+If you want to build it as **DLL/shared library** use the *CMakeLists.txt* file that can be found in the *dll* subdirectory. In the same subdirectory you will also find an example project using *TrianglePP* as a shared library.
  - **WARNING:** DLL build was only tested on Windows as for now!!!!
 
 ## Demo App:
