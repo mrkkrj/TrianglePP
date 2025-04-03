@@ -63,15 +63,15 @@ Thus in case of Steiner points (i.e. points which were added by the algorithm) t
 
 To avoid that we can generate a continuous indexing for all the points of the triangulation, as shown below:
 
-    Delaunay generator(inputPoints);
-    generator.enableMeshIndexGeneration(); // must be enabled!
+    Delaunay trGenerator(inputPoints);
+    trGenerator.enableMeshIndexGeneration(); // must be enabled!
 
-    generator.Triangulate(true);
+    trGenerator.Triangulate(true);
 
     Delaunay::Point p0, p1, p2;
     int meshIdx0 = -1, meshIdx1 = -1, meshIdx2 = -1;
 
-    for (auto fit = gen.fbegin(); fit != gen.fend(); ++fit)
+    for (auto fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
         fit.Org(p0, meshIdx0);  // queries the mesh index!
         fit.Dest(p1, meshIdx1);
@@ -116,6 +116,26 @@ The *TriangulationMesh* class provides operations on oriented triangles (aka fac
 - Find the next edge clockwise with the same origin
 - Calculate incident triangles around a vertex
 - etc.
+
+You can access and use the *TriangulationMesh* class as shown below.
+
+    TriangulationMesh mesh = trGenerator.mesh();
+
+    // start with default current edge:
+    auto fit = trGenerator.fbegin();
+    auto firstAdjoningTriangle = fit.Sym();
+
+    // move current edge:
+    fit = mesh.Lnext(fit)
+    auto secondAdjoningTriangle = fit.Sym();
+
+    // move current edge:
+    fit = mesh.Lnext(fit)
+    auto thirdAdjoningTriangle = fit.Sym();
+
+
+Note: the **current edge** of a triangle is the edge from origin *Org()* to destination *Dest()*. Operations moving the current edge will return a triangle with origin and destination changed acoordingly.
+
 
 ### Quality constraints
 
