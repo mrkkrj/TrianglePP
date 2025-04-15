@@ -189,14 +189,14 @@ and:
 
 *"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but **each PSLG segment is present as a single edge** in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles **might not be Delaunay**, but they are all constrained Delaunay."*
 
+Now, the documentaion of the *Delaunay::Triangulate()* method says basically the same:
 
- - Docs:
          If segment constraints are set, this method creates a constrained Delaunay triangulation where
          **each PSLG segment is present as a single edge in the triangulation**. Note that some of the resulting
          triangles might *not be Delaunay*! In quality triangulation *additional* vertices called Steiner 
          points may be created.
 
-In the following figure, you can see the constrained Delaunay triangulation in action. Note that the constraining segments are shown in green.
+In the following figure, you can see the constrained Delaunay triangulation in action as to better visualize the influence of segment constraints on triangulation. Note that the constraining segments are shown in green.
 
 ![triangle-PP's segment constraints](pics/segment-constr-example.jpg)
 
