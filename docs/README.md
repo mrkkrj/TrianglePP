@@ -63,15 +63,15 @@ Thus in case of Steiner points (i.e. points which were added by the algorithm) t
 
 To avoid that we can generate a continuous indexing for all the points of the triangulation, as shown below:
 
-    Delaunay generator(inputPoints);
-    generator.enableMeshIndexGeneration(); // must be enabled!
+    Delaunay trGenerator(inputPoints);
+    trGenerator.enableMeshIndexGeneration(); // must be enabled!
 
-    generator.Triangulate(true);
+    trGenerator.Triangulate(true);
 
     Delaunay::Point p0, p1, p2;
     int meshIdx0 = -1, meshIdx1 = -1, meshIdx2 = -1;
 
-    for (auto fit = gen.fbegin(); fit != gen.fend(); ++fit)
+    for (auto fit = trGenerator.fbegin(); fit != trGenerator.fend(); ++fit)
     {
         fit.Org(p0, meshIdx0);  // queries the mesh index!
         fit.Dest(p1, meshIdx1);
@@ -106,11 +106,40 @@ You can also use the *foreach()* style loop as shown below:
 
 ### Mesh walking
 
-t.b.c. ...
+The *TriangulationMesh* class provides operations on oriented triangles (aka faces) of a triangulation result, for example:
+
+- Access the triangle adjoining the edge with number N
+- Access the triangle opposite to current edge of the face
+- Find the next edge (counterclockwise) of a triangle
+- Find the previous edge (clockwise) of a triangle
+- Find the next edge (counterclockwise) of a triangle with the same origin
+- Find the next edge clockwise with the same origin
+- Calculate incident triangles around a vertex
+- etc.
+
+You can access and use the *TriangulationMesh* class as shown below.
+
+    TriangulationMesh mesh = trGenerator.mesh();
+
+    // start with default current edge:
+    auto fit = trGenerator.fbegin();
+    auto firstAdjoningTriangle = fit.Sym();
+
+    // move current edge:
+    fit = mesh.Lnext(fit)
+    auto secondAdjoningTriangle = fit.Sym();
+
+    // move current edge:
+    fit = mesh.Lnext(fit)
+    auto thirdAdjoningTriangle = fit.Sym();
+
+
+Note: the **current edge** of a triangle is the edge from origin *Org()* to destination *Dest()*. Operations moving the current edge will return a triangle with origin and destination changed acoordingly.
+
 
 ### Quality constraints
 
-You can set some constraints for the triangulation, i.e. the minimum angle and maximum area for the resulting triangles like that:
+You can set some constraints for the triangulation, i.e. the **minimum angle** and **maximum area** for the resulting triangles like that:
 
     generator.setMaxArea(30);
     generator.setMinAngle(30); // in degrees
@@ -118,9 +147,9 @@ You can set some constraints for the triangulation, i.e. the minimum angle and m
 or
     generator.setQualityConstraints(30, 30);
 
-However, the minimum angle constraint has some caveats. The documentation of the original Triangle package says the following:
+However, the minimum angle constraint has some caveats. The documentation of the original *Triangle* package says the following:
 
-"If the minimum angle is 28.6 degrees or smaller, Triangle is **mathematically guaranteed** to terminate (assuming infinite precision arithmetic - Triangle may fail to terminate if you run out of precision). In practice, Triangle often succeeds for minimum angles up to 34 degrees. For some meshes, however, you might need to reduce the minimum angle to avoid problems associated with insufficient floating-point precision."
+"If the minimum angle is 28.6 degrees or smaller, *Triangle* is **mathematically guaranteed** to terminate (assuming infinite precision arithmetic - *Triangle* may fail to terminate if you run out of precision). In practice, *Triangle* often succeeds for minimum angles up to 34 degrees. For some meshes, however, you might need to reduce the minimum angle to avoid problems associated with insufficient floating-point precision."
 
 There is a method in the Triangle++ API that checks current constraints for viability:
 
@@ -134,27 +163,42 @@ There is a method in the Triangle++ API that checks current constraints for viab
 
 ### Regions and region constraints
 
-t.b.c. ...
+You can use following method in the Triangle++ API to set max area constraint for a region in the input mesh:
+
+    /**
+       @param regions: vector of 2 dimensional points where each points marks a regions, i.e. it infects all
+                       triangles around in until it sees a segment
+       @param areas:  max. triangle area for the region with the same index in the regions vector
+       @return: true if the input is valid, false otherwise
+      */
+     bool setRegionsConstraint(const std::vector<Point>& regions, const std::vector<float>& areas);
+
+You can also define region constraint in **.poly** input files, as shown in *tppDataFiles/box-regions.poly* example file. 
+
+Example of 2 regions with constraints is shown below (using the Demo App):
+
+![triangle-PP's GUI regions](pics/triangle-pp-testApp-regions.jpg)
 
 ### Segment constraints
 
 As stated in http://www.cs.cmu.edu/~quake/triangle.defs.html : 
 
-*"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. Segments are edges whose endpoints are vertices in the PSLG, and whose presence in any mesh generated from the PSLG is enforced."*
+*"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. **Segments are edges** whose endpoints are vertices in the PSLG, and whose **presence in any mesh generated** from the PSLG **is enforced**."*
 
 and:
 
-*"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but each PSLG segment is present as a single edge in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles might not be Delaunay, but they are all constrained Delaunay."*
+*"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but **each PSLG segment is present as a single edge** in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles **might not be Delaunay**, but they are all constrained Delaunay."*
 
+Now, the documentaion of the *Delaunay::Triangulate()* method says basically the same:
 
- - Docs:
          If segment constraints are set, this method creates a constrained Delaunay triangulation where
-         each PSLG segment is present as a single edge in the triangulation. Note that some of the resulting
+         **each PSLG segment is present as a single edge in the triangulation**. Note that some of the resulting
          triangles might *not be Delaunay*! In quality triangulation *additional* vertices called Steiner 
          points may be created.
 
+In the following figure, you can see the constrained Delaunay triangulation in action as to better visualize the influence of segment constraints on triangulation. Note that the constraining segments are shown in green.
 
-t.b.c. ...
+![triangle-PP's segment constraints](pics/segment-constr-example.jpg)
 
 
 ### Conforming triangulations
@@ -169,8 +213,8 @@ and:
 
 
  - Docs:
-          A conforming Delaunay triangulation is a *true Delaunay* triangulation in which each constraining 
-          segment may have been *subdivided* into several edges by the insertion of *additional* vertices, called 
+          A conforming Delaunay triangulation is a *true Delaunay* triangulation in which **each constraining 
+          segment may have been *subdivided* into several edges** by the insertion of *additional* vertices, called 
           Steiner points (@see: http://www.cs.cmu.edu/~quake/triangle.defs.html)
 
 
@@ -295,9 +339,7 @@ Thus there will be no backports of fixes or new features for **both** *TriangleP
 ## File I/O
 
 You can write and read ASCII files containing point and segement definitions using Triangle++ methods. Some examples are stored in the *tppDataFiles* directory. 
-Documentation for the used formats can be found .... 
-
-t.b.c. ...
+Documentation for the used formats can be found in [TriLib README.txt](./TriLib%2README.txt) in the *"File Formats"* section. The 2 most often used input formats are also shortly introduced below:
 
 
 ### .node files
@@ -313,7 +355,7 @@ As documentation at http://www.cs.cmu.edu/~quake/triangle.node.html is saying, t
 Blank lines and comments prefixed by `#' may be placed anywhere. Vertices must be numbered consecutively, starting from one or zero.
 
     ...
-*"
+"*
 
 t.b.c. ...
 
@@ -344,7 +386,8 @@ t.b.c. ...
 
 ### Input files sanitization
 
-t.b.c. ...
+The library will try to sanitize the input data, as to prevent the triangulation algorithm from crashing or throwing an assert. At the moment following sanitizations are implemented:
+ - removal of duplicated points in segment definitions
 
 
 ### Example TrPP data files
