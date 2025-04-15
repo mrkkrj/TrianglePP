@@ -139,7 +139,7 @@ Note: the **current edge** of a triangle is the edge from origin *Org()* to dest
 
 ### Quality constraints
 
-You can set some constraints for the triangulation, i.e. the minimum angle and maximum area for the resulting triangles like that:
+You can set some constraints for the triangulation, i.e. the **minimum angle** and **maximum area** for the resulting triangles like that:
 
     generator.setMaxArea(30);
     generator.setMinAngle(30); // in degrees
@@ -147,9 +147,9 @@ You can set some constraints for the triangulation, i.e. the minimum angle and m
 or
     generator.setQualityConstraints(30, 30);
 
-However, the minimum angle constraint has some caveats. The documentation of the original Triangle package says the following:
+However, the minimum angle constraint has some caveats. The documentation of the original *Triangle* package says the following:
 
-"If the minimum angle is 28.6 degrees or smaller, Triangle is **mathematically guaranteed** to terminate (assuming infinite precision arithmetic - Triangle may fail to terminate if you run out of precision). In practice, Triangle often succeeds for minimum angles up to 34 degrees. For some meshes, however, you might need to reduce the minimum angle to avoid problems associated with insufficient floating-point precision."
+"If the minimum angle is 28.6 degrees or smaller, *Triangle* is **mathematically guaranteed** to terminate (assuming infinite precision arithmetic - *Triangle* may fail to terminate if you run out of precision). In practice, *Triangle* often succeeds for minimum angles up to 34 degrees. For some meshes, however, you might need to reduce the minimum angle to avoid problems associated with insufficient floating-point precision."
 
 There is a method in the Triangle++ API that checks current constraints for viability:
 
@@ -183,11 +183,11 @@ Example of 2 regions with constraints is shown below (using the Demo App):
 
 As stated in http://www.cs.cmu.edu/~quake/triangle.defs.html : 
 
-*"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. Segments are edges whose endpoints are vertices in the PSLG, and whose presence in any mesh generated from the PSLG is enforced."*
+*"A Planar Straight Line Graph (PSLG) is a collection of vertices and segments. **Segments are edges** whose endpoints are vertices in the PSLG, and whose **presence in any mesh generated** from the PSLG **is enforced**."*
 
 and:
 
-*"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but each PSLG segment is present as a single edge in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles might not be Delaunay, but they are all constrained Delaunay."*
+*"A constrained Delaunay triangulation of a PSLG is similar to a Delaunay triangulation, but **each PSLG segment is present as a single edge** in the triangulation. A constrained Delaunay triangulation is not truly a Delaunay triangulation. Some of its triangles **might not be Delaunay**, but they are all constrained Delaunay."*
 
 
  - Docs:
@@ -196,8 +196,9 @@ and:
          triangles might *not be Delaunay*! In quality triangulation *additional* vertices called Steiner 
          points may be created.
 
+In the following figure, you can see the constrained Delaunay triangulation in action. Note that the constraining segments are shown in green.
 
-t.b.c. ...
+![triangle-PP's segment constraints](pics/segment-constr-example.jpg)
 
 
 ### Conforming triangulations
