@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QPixmap>
 #include <QScrollBar>
+#include <QStandardItem>
 #include <QDebug>
 
 #include <vector>
@@ -105,6 +106,22 @@ namespace {
       return QPointF(point.x() * multFactor, point.y() * multFactor);
    }
 
+
+   void setComboBoxItemEnabled(const QComboBox& comboBox, int index, bool enabled)
+   {
+       auto model = qobject_cast<QStandardItemModel*>(comboBox.model());
+       Q_ASSERT(model);
+       if(!model)
+           return;
+
+       auto item = model->item(index);
+       Q_ASSERT(item);
+       if(!item)
+           return;
+
+       item->setEnabled(enabled);
+   }
+
 }
 
 
@@ -135,6 +152,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    ui.optionsToolButton->setText(QChar(0x2630)); // trigram for the heaven (tian)     
    
    ui.pointModeComboBox->setCurrentIndex(AutomaticMode);
+   setComboBoxItemEnabled(*ui.pointModeComboBox, FromImageMode, false);
    ui.hideMarkersCheckBox->hide();
 
    zoomInAct_ = new QAction(this);
