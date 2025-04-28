@@ -390,9 +390,9 @@ The library will try to sanitize the input data, as to prevent the triangulation
  - removal of duplicated points in segment definitions
 
 
-### Example TrPP data files
+### Example TrianglePP data files
 
-examples in this directory are....
+Example *.node*, *.poly* and *.area* files can be found in the *tppDataFiles* directory. The examples in this directory are ...
 
 t.b.c. ...
 
