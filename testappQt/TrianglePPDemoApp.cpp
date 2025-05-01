@@ -155,21 +155,13 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    setComboBoxItemEnabled(*ui.pointModeComboBox, FromImageMode, false);
    ui.hideMarkersCheckBox->hide();
 
-   zoomInAct_ = new QAction(this);
-   zoomInAct_->setShortcut(QKeySequence::ZoomIn);
-   addAction(zoomInAct_);
-   zoomOutAct_ = new QAction(this);
-   zoomOutAct_->setShortcut(QKeySequence::ZoomOut);
-   addAction(zoomOutAct_);
+   addUiShortcuts();
 
    // drawing area changes:
    connect(ui.drawAreaWidget, &DrawingArea::pointDeleted, this, &TrianglePPDemoApp::onTriangulationPointDeleted);
    connect(ui.drawAreaWidget, &DrawingArea::linePointsSelected, this, &TrianglePPDemoApp::onSegmentEndpointsSelected);
    connect(ui.drawAreaWidget, &DrawingArea::pointChangedToHoleMarker, this, &TrianglePPDemoApp::onPointChangedToHoleMarker);
    connect(ui.drawAreaWidget, &DrawingArea::pointMoved, this, &TrianglePPDemoApp::onTriangulationPointMoved);
-
-   connect(zoomInAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomIn);
-   connect(zoomOutAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomOut);
 }
 
 
@@ -403,11 +395,12 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
 {
    QMenu ctxtMenu(tr(""), this);
    
-   QAction action01("Save to File", this);
+   QAction action01("Save to File (Ctrl+S)", this);
+   action01.setEnabled(ui.drawAreaWidget->hasPoints());
    connect(&action01, &QAction::triggered, this, &TrianglePPDemoApp::writeToFile);
    ctxtMenu.addAction(&action01);
 
-   QAction action1("Options", this);
+   QAction action1("Options (Ctrl+O)", this);
    connect(&action1, &QAction::triggered, this, &TrianglePPDemoApp::showTrianguationOptions);
    ctxtMenu.addAction(&action1);
 
@@ -415,19 +408,24 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
    connect(&action2, &QAction::triggered, this, &TrianglePPDemoApp::showInfo);
    ctxtMenu.addAction(&action2);
 
-   QAction action31("Zoom In (Ctrl +)", this);
+   QAction action31("Zoom In (Ctrl+Plus)", this);
    action31.setEnabled(ui.drawAreaWidget->hasPoints());
    connect(&action31, &QAction::triggered, this, &TrianglePPDemoApp::zoomIn);
    ctxtMenu.addAction(&action31);
 
-   QAction action32("Zoom Out (Ctrl -)", this);
+   QAction action32("Zoom Out (Ctrl+Minus)", this);
    action32.setEnabled(ui.drawAreaWidget->hasPoints());
    connect(&action32, &QAction::triggered, this, &TrianglePPDemoApp::zoomOut);
    ctxtMenu.addAction(&action32);
 
-   QAction action4("Close", this);
-   connect(&action4, &QAction::triggered, this, &TrianglePPDemoApp::close);
+   QAction action4("Undo Point Creation (Ctrl+Z)", this);
+   action4.setEnabled(ui.drawAreaWidget->hasPoints());
+   connect(&action4, &QAction::triggered, this, &TrianglePPDemoApp::undoPointCreation);
    ctxtMenu.addAction(&action4);
+
+   QAction action5("Quit", this);
+   connect(&action5, &QAction::triggered, this, &TrianglePPDemoApp::close);
+   ctxtMenu.addAction(&action5);
 
    ctxtMenu.exec(mapToGlobal(ui.optionsToolButton->geometry().bottomLeft()));
 }
@@ -534,6 +532,36 @@ void TrianglePPDemoApp::onTriangulationPointMoved(const QPointF& pos1, const QPo
    {
       on_tesselatePointsPushButton_clicked();
    }
+}
+
+
+void TrianglePPDemoApp::addUiShortcuts()
+{
+   zoomInAct_ = new QAction(this);
+   zoomInAct_->setShortcut(QKeySequence::ZoomIn);
+   addAction(zoomInAct_);
+   
+   zoomOutAct_ = new QAction(this);
+   zoomOutAct_->setShortcut(QKeySequence::ZoomOut);
+   addAction(zoomOutAct_);
+
+   saveFileAct_ = new QAction(this);
+   saveFileAct_->setShortcut(QKeySequence::Save);
+   addAction(saveFileAct_);
+
+   undoAct_ = new QAction(this);
+   undoAct_->setShortcut(QKeySequence::Undo);
+   addAction(undoAct_);
+
+   showOptionsAct_ = new QAction(this);
+   showOptionsAct_->setShortcut(Qt::CTRL | Qt::Key_O);
+   addAction(showOptionsAct_);
+
+   connect(zoomInAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomIn);
+   connect(zoomOutAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomOut);
+   connect(saveFileAct_, &QAction::triggered, this, &TrianglePPDemoApp::writeToFile);
+   connect(undoAct_, &QAction::triggered, this, &TrianglePPDemoApp::undoPointCreation);   
+   connect(showOptionsAct_, &QAction::triggered, this, &TrianglePPDemoApp::showTrianguationOptions);
 }
 
 
@@ -1099,6 +1127,15 @@ void TrianglePPDemoApp::zoomOut()
     zoomFactor_ -= (zoomFactor_ >= 0.5f) ? 0.25f
                                         : (zoomFactor_ >= 0.1f) ? 0.1f: 0;
     zoomPoints(0.75);
+}
+
+
+void TrianglePPDemoApp::undoPointCreation() 
+{
+   if(!ui.drawAreaWidget->hasPoints())
+      return;
+
+   ui.drawAreaWidget->clearLastPoint();   
 }
 
 

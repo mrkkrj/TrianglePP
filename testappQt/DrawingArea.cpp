@@ -126,6 +126,12 @@ void DrawingArea::clearPoint(const QPointF& pos)
 }
 
 
+void DrawingArea::clearLastPoint()
+{
+   deletPointAtLastPos();
+}
+
+
 void DrawingArea::drawLine(const QPointF& from, const QPointF& to)
 {
    startPos_ = from;

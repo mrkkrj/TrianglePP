@@ -47,6 +47,7 @@ private slots:
    void onTriangulationPointMoved(const QPointF& pos1, const QPointF& pos2);
 
 private:
+   void addUiShortcuts();
    void setGenerateButtonText();
    void generateRandomPoints();
    void showExample1();
@@ -81,6 +82,7 @@ private:
    void zoomOut();
    void zoomPoints(float zoomFactor);
    void resetZoom();
+   void undoPointCreation();
 
    QPointF rescaleReadPoint(const QPointF& point) const;
    QColor segmentColor() const;
@@ -90,6 +92,9 @@ private:
 
     QAction* zoomInAct_;
     QAction* zoomOutAct_;
+    QAction* showOptionsAct_;
+    QAction* saveFileAct_;
+    QAction* undoAct_;
 
     enum PointGenerationMode { 
        ManualMode = 0, AutomaticMode, FromImageMode, FromFileMode, Example1Mode, Example2Mode

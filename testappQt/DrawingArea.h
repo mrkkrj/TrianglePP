@@ -45,6 +45,7 @@ public:
 
     void drawPoint(const QPointF& pos);
     void clearPoint(const QPointF& pos);
+    void clearLastPoint();
     void drawLine(const QPointF& from, const QPointF& to);
     void drawText(const QPointF& pos, const QString& txt, const QFont* font = nullptr);
 
