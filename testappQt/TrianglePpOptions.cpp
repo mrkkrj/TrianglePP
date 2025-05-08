@@ -10,6 +10,7 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QColorDialog>
 
 
 // public methods
@@ -65,6 +66,12 @@ bool TrianglePpOptions::useConformingDelaunay() const
 }
 
 
+bool TrianglePpOptions::applyQualityConstraints() const 
+{
+  return ui.applyQualityConstraintsCheckBox->isChecked();
+}
+
+
 bool TrianglePpOptions::includeConvexHull() const 
 {
   return !ui.removeConcavitiesCheckBox->isChecked();
@@ -74,6 +81,14 @@ bool TrianglePpOptions::includeConvexHull() const
 bool TrianglePpOptions::seperateSegmentColor() const
 {
    return ui.seperateSegmentColorCheckBox->isChecked();
+}
+
+
+void TrianglePpOptions::getDelaunayColors(QColor& vertexColor, QColor& segmentColor,  QColor& voronoiColor) const
+{
+   vertexColor = vertexColor_;
+   segmentColor = segmentColor_;
+   voronoiColor =  voronoiColor_;
 }
 
 
@@ -98,19 +113,36 @@ QVector<int> TrianglePpOptions::getSegmentPointIndexes() const
 
 void TrianglePpOptions::fillContents(
     int minAngle, int maxArea, int minPoints, int maxPoints, 
-    bool confDelaunay, bool convexHull, bool diffColorForSegments)
+    bool qualityConstr, bool confDelaunay, bool convexHull, bool diffColorForSegments)
 {
    ui.minAngleLineEdit->setText(minAngle >= 0 ? QString::number(minAngle) : "");
    ui.maxAreaLineEdit->setText(maxArea >= 0 ? QString::number(maxArea) : "");
    ui.minPointCountLineEdit->setText(minPoints >= 0 ? QString::number(minPoints) : "");
    ui.maxPointCountLineEdit->setText(maxPoints >= 0 ? QString::number(maxPoints) : "");
 
+   ui.applyQualityConstraintsCheckBox->setChecked(qualityConstr);
    ui.conformingDelaunayCheckBox->setChecked(confDelaunay);
    ui.constrainedDelaunayCheckBox->setChecked(!confDelaunay);
    enableMinMaxAngle(!confDelaunay);
 
    ui.removeConcavitiesCheckBox->setChecked(!convexHull);
    ui.seperateSegmentColorCheckBox->setChecked(diffColorForSegments);
+}
+
+
+void TrianglePpOptions::fillColors(const QColor& vertexColor, const QColor& segmentColor, const QColor& voronoiColor)
+{
+   ui.vertexColorButton->setPalette(QPalette(vertexColor));
+   vertexColor_ = vertexColor;
+
+   auto segmentColorShown = ui.seperateSegmentColorCheckBox->isChecked() ? segmentColor : vertexColor;
+   segmentColor_ = segmentColor;
+
+   ui.segmentColorButton->setPalette(QPalette(segmentColorShown));
+   ui.segmentColorButton->setEnabled(ui.seperateSegmentColorCheckBox->isChecked());
+
+   ui.voronoiColorButton->setPalette(QPalette(voronoiColor));
+   voronoiColor_ = voronoiColor;   
 }
 
 
@@ -152,6 +184,19 @@ void TrianglePpOptions::on_conformingDelaunayCheckBox_clicked(bool checked)
 {
    ui.constrainedDelaunayCheckBox->setChecked(!checked);
    enableMinMaxAngle(!checked);
+}
+
+
+void TrianglePpOptions::on_applyQualityConstraintsCheckBox_clicked(bool checked) 
+{
+   ui.applyQualityConstraintsCheckBox->setChecked(checked);
+   if (checked)
+   {
+      ui.conformingDelaunayCheckBox->setChecked(false);
+   }
+
+   enableMinMaxAngle(!checked);
+   ui.conformingDelaunayCheckBox->setEnabled(!checked);
 }
 
 
@@ -226,6 +271,43 @@ void TrianglePpOptions::on_removeConcavitiesCheckBox_clicked(bool checked)
 void TrianglePpOptions::on_seperateSegmentColorCheckBox_clicked(bool checked)
 {
    ui.seperateSegmentColorCheckBox->setChecked(checked);
+   fillColors(vertexColor_, segmentColor_, voronoiColor_);
+}
+
+
+void TrianglePpOptions::on_vertexColorButton_clicked()
+{
+   QColorDialog dlg;
+
+   if(dlg.exec() == QDialog::Accepted)
+   {
+      vertexColor_ = dlg.currentColor();
+      ui.vertexColorButton->setPalette(QPalette(vertexColor_));
+   }
+}
+
+
+void TrianglePpOptions::on_segmentColorButton_clicked()
+{
+   QColorDialog dlg;
+
+   if(dlg.exec() == QDialog::Accepted)
+   {
+      segmentColor_ = dlg.currentColor();
+      ui.segmentColorButton->setPalette(QPalette(segmentColor_));
+   }
+}
+
+
+void TrianglePpOptions::on_voronoiColorButton_clicked()
+{
+   QColorDialog dlg;
+
+   if(dlg.exec() == QDialog::Accepted)
+   {
+      voronoiColor_ = dlg.currentColor();
+      ui.voronoiColorButton->setPalette(QPalette(voronoiColor_));
+   }
 }
 
 
@@ -234,4 +316,3 @@ void TrianglePpOptions::enableMinMaxAngle(bool enable)
    ui.minAngleLineEdit->setEnabled(enable);
    ui.maxAreaLineEdit->setEnabled(enable);
 }
-

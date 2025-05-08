@@ -100,7 +100,7 @@ private:
        ManualMode = 0, AutomaticMode, FromImageMode, FromFileMode, Example1Mode, Example2Mode
     } mode_;
 
-    bool useConstraints_;
+    bool useQualityConstr_;
     bool triangulated_;
     bool tesselated_;
 
@@ -134,4 +134,8 @@ private:
     QVector<QPointF> holePointsOrig_;
     QVector<QPointF> regionPointsOrig_;
     QVector<float> regionMaxAreasOrig_;
+
+    QColor triangleColor_;
+    QColor voronoiColor_;
+    QColor segmentColor_;
 };

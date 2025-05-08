@@ -132,7 +132,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
       zoomInAct_(nullptr),
       zoomOutAct_(nullptr),
       mode_(ManualMode),
-      useConstraints_(false),
+      useQualityConstr_(false),
       triangulated_(false),
       tesselated_(false),
       minAngle_(-1),
@@ -154,6 +154,10 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    ui.pointModeComboBox->setCurrentIndex(AutomaticMode);
    setComboBoxItemEnabled(*ui.pointModeComboBox, FromImageMode, false);
    ui.hideMarkersCheckBox->hide();
+
+   triangleColor_ = c_TriangleColor;
+   voronoiColor_ = c_VoronoiColor;
+   segmentColor_ = c_SegmentColor;
 
    addUiShortcuts();
 
@@ -209,7 +213,7 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    ui.drawAreaWidget->clearImage();
 
    // ...but retain the points!
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 
    for (auto& point : drawnPoints)
    {
@@ -253,11 +257,11 @@ void TrianglePPDemoApp::on_triangualtePointsPushButton_clicked()
    {
       if (useConformingDelaunay_)
       {
-         trGenerator.TriangulateConf(useConstraints_, trace);
+         trGenerator.TriangulateConf(useQualityConstr_, trace);
       }
       else
       {
-         trGenerator.Triangulate(useConstraints_, trace);
+         trGenerator.Triangulate(useQualityConstr_, trace);
       }
    }
    catch (std::exception& e)
@@ -306,7 +310,7 @@ void TrianglePPDemoApp::on_tesselatePointsPushButton_clicked()
       ui.drawAreaWidget->clearImage();
 
       // ...but retain the points!
-      ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+      ui.drawAreaWidget->setDrawColor(triangleColor_);
 
       for (auto& point : drawnPoints)
       {
@@ -360,7 +364,7 @@ void TrianglePPDemoApp::on_pointModeComboBox_currentIndexChanged(int index)
 
 void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 {
-   useConstraints_ = checked;
+   useQualityConstr_ = checked;
 
    if (triangulated_)
    {
@@ -387,7 +391,7 @@ void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
       drawMarkerPoint(point, regionColor, "R");
    }
 
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 }
 
 
@@ -486,7 +490,7 @@ void TrianglePPDemoApp::onSegmentEndpointsSelected(int startPointIdx, int endPoi
 
    segmentEndpointIndexes_ << startPointIdx << endPointIdx;
 
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 }
 
 
@@ -495,7 +499,7 @@ void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPointF& 
    Q_UNUSED(pointIdx);
 
    drawMarkerPoint(pos, c_HoleMarkerColor, "H");
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 
    holePoints_ << pos;
 
@@ -508,7 +512,7 @@ void TrianglePPDemoApp::onPointChangedToRegionMarker(int pointIdx, const QPointF
    Q_UNUSED(pointIdx);
 
    drawMarkerPoint(pos, c_RegionMarkerColor, "R");
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 
    regionPoints_ << pos;
 
@@ -727,9 +731,16 @@ void TrianglePPDemoApp::showTrianguationOptions()
          maxArea_ > 0 ? maxArea_ : -1,
          minPoints_ > 0 ? minPoints_ : c_defaultMinPoints,
          maxPoints_ > 0 ? maxPoints_ : c_defaultMaxPoints,
+         useQualityConstr_,
          useConformingDelaunay_,
          includeConvexHull_,
          seperateSegmentColor_);
+
+      dlg.fillColors(
+         triangleColor_,
+         segmentColor_,
+         voronoiColor_
+      );         
 
    float guaranteed = 0, possible = 0;
    Delaunay::getMinAngleBoundaries(guaranteed, possible);
@@ -744,6 +755,10 @@ void TrianglePPDemoApp::showTrianguationOptions()
       maxArea_ = dlg.getMaxArea();
       minPoints_ = (dlg.getMinPointCount() == c_defaultMinPoints) ? -1 : dlg.getMinPointCount();
       maxPoints_ = (dlg.getMaxPointCount() == c_defaultMaxPoints) ? -1 : dlg.getMaxPointCount();
+
+      useQualityConstr_ = dlg.applyQualityConstraints();
+      ui.useConstraintsCheckBox->setChecked(useQualityConstr_);
+
       useConformingDelaunay_ = dlg.useConformingDelaunay();
 
       ui.useConstraintsCheckBox->setEnabled(!useConformingDelaunay_);
@@ -755,6 +770,8 @@ void TrianglePPDemoApp::showTrianguationOptions()
       segmentEndpointIndexes_ = dlg.getSegmentPointIndexes();
       includeConvexHull_ = dlg.includeConvexHull();
       seperateSegmentColor_ = dlg.seperateSegmentColor();
+
+      dlg.getDelaunayColors(triangleColor_, segmentColor_,  voronoiColor_);
    }
 }
 
@@ -812,7 +829,7 @@ void TrianglePPDemoApp::clearDisplay()
    triangulated_ = false;
    tesselated_ = false;
 
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 }
 
 
@@ -878,7 +895,7 @@ void TrianglePPDemoApp::drawTriangualtion(tpp::Delaunay& trGenerator, QVector<QP
 void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
 {
    // draw Voronoi points
-   ui.drawAreaWidget->setDrawColor(c_VoronoiColor);
+   ui.drawAreaWidget->setDrawColor(voronoiColor_);
 
    for (tpp::VoronoiVertexIterator iter = trGenerator.vvbegin(); iter != trGenerator.vvend(); ++iter)
    {
@@ -934,13 +951,13 @@ void TrianglePPDemoApp::drawVoronoiTesselation(tpp::Delaunay& trGenerator)
       }
    }
 
-   ui.drawAreaWidget->setDrawColor(c_TriangleColor);
+   ui.drawAreaWidget->setDrawColor(triangleColor_);
 }
 
 
 void TrianglePPDemoApp::configDelaunay(tpp::Delaunay& trGenerator)
 {
-   if (useConstraints_)
+   if (useQualityConstr_)
    {
       if (minAngle_ > 0)
       {
@@ -1258,7 +1275,7 @@ void TrianglePPDemoApp::resetZoom()
 
 QColor TrianglePPDemoApp::segmentColor() const
 {         
-   return seperateSegmentColor_ ? c_SegmentColor : c_TriangleColor;
+   return seperateSegmentColor_ ? segmentColor_ : triangleColor_;
 }
 
 

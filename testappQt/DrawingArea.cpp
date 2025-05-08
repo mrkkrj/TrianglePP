@@ -122,7 +122,6 @@ void DrawingArea::clearPoint(const QPointF& pos)
    {
       emit pointDeleted(pos);
    }
-
 }
 
 
