@@ -9,6 +9,7 @@ A small demonstrator/tester for the library.
 ![triangle-PP info screen](./triangle-PP-info-screen.jpg) 
 
 <br>
+
  - For some screenshots to see what this demonstrator is able to do, please consult the main *README* file of the project.
  - Also see below for the available triangulation options
 
