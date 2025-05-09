@@ -6,16 +6,20 @@
 A small demonstrator/tester for the library.
 <br>
 
-
 ![triangle-PP info screen](./triangle-PP-info-screen.jpg) 
 
-The Demo App has same options that can be set, available in the *Options* menu (Ctrl+O):
-
-![demmo app options](./demo-app-options.jpg)
-
- - For more screenshots of what this demonstrator can do, please consult the main *README* file of the project.
+<br>
+ - For some screenshots to see what this demonstrator is able to do, please consult the main *README* file of the project.
+ - Also see below for the available triangulation options
 
 **Note:** On Windows the Demo App will be compiled with *TRIANGLE_DBG_TO_FILE* define, so that its debug traces will be written to the *./triangle.out.txt* file.
+
+## Options
+The Demo App has same options that can be set, available in the *Options* menu (Ctrl+O):
+
+![demo app options](./demo-app-options.jpg)
+
+tbc...
 
 ## Versions
 Recently this Demo App was ported to Qt6. You will find the legacy Qt5 version on a separate branch, which isn't maintained at the moment, 
