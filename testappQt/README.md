@@ -20,6 +20,7 @@ i.e. there will be no backports of fixes or new features if not explicitely requ
 ## TODOs:
 
  - add visual GUI support for adding region markers and region constraints
+ - save current settings and re-read them on restart
 
  - remove warnings
  - correct rescaling so that points on the border of frame will be entirely visible (needed ???)
