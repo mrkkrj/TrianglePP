@@ -158,6 +158,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    triangleColor_ = c_TriangleColor;
    voronoiColor_ = c_VoronoiColor;
    segmentColor_ = c_SegmentColor;
+   holeMarkerColor_ = c_HoleMarkerColor;
 
    addUiShortcuts();
 
@@ -376,7 +377,7 @@ void TrianglePPDemoApp::on_useConstraintsCheckBox_toggled(bool checked)
 void TrianglePPDemoApp::on_hideMarkersCheckBox_toggled(bool checked)
 {
    // repaint all holes
-   QColor holeColor = checked ? Qt::white : c_HoleMarkerColor;
+   QColor holeColor = checked ? Qt::white : holeMarkerColor_;
 
    for (auto& hole : holePoints_)
    {
@@ -498,7 +499,7 @@ void TrianglePPDemoApp::onPointChangedToHoleMarker(int pointIdx, const QPointF& 
 {
    Q_UNUSED(pointIdx);
 
-   drawMarkerPoint(pos, c_HoleMarkerColor, "H");
+   drawMarkerPoint(pos, holeMarkerColor_, "H");
    ui.drawAreaWidget->setDrawColor(triangleColor_);
 
    holePoints_ << pos;
@@ -772,6 +773,7 @@ void TrianglePPDemoApp::showTrianguationOptions()
       seperateSegmentColor_ = dlg.seperateSegmentColor();
 
       dlg.getDelaunayColors(triangleColor_, segmentColor_,  voronoiColor_);
+      holeMarkerColor_ = segmentColor_;
    }
 }
 

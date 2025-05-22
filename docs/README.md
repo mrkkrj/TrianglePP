@@ -200,6 +200,14 @@ In the following figure, you can see the constrained Delaunay triangulation in a
 
 ![triangle-PP's segment constraints](pics/segment-constr-example.jpg)
 
+Additionally, one can define a **hole** marker point as to exclude the inside of a polygon formed by **segments** from the triangulation, as visible on the example below:
+
+![triangle-PP's hole example](pics/hole-example-custom-colors.jpg)
+
+The documentaion of the *Delaunay::Triangulate()* method defines it in a more formal way:
+
+     holes: vector of 2 dimensional points where each points marks a hole, i.e. it infects 
+            all triangles around in until it sees a segment
 
 ### Conforming triangulations
 

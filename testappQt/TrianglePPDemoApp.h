@@ -138,4 +138,5 @@ private:
     QColor triangleColor_;
     QColor voronoiColor_;
     QColor segmentColor_;
+    QColor holeMarkerColor_;
 };

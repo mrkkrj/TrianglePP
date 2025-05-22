@@ -23,21 +23,21 @@
        10/21/06: piyush - Replaced vertexsort with C++ sort.
        08/24/11: mrkkrj - Ported to Visual Studio, added comp. operators, reformatted and added some comments 
        10/15/11: mrkkrj - added support for the "quality triangulation" option, added some debug support
-       11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney() 
-       17/09/18: mrkkrj – ported to 64-bit (preliminary, not thorougly tested!) 
-       22/01/20: mrkkrj – added support for custom constraints (angle and area) 
-       17/04/20: mrkkrj – added support for Voronoi tesselation 
-       05/08/22: mrkkrj – added more tests for constrained PSLG triangulations, included (reworked) Yejneshwar's 
+       11/07/11: mrkkrj - bugfix in Triangle's divandconqdelauney()
+       17/09/18: mrkkrj - ported to 64-bit (preliminary, not thorougly tested!)
+       22/01/20: mrkkrj - added support for custom constraints (angle and area)
+       17/04/20: mrkkrj - added support for Voronoi tesselation
+       05/08/22: mrkkrj - added more tests for constrained PSLG triangulations, included (reworked) Yejneshwar's
                           fix for removal of concavities 
-       17/12/22: mrkkrj – Ported to Linux, reworked Yejneshwar's fix again 
-       30/12/22: mrkkrj – added first file read-write support 
-       03/02/23: mrkkrj – added first support for input sanitization 
-       15/03/23: mrkkrj – added support for iteration over the resulting mesh, some refactorings 
-       27/03/23: mrkkrj – API break, removed old (i.e. deprecated) names, changed comment formatting
-       05/07/23: mrkkrj – set TriLib's SELF_CHECK option as default, make it overridable with TRIANGLE_NO_TRILIB_SELFCHECK,
+       17/12/22: mrkkrj - Ported to Linux, reworked Yejneshwar's fix again
+       30/12/22: mrkkrj - added first file read-write support
+       03/02/23: mrkkrj - added first support for input sanitization
+       15/03/23: mrkkrj - added support for iteration over the resulting mesh, some refactorings
+       27/03/23: mrkkrj - API break, removed old (i.e. deprecated) names, changed comment formatting
+       05/07/23: mrkkrj - set TriLib's SELF_CHECK option as default, make it overridable with TRIANGLE_NO_TRILIB_SELFCHECK,
                           bugfix TriLib internal error in deletevertex()
-       29/09/23: mrkkrj – first support for regions and regional constraints
-       24/10/23: mrkkrj – support for DLL builds
+       29/09/23: mrkkrj - first support for regions and regional constraints
+       24/10/23: mrkkrj - support for DLL builds
  */
 
 #ifndef TRPP_INTERFACE
