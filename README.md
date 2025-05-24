@@ -8,7 +8,7 @@ Additionally it can generate:
  1. **quality Delaunay** triangulations (where we can set bounds on the areas and angles of the resulting triangles) 
  2. **constrained Delaunay** triangulations (where we can connect some points with and edge and require that this edge will be part of the result). 
 
-    BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and **excluded** from triangulation. On top of this, we can even specify quality constraints, even different ones for each separate **region**. The next figure shows an example of using holes and constraints on triangle area: <img src="docs/pics/constr-triangulation-example.jpg" alt="constrained example" height="220"/>    
+    BTW, constrained Delaunay triangulations open up some very interesting possibilities: they allow us to triangulate polygons even with other polygons inside them. These embedded polygons can be also marked as **holes** and **excluded** from triangulation. On top of this, we can even specify quality constraints, even different ones for each separate **region**. The next figure shows an example of that: <img src="docs/pics/constr-triangulation-example.jpg" alt="constrained example" height="220"/>    
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See below in the **Demo App** section for screenshots illustrating some other possibilities.
 
