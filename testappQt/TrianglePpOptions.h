@@ -33,7 +33,8 @@ public:
     void getDelaunayColors(QColor& vertexColor, QColor& segmentColor,  QColor& voronoiColor) const;
 
     void fillContents(int minAngle, int maxArea = -1, int minPoints = -1, int maxPoints = -1, 
-                      bool qualityConstr = false, bool confDelaunay = false, bool convexHull = false, bool diffColorForSegments = true);
+                      bool qualityConstr = false, bool confDelaunay = false, bool convexHull = false, 
+                      bool diffColorForSegments = true);
     void fillColors(const QColor& vertexColor, const QColor& segmentColor, const QColor& voronoiColor);
   
 
@@ -52,6 +53,7 @@ private slots:
    void on_vertexColorButton_clicked();
    void on_segmentColorButton_clicked();
    void on_voronoiColorButton_clicked();
+   void on_restoreColorsButton_clicked();
    
 private:
    void enableMinMaxAngle(bool enable);

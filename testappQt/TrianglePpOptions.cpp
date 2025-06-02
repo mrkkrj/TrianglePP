@@ -311,6 +311,21 @@ void TrianglePpOptions::on_voronoiColorButton_clicked()
 }
 
 
+void TrianglePpOptions::on_restoreColorsButton_clicked()
+{
+   // OPEN TODO:: getDefaultColors from settings ??? !!!!
+   
+   vertexColor_ = Qt::blue;
+   ui.vertexColorButton->setPalette(QPalette(vertexColor_));
+
+   segmentColor_ = "limegreen";
+   ui.segmentColorButton->setPalette(QPalette(segmentColor_));
+
+   voronoiColor_ = Qt::red;
+   ui.voronoiColorButton->setPalette(QPalette(voronoiColor_));
+}
+
+
 void TrianglePpOptions::enableMinMaxAngle(bool enable)
 {
    ui.minAngleLineEdit->setEnabled(enable);

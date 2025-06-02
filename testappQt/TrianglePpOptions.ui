@@ -22,129 +22,20 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="13" column="1">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>Conforming Delaunay: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Segments (by their start/end point indexes)</string>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="2">
-      <widget class="QLineEdit" name="minPointCountLineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="4">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="9" column="1">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Max. Point Count: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="19" column="2">
-      <widget class="QPushButton" name="segmentColorButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="4">
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="2" column="2">
-      <widget class="QLineEdit" name="minAngleLineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Min. Point Count: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QLabel" name="label_6">
-       <property name="font">
-        <font>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Quality and Constraints:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="24" column="2">
-      <widget class="QCheckBox" name="seperateSegmentColorCheckBox">
+     <item row="14" column="2">
+      <widget class="QCheckBox" name="removeConcavitiesCheckBox">
        <property name="text">
         <string/>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="15" column="2">
-      <widget class="QCheckBox" name="applyQualityConstraintsCheckBox">
+     <item row="11" column="1">
+      <widget class="QLabel" name="label_10">
        <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="1">
-      <widget class="QLabel" name="label_16">
-       <property name="text">
-        <string>Apply Quality Constraints</string>
+        <string>Constrained Delaunay: </string>
        </property>
       </widget>
      </item>
@@ -157,117 +48,6 @@
        </property>
        <property name="text">
         <string>Point Generation:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="2">
-      <widget class="QLineEdit" name="maxPointCountLineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Min. Angle: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="4">
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Max. Area: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="3">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>[deg]</string>
-       </property>
-      </widget>
-     </item>
-     <item row="24" column="1">
-      <widget class="QLabel" name="label_14">
-       <property name="text">
-        <string>Different color for segments:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="13" column="2">
-      <widget class="QCheckBox" name="conformingDelaunayCheckBox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="2">
-      <widget class="QCheckBox" name="removeConcavitiesCheckBox">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="19" column="1">
-      <widget class="QLabel" name="label_17">
-       <property name="text">
-        <string>Segment color</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2" colspan="2">
-      <widget class="QLineEdit" name="segmentPointsLineEdit"/>
-     </item>
-     <item row="18" column="2">
-      <widget class="QPushButton" name="vertexColorButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="18" column="1">
-      <widget class="QLabel" name="label_15">
-       <property name="text">
-        <string>Point and vertex color</string>
        </property>
       </widget>
      </item>
@@ -297,6 +77,13 @@
        </property>
       </widget>
      </item>
+     <item row="8" column="1">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Min. Point Count: </string>
+       </property>
+      </widget>
+     </item>
      <item row="16" column="0" colspan="2">
       <widget class="QLabel" name="label_13">
        <property name="font">
@@ -306,6 +93,50 @@
        </property>
        <property name="text">
         <string>View Options:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="2">
+      <widget class="QCheckBox" name="conformingDelaunayCheckBox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>Segments (by their start/end point indexes)</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="4">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Min. Angle: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="18" column="1">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Point and vertex color</string>
        </property>
       </widget>
      </item>
@@ -319,10 +150,169 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="1">
-      <widget class="QLabel" name="label_10">
+     <item row="11" column="2">
+      <widget class="QCheckBox" name="constrainedDelaunayCheckBox">
        <property name="text">
-        <string>Constrained Delaunay: </string>
+        <string/>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>[deg]</string>
+       </property>
+      </widget>
+     </item>
+     <item row="25" column="2">
+      <widget class="QCheckBox" name="seperateSegmentColorCheckBox">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="2">
+      <widget class="QCheckBox" name="applyQualityConstraintsCheckBox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="1">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Conforming Delaunay: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2" colspan="2">
+      <widget class="QLineEdit" name="segmentPointsLineEdit"/>
+     </item>
+     <item row="9" column="2">
+      <widget class="QLineEdit" name="maxPointCountLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="20" column="1">
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>Voronoi color</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="1">
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Apply Quality Constraints</string>
+       </property>
+      </widget>
+     </item>
+     <item row="18" column="2">
+      <widget class="QPushButton" name="vertexColorButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="label_6">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Quality and Constraints:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="19" column="1">
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>Segment color</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="minAngleLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Max. Area: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="4">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="19" column="2">
+      <widget class="QPushButton" name="segmentColorButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="2">
+      <widget class="QLineEdit" name="minPointCountLineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -338,13 +328,30 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="2">
-      <widget class="QCheckBox" name="constrainedDelaunayCheckBox">
+     <item row="25" column="1">
+      <widget class="QLabel" name="label_14">
        <property name="text">
-        <string/>
+        <string>Different color for segments:</string>
        </property>
-       <property name="checked">
-        <bool>true</bool>
+      </widget>
+     </item>
+     <item row="3" column="4">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="9" column="1">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Max. Point Count: </string>
        </property>
       </widget>
      </item>
@@ -361,10 +368,10 @@
        </property>
       </widget>
      </item>
-     <item row="20" column="1">
-      <widget class="QLabel" name="label_18">
+     <item row="22" column="2">
+      <widget class="QPushButton" name="restoreColorsButton">
        <property name="text">
-        <string>Voronoi color</string>
+        <string>Default Colors</string>
        </property>
       </widget>
      </item>
