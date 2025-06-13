@@ -323,6 +323,8 @@ void TrianglePpOptions::on_restoreColorsButton_clicked()
 
    voronoiColor_ = Qt::red;
    ui.voronoiColorButton->setPalette(QPalette(voronoiColor_));
+
+   ui.seperateSegmentColorCheckBox->setChecked(true);
 }
 
 
