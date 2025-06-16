@@ -65,6 +65,7 @@ private:
 
    void writeToFile();
    void readFromFile();
+   void saveToImage();
 
    struct Point {
        float x; float y;
@@ -94,6 +95,7 @@ private:
     QAction* zoomOutAct_;
     QAction* showOptionsAct_;
     QAction* saveFileAct_;
+    QAction* saveToImageAct_;
     QAction* undoAct_;
 
     enum PointGenerationMode { 

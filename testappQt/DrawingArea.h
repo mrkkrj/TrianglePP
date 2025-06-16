@@ -53,9 +53,12 @@ public:
     QVector<QPointF> getHoleMarkerCoordinates() const;
 
     bool openImage(const QString& fileName);
-    bool saveImage(const QString& fileName, const char* fileFormat);
     void clearImage();
     void printImage();
+    /**
+      @note: if format is nullptr, image format will be chosen from fileName's suffix
+    */
+    bool saveImage(const QString& fileName, const char* fileFormat = nullptr);   
 
 signals:
    void pointAdded(const QPointF& pos);

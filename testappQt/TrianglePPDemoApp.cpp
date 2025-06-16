@@ -400,6 +400,11 @@ void TrianglePPDemoApp::on_optionsToolButton_clicked()
 {
    QMenu ctxtMenu(tr(""), this);
    
+   QAction action0("Save to Image (Ctrl+I)", this);
+   action0.setEnabled(ui.drawAreaWidget->hasPoints());
+   connect(&action0, &QAction::triggered, this, &TrianglePPDemoApp::saveToImage);
+   ctxtMenu.addAction(&action0);
+
    QAction action01("Save to File (Ctrl+S)", this);
    action01.setEnabled(ui.drawAreaWidget->hasPoints());
    connect(&action01, &QAction::triggered, this, &TrianglePPDemoApp::writeToFile);
@@ -562,9 +567,14 @@ void TrianglePPDemoApp::addUiShortcuts()
    showOptionsAct_->setShortcut(Qt::CTRL | Qt::Key_O);
    addAction(showOptionsAct_);
 
+   saveToImageAct_ = new QAction(this);
+   saveToImageAct_->setShortcut(Qt::CTRL | Qt::Key_I);
+   addAction(saveToImageAct_);
+
    connect(zoomInAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomIn);
    connect(zoomOutAct_, &QAction::triggered, this, &TrianglePPDemoApp::zoomOut);
    connect(saveFileAct_, &QAction::triggered, this, &TrianglePPDemoApp::writeToFile);
+   connect(saveToImageAct_, &QAction::triggered, this, &TrianglePPDemoApp::saveToImage);
    connect(undoAct_, &QAction::triggered, this, &TrianglePPDemoApp::undoPointCreation);   
    connect(showOptionsAct_, &QAction::triggered, this, &TrianglePPDemoApp::showTrianguationOptions);
 }
@@ -1499,6 +1509,22 @@ void TrianglePPDemoApp::readFromFile()
 
     regionPointsOrig_.clear();
     convertToQPoints(regionMarkers, regionPointsOrig_);
+}
+
+
+void TrianglePPDemoApp::saveToImage()
+{
+   QString fileName = QFileDialog::getSaveFileName(this, tr("Save Image"),
+                                                   lastFileDir_ + "/untitled.jpg", 
+                                                   tr("Images (*.png *.xpm *.jpg)"));
+    lastFileDir_ = QFileInfo(fileName).absolutePath();
+
+    bool ok = ui.drawAreaWidget->saveImage(fileName);
+
+    if (!ok)
+    {
+       QMessageBox::critical(this, tr("Triangle++"), tr("File couldn't be written!"));
+    }   
 }
 
 

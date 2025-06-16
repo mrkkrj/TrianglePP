@@ -38,7 +38,6 @@ i.e. there will be no backports of fixes or new features if not explicitely requ
    - needed ??? --> we already added zooming
 
  
- - add JPG export/screenshot
  - add convex hull demonstration (worth it ???)
 
 
