@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QScrollBar>
 #include <QStandardItem>
+#include <QSettings>
 #include <QDebug>
 
 #include <vector>
@@ -155,11 +156,7 @@ TrianglePPDemoApp::TrianglePPDemoApp(QWidget *parent)
    setComboBoxItemEnabled(*ui.pointModeComboBox, FromImageMode, false);
    ui.hideMarkersCheckBox->hide();
 
-   triangleColor_ = c_TriangleColor;
-   voronoiColor_ = c_VoronoiColor;
-   segmentColor_ = c_SegmentColor;
-   holeMarkerColor_ = c_HoleMarkerColor;
-
+   readFromSettings();
    addUiShortcuts();
 
    // drawing area changes:
@@ -545,6 +542,49 @@ void TrianglePPDemoApp::onTriangulationPointMoved(const QPointF& pos1, const QPo
 }
 
 
+void TrianglePPDemoApp::readFromSettings()
+{
+   QCoreApplication::setOrganizationName("IB-Krajewski");
+   QCoreApplication::setOrganizationDomain("ib-krajewski.de");
+   QCoreApplication::setApplicationName("Triangle++ Demo App");
+
+   QSettings settings;
+
+   minAngle_ = settings.value("minAngle", -1).toInt();
+   maxArea_ = settings.value("maxArea", -1).toInt();
+   minPoints_ = settings.value("minPoints", -1).toInt();
+   maxPoints_ = settings.value("maxPoints", -1).toInt();
+
+   seperateSegmentColor_ = settings.value("seperateSegmentColor", true).toBool();
+   useQualityConstr_ = settings.value("useQualityConstr", false).toBool();
+
+   triangleColor_ = settings.value("triangleColor", c_TriangleColor).value<QColor>();
+   voronoiColor_ = settings.value("voronoiColor", c_VoronoiColor).value<QColor>();
+   segmentColor_ = settings.value("segmentColor", c_SegmentColor).value<QColor>();
+   holeMarkerColor_ = settings.value("holeMarkerColor", c_HoleMarkerColor).value<QColor>();
+}
+
+
+void TrianglePPDemoApp::writeToSettings()
+{
+    QSettings settings;
+
+    settings.setValue("minAngle", minAngle_);
+    settings.setValue("maxArea", maxArea_);
+    settings.setValue("minPoints", minPoints_);
+    settings.setValue("maxPoints", maxPoints_);
+
+    settings.setValue("seperateSegmentColor", seperateSegmentColor_);
+    settings.setValue("useQualityConstr", useQualityConstr_);
+
+
+    settings.setValue("triangleColor", triangleColor_);
+    settings.setValue("voronoiColor", voronoiColor_);
+    settings.setValue("segmentColor", segmentColor_);
+    settings.setValue("holeMarkerColor", holeMarkerColor_);
+}
+
+
 void TrianglePPDemoApp::addUiShortcuts()
 {
    zoomInAct_ = new QAction(this);
@@ -784,6 +824,8 @@ void TrianglePPDemoApp::showTrianguationOptions()
 
       dlg.getDelaunayColors(triangleColor_, segmentColor_,  voronoiColor_);
       holeMarkerColor_ = segmentColor_;
+
+      writeToSettings();
    }
 }
 

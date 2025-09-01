@@ -47,6 +47,8 @@ private slots:
    void onTriangulationPointMoved(const QPointF& pos1, const QPointF& pos2);
 
 private:
+   void readFromSettings();
+   void writeToSettings();
    void addUiShortcuts();
    void setGenerateButtonText();
    void generateRandomPoints();
