@@ -20,5 +20,12 @@ These are the preliminary test cases for the Triangle++ package.
 
 <kbd><img src="./example_constr_segments-wth-holes-result.jpg" alt="example_constr_segments-wth-holes-result" width="520"></kbd>
 
+ - tests also include cases for reported bugs and crashes
+
 ## TODOs:
- - add more tests for input sanitizing
+ - add more tests for input sanitizing:     
+    //  SECTION("TEST 9.2: PSLG triangluation with duplicate points NOT used in segments")    
+    //  SECTION("TEST 9.3: PSLG triangluation with duplicate segments")    
+    //  SECTION("TEST 9.4: PSLG triangluation with duplicate holes")    
+    //  SECTION("TEST 9.5: PSLG triangluation with colinear segments")
+ - add more tests for mesh walking

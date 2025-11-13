@@ -428,6 +428,8 @@ For example:
 
 The library will try to sanitize the input data, as to prevent the triangulation algorithm from crashing or throwing an assert. At the moment following sanitizations are implemented:
  - removal of duplicated points in segment definitions
+    - thus: removal of colinear segments
+ - rememoval of duplicated points in general
 
 
 ### Example TrianglePP data files
