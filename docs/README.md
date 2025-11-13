@@ -145,6 +145,7 @@ You can set some constraints for the triangulation, i.e. the **minimum angle** a
     generator.setMinAngle(30); // in degrees
 
 or
+
     generator.setQualityConstraints(30, 30);
 
 However, the minimum angle constraint has some caveats. The documentation of the original *Triangle* package says the following:
@@ -227,28 +228,25 @@ and:
 
 *"A constrained conforming Delaunay triangulation (CCDT) of a PSLG is a constrained Delaunay triangulation that includes Steiner points. It usually takes fewer vertices to make a good-quality CCDT than a good-quality CDT, because the triangles do not need to be Delaunay (although they still must be constrained Delaunay)."*
 
+Note: PSLG stands for Planar Straight Line Graph.
 
  - Docs:
           A conforming Delaunay triangulation is a *true Delaunay* triangulation in which **each constraining 
           segment may have been *subdivided* into several edges** by the insertion of *additional* vertices, called 
           Steiner points (@see: http://www.cs.cmu.edu/~quake/triangle.defs.html)
 
-
-t.b.c. ...
-
+In short, when creating a conforming triangulation, new vertices (Steiner points) may be added and when constrained by segments, the Steiner points may appear on the segments.
 
 ### The Point class
 
-Currently the dpoint class by Piyush Kumar is used: a d-dimensional *reviver::dpoint* class with d=2. 
-If you want to use your own point class, you might have to work hard... 
+Currently the legacy *dpoint* class (by Piyush Kumar) is used: a d-dimensional *reviver::dpoint* class with *d=2*. 
+If you want to use your own point class, you might have to work hard.
 
  **OPEN TODO:**
   - decouple Delaunay::Point and Delaunay classes
   - templatize Delaunay class on the used Point type: Delaunay<class Point> { ... }
 
-
-t.b.c. ...
-
+However, this isn't a high prio topic at the moment.
 
 ## Generating Voronoi diagrams
 
@@ -329,12 +327,11 @@ If compiled with *TRIANGLE_DBG_TO_FILE* define, basic triangulation debug traces
 
 Moreover, debug traces for reading and writing point/segment files a separate output file can be used by calling the
 
- *Delaunay::enableFileIOTrace(true);*
+    *Delaunay::enableFileIOTrace(true);*
 
  method. The file I/O traces are then written to the *./tpp_fileIO.out.txt* file. **Caution:** If this file is written, the basic triangulation debug traces won't be generated!
 
-
-Additionally, debug output will be sent to stdout, depending on the traceLvl parameter in Triangulate() or Tesselate() methods.
+Additionally, debug output will be sent to stdout, depending on the traceLvl parameter in *Triangulate()* or *Tesselate()* methods.
 
 
 ## Library versions
@@ -370,10 +367,15 @@ As documentation at http://www.cs.cmu.edu/~quake/triangle.node.html is saying, t
 
 Blank lines and comments prefixed by `#' may be placed anywhere. Vertices must be numbered consecutively, starting from one or zero.
 
-    ...
 "*
 
-t.b.c. ...
+For example:
+
+    100  2  0  0
+    1  0.0476694  0.809168
+    2  -0.0412985  0.0934087
+    3  0.771124  -0.145541
+    4  ...
 
 
 ### .poly files
@@ -394,10 +396,32 @@ As documentation at http://www.cs.cmu.edu/~quake/triangle.poly.html is saying, t
 
 A .poly file represents a PSLG, as well as some additional information. PSLG stands for Planar Straight Line Graph, a term familiar to computational geometers. By definition, a PSLG is just a list of vertices and segments. A .poly file can also contain information about holes and concavities, as well as regional attributes and constraints on the areas of triangles.
 
-    ...
 *"
 
-t.b.c. ...
+For example:
+
+    # CDT 11 points in 2D, no attributes, no boundary markers
+    11 2 0 1
+
+    # The points:
+     1   0 0      0
+     2   0 1      0
+     3   0 3      0
+     ...
+ 
+    # Three segments:
+    3 1
+     1   2 10     0      
+     2   1  9     0   
+     3   3 11     0   
+
+    # no holes:
+    0
+
+    # 2 regions:
+    2
+     1   3 0.5   0.18
+     2   3 1.25  0.85
 
 
 ### Input files sanitization
