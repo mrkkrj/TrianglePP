@@ -23,8 +23,11 @@ As you see, we can set the colours using for painting triangulations in the UI, 
  - the "Remove Concavities" option, when used with segment constraints, will remove all the triangles **outside** the polygon created by the segments. See below for examples:
 
     - without "Remove Concavities"
+
 ![demo app no_markers](./triangle-PP-keep-concavities.jpg) 
+
     - with "Remove Concavities"
+    
 ![demo app no_markers](./triangle-PP-remove-concavities.jpg)
 
 <br>
