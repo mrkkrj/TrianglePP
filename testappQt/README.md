@@ -24,13 +24,14 @@ As you see, we can change:
  - used quality constrains and triangulation modes. 
 
 For explanation of triangualtion modes please refer to the main documentation.
-    - note: the "Remove Concavities" option, when used with segment constraints, will remove all the triangles **outside** the polygon created by the segments. See below for examples:
+
+ - note: the "Remove Concavities" option, when used with segment constraints, will remove all the triangles **outside** the polygon created by the segments. See below for examples:
 
     - without "Remove Concavities"
 
 ![demo app no_markers](./triangle-PP-keep-concavities.jpg) 
 
-- with "Remove Concavities"
+ - with "Remove Concavities"
     
 ![demo app no_markers](./triangle-PP-remove-concavities.jpg)
 
