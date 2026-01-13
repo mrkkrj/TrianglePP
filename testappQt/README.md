@@ -63,8 +63,6 @@ On Linux the traces will be written to the console instead.
 
  - remove warnings
  - correct rescaling so that points on the border of frame will be entirely visible (needed ???)
- - rescale the inputs only on explicit request (and back...) 
-   - needed ??? --> we already added zooming
  
  - add convex hull demonstration (worth it ???)
 

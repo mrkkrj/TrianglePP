@@ -106,6 +106,11 @@ You can then save your work to a text file and then read it back some other time
 
 ![triangle-PP's File I/O](docs/pics/triangle-pp-testApp-File_IO.jpg)
 
+And, at last, you can also take a screenshot of your work by using the burger menu on directly, with Ctrl+I:
+
+![triangle-PP's File I/O](docs/pics/saving-as-image.png)
+
+
 ## Original Triangle package
 
 ![Triangle logo](T.gif) 
