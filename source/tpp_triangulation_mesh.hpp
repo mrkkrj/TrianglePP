@@ -117,9 +117,14 @@ namespace tpp
        */
       FaceIterator locate(int vertexId);
 
-   private:
+      /**
+         @brief:  Constructor, only made public for the sake of Python bindings!
+
+         Do not create it manually, use Delaunay::mesh() method!
+       */
       TriangulationMesh(Delaunay* triangulator);
 
+   private:
       Delaunay* m_delaunay;
 
       friend class Delaunay;
