@@ -1,4 +1,10 @@
-Copyright (c) 2012 by Marek Krajewski <marek@ib-krajewski.de>. 
+The wrapper code is issued under LGPL as shown below, the original J.P. Shevchuk's 
+2005 C-language Triangle package however is free, but only for non-commercial usage
+(see https://www.cs.cmu.edu/~quake/triangle.html). Be forewarned!
+
+---
+
+Copyright (c) 2012-26 by Marek Krajewski <marek@ib-krajewski.de>. 
 
 This program is free software: you can redistribute it and/or modify it 
 under the terms of the GNU Lesser General Public License as published by the 
