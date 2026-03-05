@@ -54,6 +54,10 @@ You can also use the *foreach()* style loop as shown below:
 
 For more examples consult the *docs* directory.
 
+## Usage from Python:
+
+Python bindings are provided in a separate project: [Triangle-PPy](https://github.com/mrkkrj/TrianglePPy)!
+
 ## Build:
 
 Normally, you just add two source files to your project:

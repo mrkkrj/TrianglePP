@@ -63,6 +63,8 @@ On Linux the traces will be written to the console instead.
 
 ## TODOs:
 
+ - max area constraint doesn't seem to be working anymore!
+ 
  - add visual GUI support for adding region markers and region constraints (at the moment they can only be read from a *.poly* file!)
  - save current settings and re-read them on restart
 
