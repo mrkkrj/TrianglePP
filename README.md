@@ -56,7 +56,7 @@ For more examples consult the *docs* directory.
 
 ## Usage from Python:
 
-Python bindings are provided in a separate project: [Triangle-PPy](https://github.com/mrkkrj/TrianglePPy)!
+Python bindings are provided in a separate project: [Triangle-PPy](https://github.com/mrkkrj/TrianglePPy)! <img src="triangle-PPy-sm.jpg" alt="triangle-PP's logo" width="80"/><br/>
 
 ## Build:
 

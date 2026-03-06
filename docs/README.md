@@ -237,6 +237,10 @@ Note: PSLG stands for Planar Straight Line Graph.
 
 In short, when creating a conforming triangulation, new vertices (Steiner points) may be added and when constrained by segments, the Steiner points may appear on the segments.
 
+On the figure below you can see the difference between a conforming an a constrained triangulation of the same Planar Straight Line Graph (PSLG):
+
+![constrained vs conforming](pics/constrained-and-conforming-d.png)
+
 ### The Point class
 
 Currently the legacy *dpoint* class (by Piyush Kumar) is used: a d-dimensional *reviver::dpoint* class with *d=2*. 
