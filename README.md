@@ -119,7 +119,8 @@ And, at last, you can also take a screenshot of your work by either by using the
 
 ![Triangle logo](T.gif) 
 
-This code is a wrapper for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C. The library was a **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
+This code is a wrapper for the original 2005 J.P. Shevchuk's *Triangle* package that was written in old plain C. J.P.'s library was the **winner** of the 2003 James Hardy Wilkinson Prize in Numerical Software (sic!).
+
 For more information you can look at:
  - http://www.cs.cmu.edu/~quake/triangle.html
  - http://www.cs.cmu.edu/~quake/triangle.demo.html
@@ -132,18 +133,26 @@ Then the code was ported to x64 Windows and Linux, *CMake* support (for both the
 Recently, support for reading and writing of *Triangle*'s file formats, regions and regional constraints, as well as for input data sanitization were also added.
 
 ## TODOs:
+
+ - add *Python* bindings **(it's happening - WIP!)**
+   - move C++ functionality added there to the base Triangle++ code (i.e. foreach iteration for Voronoi edges and vertices)!
+   - and with that: make TrianglePP's iterators std::iterator-compatible! (modernize C++!)
+ 
+ - add *Python* demo using the bindings
+ 
+ - add writeEdges() and/(or?) writeTriangulation() functions for .ele files
+ - add writeVoronoiDiagram() function
+ - add writeNeighbours() function
+ - add readTriangulation() function to restore the last triangulation state (refining & work saving support)
+ - add support for saving triangulations as GLB files - Draco encoded? **(needed ???)**
+
  - remove warnings
 
- - add *Python* bindings **(important, contributions welcome !!!)**
- - add *Python* demo
-  
- - decouple *tpp::Delaunay* from the *reviver::dpoint<>* class (???)
+ - decouple *tpp::Delaunay* from the *reviver::dpoint<>* class **(needed ???)**
  - Add support for all options in constrained triangulations (Steiner point constraints, boundary attributes)
- - add support for saving Voronoi meshes in an .edge file
- - add support for saving triangulations as GLB files (Draco encoded?)
-
- - add support for refining of triangulations (needed ???) 
- - add convex hull demonstration to the Qt demo app (needed ???)
+ 
+ - add direct support for refining of triangulations **(needed ???)**
+ - add convex hull demonstration to the Qt demo app **(needed ???)**
   
  - add CI support (Travis ??)
  - Port the Qt demo app to Emscripten
