@@ -38,6 +38,7 @@
                           bugfix TriLib internal error in deletevertex()
        29/09/23: mrkkrj - first support for regions and regional constraints
        24/10/23: mrkkrj - support for DLL builds
+       16/03/26: mrkkrj - added foreach() iteration over Voronoi results
  */
 
 #ifndef TRPP_INTERFACE

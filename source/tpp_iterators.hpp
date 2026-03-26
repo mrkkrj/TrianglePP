@@ -201,12 +201,15 @@ namespace tpp
       VoronoiVertexIterator();
       void advance(int steps);
 
+      double x() const;
+      double y() const;
+
       friend class Delaunay;
       friend bool TRPP_LIB_EXPORT operator==(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
       friend bool TRPP_LIB_EXPORT operator!=(VoronoiVertexIterator const&, VoronoiVertexIterator const&);
 
    private:
-      VoronoiVertexIterator(Delaunay* tiangulator);
+      VoronoiVertexIterator(Delaunay* triangulator);
 
       Delaunay* m_delaunay;   
 
@@ -214,6 +217,34 @@ namespace tpp
       int vvindex;
       int vvcount;
    };
+
+
+   /**
+      @brief: This class supports iteration over Voronoi vertices in a foreach() loop
+    */
+   struct TRPP_LIB_EXPORT VoronoiVertexList
+   {
+      VoronoiVertexList(Delaunay* triangulator) : m_delaunay(triangulator) {}
+
+      struct VoronoiVertexListIterator : public VoronoiVertexIterator
+      {
+         VoronoiVertexListIterator(VoronoiVertexIterator vit) : VoronoiVertexIterator(vit) {}
+
+         VoronoiVertexListIterator operator++() {
+            return VoronoiVertexIterator::operator++();
+         }
+
+         const VoronoiVertexIterator& operator*() const {
+            return *this;
+         }         
+      };
+
+      VoronoiVertexListIterator begin() { return m_delaunay->vvbegin(); }
+      VoronoiVertexListIterator end() { return m_delaunay->vvend(); }
+
+   private:
+      Delaunay* m_delaunay;
+   };   
 
 
    /**
@@ -251,12 +282,41 @@ namespace tpp
       friend bool TRPP_LIB_EXPORT operator!=(VoronoiEdgeIterator const&, VoronoiEdgeIterator const&);
 
    private:
-      VoronoiEdgeIterator(Delaunay* tiangulator);
+      VoronoiEdgeIterator(Delaunay* triangulator);
 
       Delaunay* m_delaunay;   
       void* veloop;  // TriLib's internal data
       int veindex;
       int vecount;
+   };
+
+
+   /**
+      @brief: This class supports iteration over Voronoi edges in a foreach() loop
+    */
+   struct TRPP_LIB_EXPORT VoronoiEdgeList
+   {
+      VoronoiEdgeList(Delaunay* triangulator) : m_delaunay(triangulator) {}
+
+      struct VoronoiEdgeListIterator : public VoronoiEdgeIterator
+      {
+         VoronoiEdgeListIterator(VoronoiEdgeIterator vit) : VoronoiEdgeIterator(vit) {}
+
+         VoronoiEdgeListIterator operator++() {
+            return VoronoiEdgeIterator::operator++();
+         }
+
+         // OPEN TODO:: change VoronoiEdgeIterator's methods to const !??
+         /*const*/ VoronoiEdgeIterator& operator*() /*const*/ {
+            return *this;
+         }         
+      };
+
+      VoronoiEdgeListIterator begin() { return m_delaunay->vebegin(); }
+      VoronoiEdgeListIterator end() { return m_delaunay->veend(); }
+
+   private:
+      Delaunay* m_delaunay;
    };
 
 } 

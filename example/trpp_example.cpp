@@ -80,7 +80,46 @@ int main()
        }
     }
 
-    std::cout << ", 2";
+    std::cout << ", 2a";
+
+    // iterate with foreach
+    for (const auto& face: trGenerator.faces())
+    {
+       // potential Steiner points:
+       Point sp1, sp2, sp3;
+
+       int vertexIdx1 = face.Org(&sp1);
+       int vertexIdx2 = face.Dest(&sp2);
+       int vertexIdx3 = face.Apex(&sp3);
+
+       // new vertices might have been added to enforce constraints!
+       //  (i.e. Steiner points)
+       if (vertexIdx1 == -1)
+       {
+          double x1 = sp1[0]; // an added vertex, it's data copied to sp1
+          double y1 = sp1[1];
+       }
+       else
+       {
+          // a point from original data
+          double x1 = delaunayInput[vertexIdx1][0];
+          double y1 = delaunayInput[vertexIdx1][1];
+
+          // but that will work too!
+          x1 = sp1[0];
+          y1 = sp1[1];
+       }
+    }
+
+    for (const auto& vertex: trGenerator.vertices())
+    {
+        auto vertexId = vertex.vertexId();
+        auto x = vertex.x();
+        auto y = vertex.y();
+        auto& pt = *vertex;
+    }
+
+    std::cout << ", 2b";
 
     // 3. creation of a Voronoi diagram
     trGenerator.Tesselate();
@@ -95,6 +134,10 @@ int main()
        auto point = *vit;
        double x1 = point[0];
        double y1 = point[1];
+
+       // also
+       x1 = vit.x();
+       y1 = vit.y();
     }
 
     std::cout << ", 3a";
@@ -126,6 +169,50 @@ int main()
     }
 
     std::cout << ", 3b";
+
+    // iterate with foreach
+    for (auto& vertex: trGenerator.voronoiVertices())
+    {
+       // access data
+       auto point = *vertex;
+       double x1 = point[0];
+       double y1 = point[1];
+
+       // also
+       x1 = vertex.x();
+       y1 = vertex.y();
+    }
+
+   for (auto& edge: trGenerator.voronoiEdges())
+   {
+       const Point& p1Ref = edge.Org();
+       Point p1 = edge.Org(); // or copy!
+       Point p2 = edge.Dest(infiniteRay);
+
+       // access data
+       double xstart = p1[0];
+       double ystart = p1[1];
+
+       if(infiniteRay)
+       {
+          // an inifinite ray, thus no endpoint coordinates!
+          auto rayNormalXValue = p2[0];
+          auto rayNormalYValue = p2[1];
+          assert(!(rayNormalXValue == 0.0 && rayNormalYValue == 0.0));
+       }
+       else
+       {
+          double xend = p2[0];
+          double yend = p2[1];
+       }
+
+       // or:
+       Point normalVector;
+       int startIdx = edge.startPointId();
+       int endIdx = edge.endPointId(normalVector);
+    }    
+
+    std::cout << ", 3c";    
 
     // 4. constrained Delaunay
     std::vector<Point> segments;

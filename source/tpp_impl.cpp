@@ -778,6 +778,12 @@ VoronoiVertexIterator Delaunay::vvend()
 }
 
 
+VoronoiVertexList Delaunay::voronoiVertices()
+{
+   return VoronoiVertexList(this);
+};
+
+
 VoronoiEdgeIterator Delaunay::vebegin()
 {
    return VoronoiEdgeIterator(this);
@@ -795,6 +801,12 @@ VoronoiEdgeIterator Delaunay::veend()
 
    return veit;
 }
+
+
+VoronoiEdgeList Delaunay::voronoiEdges()
+{
+   return VoronoiEdgeList(this);
+};
 
 
 void Delaunay::getMinMaxPoints(double& minX, double& minY, double& maxX, double& maxY) const
@@ -1895,6 +1907,16 @@ void VoronoiVertexIterator::advance(int steps)
    Assert(vvindex / stepSize < vvcount, "");
 }
 
+double VoronoiVertexIterator::x() const
+{
+    return operator*()[0];
+}
+
+
+double VoronoiVertexIterator::y() const
+{
+    return operator*()[1];
+}
 
 bool operator==(VoronoiVertexIterator const& lhs, VoronoiVertexIterator const& rhs) 
 {
