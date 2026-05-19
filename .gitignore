@@ -12,3 +12,6 @@
 /testappQt-build
 /tests-build
 /x64/Debug
+/build
+/example/build
+/tests/build
