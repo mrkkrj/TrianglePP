@@ -629,6 +629,116 @@ void Delaunay::enableFileIOTrace(bool enable)
 }
 
 
+#ifdef RECONSTRUCT_IMPL
+
+// NEW:::
+
+bool Delaunay::writeElements(const std::string& filePath)
+{
+    if(!m_triangulated)
+    {
+      std::cerr << "ERROR: Write called before triangulation!";
+      return false;
+    }   
+
+   TP_MESH_BEHAVIOR_WRAP();
+
+#ifdef TRILIB_EXIT_BY_EXCEPTION
+    try 
+    {
+#endif
+      pTriangleWrap->writeelements2file(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()),
+                                        0, nullptr);
+#ifdef TRILIB_EXIT_BY_EXCEPTION
+    }
+    catch(std::exception& e)
+    {
+      std::cerr << "ERROR: exception caught: " << e.what();
+      return false;
+    }
+    catch(...)
+    {
+      return false;
+    }
+#endif
+
+   return true;
+}
+
+
+bool Delaunay::reconstruct(
+         const std::string& elemFilePath, 
+         const std::string& segmentsFilePath = "",
+         const std::string& areasFilePath = "",
+         DebugOutputLevel traceLvl)
+{
+
+   TP_MESH_BEHAVIOR_WRAP();
+
+
+   // ????
+
+    tpbehavior->poly = 0; // poly file not provided!
+    tpbehavior->usesegments = 0;
+    FILE* polyfile = nullptr;
+    char* polyfileName = nullptr; // no poly file!
+
+    pTriangleWrap->readnodes(tpmesh, tpbehavior, const_cast<char*>(filePath.c_str()), polyfileName, &polyfile);
+
+   // ???
+
+   if (segmentsFilePath != "")
+      tpbehavior->poly = 1;   
+
+      // --->
+
+    tpbehavior->poly = 1; // poly file provided!
+    tpbehavior->usesegments = 1;   
+
+    tpmesh->steinerleft = tpbehavior->steiner;
+
+    FILE* polyfile = nullptr;
+    char* polyfileName = const_cast<char*>(filePath.c_str());
+    pTriangleWrap->readnodes(tpmesh, tpbehavior, nullptr, polyfileName, &polyfile);
+    
+    
+    // areas
+   if (areasFilePath != "")
+      tpbehavior->vararea = 1;
+
+
+#ifdef TRILIB_EXIT_BY_EXCEPTION
+    try 
+    {
+#endif
+      tpmesh->hullsize = pTriangleWrap->reconstruct3files(
+                              tpmesh, tpbehavior, 
+                              const_cast<char*>(elemFilePath.c_str(),
+                              const_cast<char*>(areasFilePath.c_str(),
+                              const_cast<char*>(segmentsFilePath.c_str(),
+                              polyfile
+                           );
+#ifdef TRILIB_EXIT_BY_EXCEPTION
+    }
+    catch(std::exception& e)
+    {
+      std::cerr << "ERROR: exception caught: " << e.what();
+      return false;
+    }
+    catch(...)
+    {
+      return false;
+    }
+#endif                  
+
+}
+
+
+// NEW:::
+
+#endif
+
+
 int Delaunay::edgeCount() const
 {
     return TP_MESH_PTR()->edges;

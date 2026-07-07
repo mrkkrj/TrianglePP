@@ -15119,6 +15119,157 @@ char **argv;
 
 /*****************************************************************************/
 /*                                                                           */
+/*  writeelements2file()   Write the triangles to an .ele file.              */
+/*                                                                           */
+/*   - copy of writeelements(), only name changed, added mrkkrj!!!           */
+/*                                                                           */
+/*****************************************************************************/
+
+#if defined(TRILIBRARY) && defined(TRIFILES_OUTPUT_SUPPORT) 
+#undef TRILIBRARY
+
+#ifdef TRILIBRARY
+
+#ifdef ANSI_DECLARATORS
+void writeelements(struct mesh *m, struct behavior *b,
+                   int **trianglelist, REAL **triangleattriblist)
+#else /* not ANSI_DECLARATORS */
+void writeelements(m, b, trianglelist, triangleattriblist)
+struct mesh *m;
+struct behavior *b;
+int **trianglelist;
+REAL **triangleattriblist;
+#endif /* not ANSI_DECLARATORS */
+
+#else /* not TRILIBRARY */
+
+#ifdef ANSI_DECLARATORS
+void writeelements2file(struct mesh *m, struct behavior *b, char *elefilename,
+                        int argc, char **argv)
+#else /* not ANSI_DECLARATORS */
+void writeelements2file(m, b, elefilename, argc, argv)
+struct mesh *m;
+struct behavior *b;
+char *elefilename;
+int argc;
+char **argv;
+#endif /* not ANSI_DECLARATORS */
+
+#endif /* not TRILIBRARY */
+
+{
+    TRACE(" -> writeelements2file");
+#ifdef TRILIBRARY
+  int *tlist;
+  REAL *talist;
+  int vertexindex;
+  int attribindex;
+#else /* not TRILIBRARY */
+  FILE *outfile;
+#endif /* not TRILIBRARY */
+  struct otri triangleloop;
+  vertex p1, p2, p3;
+  vertex mid1, mid2, mid3;
+  long elementnumber;
+  int i;
+
+#ifdef TRILIBRARY
+  if (!b->quiet) {
+    printf("Writing triangles.\n");
+  }
+  /* Allocate memory for output triangles if necessary. */
+  if (*trianglelist == (int *) NULL) {
+    *trianglelist = (int *) trimalloc((int) (m->triangles.items *
+                                             ((b->order + 1) * (b->order + 2) /
+                                              2) * sizeof(int)));
+  }
+  /* Allocate memory for output triangle attributes if necessary. */
+  if ((m->eextras > 0) && (*triangleattriblist == (REAL *) NULL)) {
+    *triangleattriblist = (REAL *) trimalloc((int) (m->triangles.items *
+                                                    m->eextras *
+                                                    sizeof(REAL)));
+  }
+  tlist = *trianglelist;
+  talist = *triangleattriblist;
+  vertexindex = 0;
+  attribindex = 0;
+#else /* not TRILIBRARY */
+  if (!b->quiet) {
+    printf("Writing %s.\n", elefilename);
+  }
+  outfile = fopen(elefilename, "w");
+  if (outfile == (FILE *) NULL) {
+    printf("  Error:  Cannot create file %s.\n", elefilename);
+    triexit(1);
+  }
+  /* Number of triangles, vertices per triangle, attributes per triangle. */
+  fprintf(outfile, "%ld  %d  %d\n", m->triangles.items,
+          (b->order + 1) * (b->order + 2) / 2, m->eextras);
+#endif /* not TRILIBRARY */
+
+  traversalinit(&m->triangles);
+  triangleloop.tri = triangletraverse(m);
+  triangleloop.orient = 0;
+  elementnumber = b->firstnumber;
+  while (triangleloop.tri != (triangle *) NULL) {
+    org(triangleloop, p1);
+    dest(triangleloop, p2);
+    apex(triangleloop, p3);
+    if (b->order == 1) {
+#ifdef TRILIBRARY
+      tlist[vertexindex++] = vertexmark(p1);
+      tlist[vertexindex++] = vertexmark(p2);
+      tlist[vertexindex++] = vertexmark(p3);
+#else /* not TRILIBRARY */
+      /* Triangle number, indices for three vertices. */
+      fprintf(outfile, "%4ld    %4d  %4d  %4d", elementnumber,
+              vertexmark(p1), vertexmark(p2), vertexmark(p3));
+#endif /* not TRILIBRARY */
+    } else {
+      mid1 = (vertex) triangleloop.tri[m->highorderindex + 1];
+      mid2 = (vertex) triangleloop.tri[m->highorderindex + 2];
+      mid3 = (vertex) triangleloop.tri[m->highorderindex];
+#ifdef TRILIBRARY
+      tlist[vertexindex++] = vertexmark(p1);
+      tlist[vertexindex++] = vertexmark(p2);
+      tlist[vertexindex++] = vertexmark(p3);
+      tlist[vertexindex++] = vertexmark(mid1);
+      tlist[vertexindex++] = vertexmark(mid2);
+      tlist[vertexindex++] = vertexmark(mid3);
+#else /* not TRILIBRARY */
+      /* Triangle number, indices for six vertices. */
+      fprintf(outfile, "%4ld    %4d  %4d  %4d  %4d  %4d  %4d", elementnumber,
+              vertexmark(p1), vertexmark(p2), vertexmark(p3), vertexmark(mid1),
+              vertexmark(mid2), vertexmark(mid3));
+#endif /* not TRILIBRARY */
+    }
+
+#ifdef TRILIBRARY
+    for (i = 0; i < m->eextras; i++) {
+      talist[attribindex++] = elemattribute(triangleloop, i);
+    }
+#else /* not TRILIBRARY */
+    for (i = 0; i < m->eextras; i++) {
+      fprintf(outfile, "  %.17g", elemattribute(triangleloop, i));
+    }
+    fprintf(outfile, "\n");
+#endif /* not TRILIBRARY */
+
+    triangleloop.tri = triangletraverse(m);
+    elementnumber++;
+  }
+
+#ifndef TRILIBRARY
+  finishfile(outfile, argc, argv);
+#endif /* not TRILIBRARY */
+}
+
+#define TRILIBRARY
+#endif /* TRIFILES_OUTPUT_SUPPORT */
+
+
+/*****************************************************************************/
+/*                                                                           */
 /*  writepoly()   Write the segments and holes to a .poly file.              */
 /*                                                                           */
 /*****************************************************************************/

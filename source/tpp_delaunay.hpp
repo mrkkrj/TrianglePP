@@ -374,6 +374,20 @@ namespace tpp
        */
       void enableFileIOTrace(bool enable);
 
+
+#ifdef RECONSTRUCT_IMPL
+      // NEW:::
+
+      bool writeElements(const std::string& filePath);
+
+      // NEW:::
+
+      bool reconstruct(const std::string& elemFilePath, 
+                       const std::string& segmentsFilePath = "",
+                       const std::string& areasFilePath = "", DebugOutputLevel traceLvl);
+#endif
+
+
       //---------------------------------
       //  misc. API 
       //---------------------------------
