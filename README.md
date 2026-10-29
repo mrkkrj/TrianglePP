@@ -60,18 +60,20 @@ Python bindings are provided in a separate project: [Triangle-PPy](https://githu
 
 You would then use it like that:
 
-    from triangle_ppy import Delaunay, DebugOutputLevel
+    from triangle_ppy import Delaunay
 
+    # prepare input
     points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
+    # use standard triangulation
     d = Delaunay(points)
     d.set_quality_constraints(min_angle=20.0, max_area=0.1)
-
-    d.triangulate(quality=True, trace_level=DebugOutputLevel.Info)
+    d.triangulate(quality=True)
 
     print(f"Triangle count: {d.triangle_count()}")
 
-    faces = d.faces() # faces are oriented triangles!
+    # iterate over triangles
+    faces = d.faces()
 
     for idx, f in enumerate(faces):
         point1 = f.org_pt()
