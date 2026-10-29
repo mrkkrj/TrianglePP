@@ -58,6 +58,28 @@ For more examples consult the *docs* directory.
 
 Python bindings are provided in a separate project: [Triangle-PPy](https://github.com/mrkkrj/TrianglePPy)! <img src="triangle-PPy-sm.jpg" alt="triangle-PP's logo" width="80"/><br/>
 
+You would then use it like that:
+
+    from triangle_ppy import Delaunay, DebugOutputLevel
+
+    points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
+
+    d = Delaunay(points)
+    d.set_quality_constraints(min_angle=20.0, max_area=0.1)
+
+    d.triangulate(quality=True, trace_level=DebugOutputLevel.Info)
+
+    print(f"Triangle count: {d.triangle_count()}")
+
+    faces = d.faces() # faces are oriented triangles!
+
+    for idx, f in enumerate(faces):
+        point1 = f.org_pt()
+        point2 = f.dest_pt()
+        point3 = f.apex_pt()
+
+        print(f"Triangle {idx}: {point1} -> {point2} -> {point3}") 
+
 ## Build:
 
 Normally, you just add two source files to your project:
