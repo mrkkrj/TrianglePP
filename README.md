@@ -54,6 +54,21 @@ You can also use the *foreach()* style loop as shown below:
 
 For more examples consult the *docs* directory.
 
+
+## Build:
+
+Normally, you just add two source files to your project:
+ - *tpp_assert.cpp*
+ - *tpp_impl.cpp*,
+
+and include the API definition file *tpp_interface.hpp* where it is needed.
+
+Alternatively, you can also build *TrianglePP* as a **static library** using the *CMakeLists.txt* file from the top level directory. 
+
+If you want to build it as **DLL/shared library** use the *CMakeLists.txt* file that can be found in the *dll* subdirectory. In the same subdirectory you will also find an example project using *TrianglePP* as a shared library.
+ - **WARNING:** DLL build was only tested on Windows as for now!!!!
+
+
 ## Usage from Python:
 
 Python bindings are provided in a separate project: [Triangle-PPy](https://github.com/mrkkrj/TrianglePPy)! <img src="triangle-PPy-sm.jpg" alt="triangle-PP's logo" width="80"/><br/>
@@ -65,7 +80,7 @@ You would then use it like that:
     # prepare input
     points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-    # use standard triangulation
+    # use quality triangulation
     d = Delaunay(points)
     d.set_quality_constraints(min_angle=20.0, max_area=0.1)
     d.triangulate(quality=True)
@@ -82,18 +97,6 @@ You would then use it like that:
 
         print(f"Triangle {idx}: {point1} -> {point2} -> {point3}") 
 
-## Build:
-
-Normally, you just add two source files to your project:
- - *tpp_assert.cpp*
- - *tpp_impl.cpp*,
-
-and include the API definition file *tpp_interface.hpp* where it is needed.
-
-Alternatively, you can also build *TrianglePP* as a **static library** using the *CMakeLists.txt* file from the top level directory. 
-
-If you want to build it as **DLL/shared library** use the *CMakeLists.txt* file that can be found in the *dll* subdirectory. In the same subdirectory you will also find an example project using *TrianglePP* as a shared library.
- - **WARNING:** DLL build was only tested on Windows as for now!!!!
 
 ## Demo App:
 
